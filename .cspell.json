@@ -1,0 +1,70 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/**/CHANGELOG.md",
+    "**/*.{json}",
+    ".cspell.json",
+    "yarn.lock",
+    ".github/workflows/**",
+    ".vscode/*.json"
+  ],
+  "dictionaries": [
+    "typescript",
+    "softwareTerms",
+    "node",
+    "en_US",
+    "npm",
+    "misc",
+    "filetypes"
+  ],
+  "import": [
+    "./node_modules/@cspell/dict-cryptocurrencies/cspell-ext.json"
+  ],
+  "ignoreRegExpList": [
+    "/```[\\w\\W]*?```/",
+    "/~~~[\\w\\W]*?~~~/",
+    "/``[\\w\\W]*?``/",
+    "/`[^`]*`/",
+    "/\\.\\/docs\\/rules\\/[^.]*.md/",
+    "/TS[^\\s]+/",
+    "\\(#.+?\\)",
+    "// @ts-.*",
+    "/[A-Za-z0-9]{32,}/"
+  ],
+  "words": [
+    "litecoin",
+    "monero",
+    "codesandbox",
+    "builtins",
+    "foo",
+    "bar",
+    "baz",
+    "qux",
+    "quux",
+    "corge",
+    "grault",
+    "garply",
+    "waldo",
+    "fred",
+    "plugh",
+    "xyzzy",
+    "thud",
+  ],
+  "overrides": [
+    {
+      "filename": "**/*.{ts,js}",
+      "ignoreRegExpList": [
+        "/@[a-z]+/",
+        "/#(end)?region/"
+      ],
+      "includeRegExpList": [
+        "/\\/\\*[\\s\\S]*?\\*\\/|([^\\\\:]|^)\\/\\/.*$/",
+        "/(\\/\\/[^\\n\\r]*[\\n\\r]+)/"
+      ]
+    }
+  ]
+}

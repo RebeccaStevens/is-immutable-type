@@ -1,0 +1,50 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "plugins": ["prettier"],
+  "extends": [
+    "@rebeccastevens/eslint-config/modern",
+    "@rebeccastevens/eslint-config/typescript",
+    "@rebeccastevens/eslint-config/common-overrides",
+    "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "parserOptions": {
+    "project": ["./tsconfig.json"]
+  },
+  "ignorePatterns": [
+    "/coverage/",
+    "/dist/",
+    "/**/*.cjs",
+    "/**/*.js",
+    "/**/*.md"
+  ],
+  "rules": {
+    "@typescript-eslint/prefer-readonly-parameter-types": "off",
+    "functional/no-loop-statement": "off",
+    "functional/prefer-readonly-type": "off"
+  },
+  "overrides": [
+    {
+      "files": ["./tests/**"],
+      "rules": {
+        "import/no-relative-parent-imports": "off",
+        "unicorn/filename-case": "off"
+      }
+    },
+    {
+      "files": ["./tests/fixtures/**"],
+      "rules": {
+        "unicorn/no-empty-file": "off"
+      }
+    },
+    {
+      "files": ["./typings/**"],
+      "rules": {
+        "import/no-unassigned-import": "off"
+      }
+    }
+  ]
+}
