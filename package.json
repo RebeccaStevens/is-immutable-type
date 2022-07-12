@@ -70,7 +70,7 @@
     "@types/node": "^18.0.3",
     "@types/rollup-plugin-auto-external": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
-    "@typescript-eslint/parser": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.6",
     "@typescript-eslint/type-utils": "^5.30.5",
     "@typescript-eslint/utils": "^5.30.5",
     "ava": "^4.3.1",
