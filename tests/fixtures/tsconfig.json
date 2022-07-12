@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "strict": true,
+    "lib": [
+      "ESNext"
+    ],
+  },
+  "include": [
+    "file.ts"
+  ]
+}
