@@ -4,6 +4,7 @@ import rollupPluginTypescript from "@rollup/plugin-typescript";
 import { defineConfig } from "rollup";
 import rollupPluginAutoExternal from "rollup-plugin-auto-external";
 import rollupPluginDts from "rollup-plugin-dts";
+import rollupPluginUassert from "rollup-plugin-unassert";
 
 import pkg from "./package.json";
 
@@ -16,6 +17,13 @@ function getPlugins() {
     rollupPluginNodeResolve(),
     rollupPluginTypescript({
       tsconfig: "tsconfig.build.json",
+    }),
+    rollupPluginUassert({
+      include: ["**/*.ts"],
+      importPatterns: [
+        'import assert from "node:assert"',
+        'import * as assert from "node:assert"',
+      ],
     }),
     rollupPluginJSON({
       preferConst: true,
