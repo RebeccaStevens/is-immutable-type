@@ -1,3 +1,5 @@
+import assert from "node:assert";
+
 import { getTypeOfPropertyOfType } from "@typescript-eslint/type-utils";
 import { ESLintUtils } from "@typescript-eslint/utils";
 import {
@@ -33,7 +35,8 @@ export type ImmutablenessOverrides = ReadonlyArray<
         pattern: RegExp;
       }
   ) & {
-    immutableness: Immutableness;
+    to: Immutableness;
+    from?: Immutableness;
   }
 >;
 
@@ -47,8 +50,8 @@ type ImmutablenessOverridesFlattened = ImmutablenessOverrides &
  * The default overrides that are applied.
  */
 export const defaultOverrides: ImmutablenessOverrides = [
-  { name: "Map", immutableness: Immutableness.Mutable },
-  { name: "Set", immutableness: Immutableness.Mutable },
+  { name: "Map", to: Immutableness.Mutable },
+  { name: "Set", to: Immutableness.Mutable },
 ];
 
 /**
@@ -71,9 +74,16 @@ export function getTypeImmutableness(
   }
 
   const override = getOverride(checker, type, overrides);
-  if (override !== undefined) {
-    cache.set(type, override);
-    return override;
+  const overrideTo = override?.to;
+  const overrideFrom = override?.from;
+
+  if (
+    overrideTo !== undefined &&
+    (overrideFrom === undefined ||
+      (overrideFrom <= overrideTo && overrideTo <= Immutableness.Mutable))
+  ) {
+    cache.set(type, overrideTo);
+    return overrideTo;
   }
 
   cache.set(type, Immutableness.Unknown);
@@ -84,6 +94,20 @@ export function getTypeImmutableness(
     overrides,
     cache
   );
+
+  if (overrideTo !== undefined) {
+    assert(overrideFrom !== undefined);
+    if (overrideFrom <= overrideTo) {
+      if (immutableness >= overrideFrom) {
+        cache.set(type, overrideTo);
+        return overrideTo;
+      }
+    } else if (immutableness <= overrideFrom) {
+      cache.set(type, overrideTo);
+      return overrideTo;
+    }
+  }
+
   cache.set(type, immutableness);
   return immutableness;
 }
@@ -100,13 +124,13 @@ function getOverride(
 
   for (const potentialOverride of overrides) {
     if (potentialOverride.name === name) {
-      return potentialOverride.immutableness;
+      return potentialOverride;
     }
     if (
       nameWithArguments !== undefined &&
       potentialOverride.pattern?.test(nameWithArguments) === true
     ) {
-      return potentialOverride.immutableness;
+      return potentialOverride;
     }
   }
 

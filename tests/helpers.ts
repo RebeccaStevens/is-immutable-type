@@ -6,7 +6,12 @@ import type { TSESTree } from "@typescript-eslint/utils";
 import type { ExecutionContext } from "ava";
 import type ts from "typescript";
 
-import { getTypeImmutableness, Immutableness } from "../src";
+import {
+  getTypeImmutableness,
+  Immutableness,
+  type ImmutablenessCache,
+  type ImmutablenessOverrides,
+} from "../src";
 
 /**
  * The root dir to "fixtures".
@@ -19,7 +24,7 @@ const rootDir = path.join(
 /**
  * Get the first type defined in the given code.
  */
-export function getType(code: string): {
+function getType(code: string): {
   type: ts.Type;
   checker: ts.TypeChecker;
 } {
@@ -32,8 +37,11 @@ export function getType(code: string): {
   const { esTreeNodeToTSNodeMap } = services;
 
   const declaration = ast.body[0] as TSESTree.TSTypeAliasDeclaration;
+  const node = esTreeNodeToTSNodeMap.get(declaration.id);
+  const type = checker.getTypeAtLocation(node);
+
   return {
-    type: checker.getTypeAtLocation(esTreeNodeToTSNodeMap.get(declaration.id)),
+    type,
     checker,
   };
 }
@@ -61,12 +69,23 @@ function immutablenessToString(immutableness: Immutableness) {
  */
 export function runTestForGetTypeImmutableness(
   t: ExecutionContext<unknown>,
-  code: string,
+  test:
+    | string
+    | Readonly<{
+        code: string;
+        overrides?: ImmutablenessOverrides;
+        cache?: ImmutablenessCache;
+      }>,
   expected: Immutableness,
   message?: string
 ): void {
+  const { code, overrides, cache } =
+    typeof test === "string"
+      ? { code: test, overrides: undefined, cache: undefined }
+      : test;
+
   const { checker, type } = getType(code);
 
-  const actual = getTypeImmutableness(checker, type);
+  const actual = getTypeImmutableness(checker, type, overrides, cache);
   t.is(immutablenessToString(actual), immutablenessToString(expected), message);
 }
