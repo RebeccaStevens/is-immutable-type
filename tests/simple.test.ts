@@ -163,21 +163,18 @@ test("sets and maps", (t) => {
     );
   }
 
-  // TODO: Distinguish and mutable Sets and Maps.
-  // // prettier-ignore
-  // [
-  //   "type Test = Set<string>;",
-  //   "type Test = Map<string, string>;"
-  // ].forEach(
-  //   (code) => {
-  //     runTestForAliasDeclaration(
-  //       t,
-  //       code,
-  //       Immutableness.Mutable,
-  //       "handles mutable sets and maps"
-  //     );
-  //   }
-  // );
+  // prettier-ignore
+  for (const code of [
+    "type Test = Set<string>;",
+    "type Test = Map<string, string>;"
+  ]) {
+      runTestForGetTypeImmutableness(
+        t,
+        code,
+        Immutableness.Mutable,
+        "handles mutable sets and maps"
+      );
+    }
 });
 
 test("functions", (t) => {

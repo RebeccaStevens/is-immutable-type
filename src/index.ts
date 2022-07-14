@@ -1,4 +1,9 @@
-export { type ImmutablenessCache, getTypeImmutableness } from "./calculate";
+export {
+  type ImmutablenessCache,
+  type ImmutablenessOverrides,
+  getTypeImmutableness,
+  defaultOverrides,
+} from "./calculate";
 export {
   Immutableness,
   getMinImmutableness,
