@@ -1,5 +1,3 @@
-import assert from "node:assert";
-
 import { getTypeOfPropertyOfType } from "@typescript-eslint/type-utils";
 import { ESLintUtils } from "@typescript-eslint/utils";
 import {
@@ -12,6 +10,7 @@ import {
   isIntersectionType,
   isPropertySignature,
   isFunctionTypeNode,
+  isTypeReference,
 } from "tsutils";
 import ts from "typescript";
 
@@ -204,6 +203,14 @@ function objectImmutableness(
     }
   }
 
+  if (isTypeReference(type)) {
+    const result = typeArgumentsImmutableness(checker, type, cache);
+    m_maxImmutableness = getMinImmutableness(m_maxImmutableness, result);
+    if (m_minImmutableness >= m_maxImmutableness) {
+      return m_minImmutableness;
+    }
+  }
+
   const stringIndexSigImmutableness = indexSignatureImmutableness(
     checker,
     type,
@@ -240,18 +247,17 @@ function objectImmutableness(
  */
 function typeArgumentsImmutableness(
   checker: ts.TypeChecker,
-  arrayType: ts.TypeReference,
+  type: ts.TypeReference,
   cache: ImmutablenessCache
 ): Immutableness {
-  const typeArguments = checker.getTypeArguments(arrayType);
-  assert(
-    typeArguments.length > 0,
-    "There should be a least one type argument for an array or tuple"
-  );
+  const typeArguments = checker.getTypeArguments(type);
+  if (typeArguments.length > 0) {
+    return typeArguments
+      .map((t) => getTypeImmutableness(checker, t, cache))
+      .reduce(getMinImmutableness);
+  }
 
-  return typeArguments
-    .map((t) => getTypeImmutableness(checker, t, cache))
-    .reduce(getMinImmutableness);
+  return Immutableness.Unknown;
 }
 
 /**

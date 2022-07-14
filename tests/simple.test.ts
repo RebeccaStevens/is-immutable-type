@@ -151,18 +151,17 @@ test("sets and maps", (t) => {
     );
   }
 
-  // TODO: Distinguish shallowly readonly Sets and Maps.
-  // [
-  //   "type Test = ReadonlySet<{ foo: string }>;",
-  //   "type Test = ReadonlyMap<{ foo: string }, { bar: string }>;",
-  // ].forEach((code) => {
-  //   runTestForAliasDeclaration(
-  //     t,
-  //     code,
-  //     Immutableness.ReadonlyShallow,
-  //     "handles shallowly readonly sets and maps"
-  //   );
-  // });
+  for (const code of [
+    "type Test = ReadonlySet<{ foo: string }>;",
+    "type Test = ReadonlyMap<{ foo: string }, { bar: string }>;",
+  ]) {
+    runTestForGetTypeImmutableness(
+      t,
+      code,
+      Immutableness.ReadonlyShallow,
+      "handles shallowly readonly sets and maps"
+    );
+  }
 
   // TODO: Distinguish and mutable Sets and Maps.
   // // prettier-ignore
