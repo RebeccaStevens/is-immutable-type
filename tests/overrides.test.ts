@@ -2,7 +2,7 @@ import test from "ava";
 
 import { Immutableness, type ImmutablenessOverrides } from "../src";
 
-import { runTestForGetTypeImmutableness } from "./helpers";
+import { runTestImmutableness } from "./helpers";
 
 test("simple", (t) => {
   // prettier-ignore
@@ -21,7 +21,7 @@ test("simple", (t) => {
       }
     ];
 
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.Mutable,
@@ -43,7 +43,7 @@ test("from lower", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<Readonly<{foo: string}>>;"
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.Immutable,
@@ -55,7 +55,7 @@ test("from lower", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<{foo: string}>;"
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.ReadonlyShallow,
@@ -77,7 +77,7 @@ test("from hgiher", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<{foo: string}>;"
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.Mutable,
@@ -89,7 +89,7 @@ test("from hgiher", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<Readonly<{foo: string}>>;"
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.ReadonlyDeep,

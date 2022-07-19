@@ -2,13 +2,13 @@ import test from "ava";
 
 import { Immutableness } from "../src";
 
-import { runTestForGetTypeImmutableness } from "./helpers";
+import { runTestImmutableness } from "./helpers";
 
 test("simple", (t) => {
   for (const code of [
     "type Test = Readonly<{ foo: string; }> & Readonly<{ bar: string; }>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -20,7 +20,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test = readonly (number | string)[] & readonly (number | boolean)[];",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyDeep,
@@ -32,7 +32,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test = { foo: string; } & { bar: string; };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Mutable,
@@ -44,7 +44,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test = Readonly<{ foo: string; } & { bar: string; }>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,

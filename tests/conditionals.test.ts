@@ -2,14 +2,14 @@ import test from "ava";
 
 import { Immutableness } from "../src";
 
-import { runTestForGetTypeImmutableness } from "./helpers";
+import { runTestImmutableness } from "./helpers";
 
 test("simple", (t) => {
   // prettier-ignore
   for (const code of [
     "type Test<G> = G extends number ? number : string;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -21,7 +21,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test<G> = G extends number ? readonly number[] : readonly string[];",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyDeep,
@@ -33,7 +33,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test<G> = G extends number ? { foo: number } : { foo: string };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Mutable,
@@ -45,7 +45,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test<G> = Readonly<G extends number ? { foo: number } : { foo: string }>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,

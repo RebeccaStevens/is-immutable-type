@@ -2,14 +2,14 @@ import test from "ava";
 
 import { Immutableness } from "../src";
 
-import { runTestForGetTypeImmutableness } from "./helpers";
+import { runTestImmutableness } from "./helpers";
 
 test("Property Signatures", (t) => {
   for (const code of [
     "type Test = { readonly [key: string]: string };",
     "type Test = { readonly [key: string]: { readonly foo: string; }; };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -21,7 +21,7 @@ test("Property Signatures", (t) => {
   for (const code of [
     "type Test = { readonly [key: string]: readonly string[] };"
   ]) {
-      runTestForGetTypeImmutableness(
+      runTestImmutableness(
         t,
         code,
         Immutableness.ReadonlyDeep,
@@ -33,7 +33,7 @@ test("Property Signatures", (t) => {
   for (const code of [
     "type Test = { readonly [key: string]: { foo: string[]; }; };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyShallow,
@@ -45,7 +45,7 @@ test("Property Signatures", (t) => {
   for (const code of [
     "type Test = { [key: string]: string };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Mutable,

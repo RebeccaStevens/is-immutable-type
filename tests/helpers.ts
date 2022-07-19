@@ -49,7 +49,7 @@ function getType(code: string): {
 /**
  * Run tests against "getTypeImmutableness".
  */
-export function runTestForGetTypeImmutableness(
+export function runTestImmutableness(
   t: ExecutionContext<unknown>,
   test:
     | string

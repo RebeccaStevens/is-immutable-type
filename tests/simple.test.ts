@@ -2,7 +2,7 @@ import test from "ava";
 
 import { Immutableness } from "../src";
 
-import { runTestForGetTypeImmutableness } from "./helpers";
+import { runTestImmutableness } from "./helpers";
 
 test("primitives", (t) => {
   for (const code of [
@@ -14,7 +14,7 @@ test("primitives", (t) => {
     "type Test = symbol;",
     "type Test = bigint;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -28,7 +28,7 @@ test("records", (t) => {
     "type Test = { readonly foo: string; };",
     "type Test = Readonly<{ foo: string; }>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -40,7 +40,7 @@ test("records", (t) => {
   for (const code of [
     "type Test = { foo: string; };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Mutable,
@@ -54,7 +54,7 @@ test("arrays", (t) => {
     "type Test = readonly string[];",
     "type Test = ReadonlyArray<string>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyDeep,
@@ -66,7 +66,7 @@ test("arrays", (t) => {
     "type Test = readonly { foo: string }[];",
     "type Test = ReadonlyArray<{ foo: string }>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyShallow,
@@ -79,7 +79,7 @@ test("arrays", (t) => {
     "type Test = string[];",
     "type Test = Array<string>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Mutable,
@@ -93,7 +93,7 @@ test("tuples", (t) => {
     "type Test = readonly [string, number, boolean];",
     "type Test = Readonly<[string, number, boolean]>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyDeep,
@@ -105,7 +105,7 @@ test("tuples", (t) => {
     "type Test = readonly [{ foo: string }, { bar: number }];",
     "type Test = Readonly<[{ foo: string }, { bar: number }]>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyShallow,
@@ -117,7 +117,7 @@ test("tuples", (t) => {
   for (const code of [
     "type Test = [string, number, boolean];",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Mutable,
@@ -131,7 +131,7 @@ test("sets and maps", (t) => {
     "type Test = Readonly<ReadonlySet<string>>;",
     "type Test = Readonly<ReadonlyMap<string, string>>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -143,7 +143,7 @@ test("sets and maps", (t) => {
     "type Test = ReadonlySet<string>;",
     "type Test = ReadonlyMap<string, string>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyDeep,
@@ -155,7 +155,7 @@ test("sets and maps", (t) => {
     "type Test = ReadonlySet<{ foo: string }>;",
     "type Test = ReadonlyMap<{ foo: string }, { bar: string }>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyShallow,
@@ -168,7 +168,7 @@ test("sets and maps", (t) => {
     "type Test = Set<string>;",
     "type Test = Map<string, string>;"
   ]) {
-      runTestForGetTypeImmutableness(
+      runTestImmutableness(
         t,
         code,
         Immutableness.Mutable,
@@ -184,12 +184,7 @@ test("functions", (t) => {
     "type Test = { (): number; };",
     "type Test = { (foo: { bar: string; }): { baz: number; } };",
   ]) {
-    runTestForGetTypeImmutableness(
-      t,
-      code,
-      Immutableness.Immutable,
-      "handles function"
-    );
+    runTestImmutableness(t, code, Immutableness.Immutable, "handles function");
   }
 });
 
@@ -198,7 +193,7 @@ test("methods", (t) => {
     "type Test = { readonly foo: () => string; };",
     "type Test = Readonly<{ foo(): string; }>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -210,7 +205,7 @@ test("methods", (t) => {
     "type Test = { foo: () => string; };",
     "type Test = { foo(): string; };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyDeep,
@@ -225,7 +220,7 @@ test("private identifiers", (t) => {
     'class Foo { #privateField = "foo"; }',
     "class Foo { #privateMember() {}; }",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,

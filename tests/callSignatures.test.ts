@@ -2,7 +2,7 @@ import test from "ava";
 
 import { Immutableness } from "../src";
 
-import { runTestForGetTypeImmutableness } from "./helpers";
+import { runTestImmutableness } from "./helpers";
 
 test("simple", (t) => {
   for (const code of [
@@ -13,7 +13,7 @@ test("simple", (t) => {
     "type Test = { (foo: { baz: number }): string; readonly bar: number };",
     "type Test = Readonly<{ (foo: { baz: number }): string; bar: number }>;",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -25,7 +25,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test = { (): void; readonly bar: readonly number[] };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyDeep,
@@ -37,7 +37,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test = { (): void; readonly bar: readonly ({ foo: number })[] };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyShallow,
@@ -51,7 +51,7 @@ test("simple", (t) => {
     "type Test = { (foo: string): void; bar: number };",
     "type Test = { (foo: { baz: number }): string; bar: number };",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Mutable,

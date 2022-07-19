@@ -2,14 +2,14 @@ import test from "ava";
 
 import { Immutableness } from "../src";
 
-import { runTestForGetTypeImmutableness } from "./helpers";
+import { runTestImmutableness } from "./helpers";
 
 test("simple", (t) => {
   for (const code of [
     "type Test<G> = Readonly<{ foo: Test<string> | string; }>;",
     "type Test<G> = G extends string ? Readonly<{ foo: string }> : Test<string>",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Immutable,
@@ -21,7 +21,7 @@ test("simple", (t) => {
     "type Test<G> = Readonly<{ foo: ReadonlyArray<Test<string>> | string; }>;",
     "type Test<G> = G extends string ? ReadonlyArray<string> : Test<string>",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyDeep,
@@ -33,7 +33,7 @@ test("simple", (t) => {
     "type Test<G> = Readonly<{ foo: Array<Test<string>> | string; }>;",
     "type Test<G> = G extends string ? Readonly<{ foo: Array<string>; }> : Test<string>",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.ReadonlyShallow,
@@ -45,7 +45,7 @@ test("simple", (t) => {
     "type Test<G> = { foo: Test<string> | string; };",
     "type Test<G> = G extends string ? { foo: string } : Test<string>",
   ]) {
-    runTestForGetTypeImmutableness(
+    runTestImmutableness(
       t,
       code,
       Immutableness.Mutable,
