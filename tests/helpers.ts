@@ -47,24 +47,6 @@ function getType(code: string): {
 }
 
 /**
- * Convert a immutableness value as a string.
- */
-function immutablenessToString(immutableness: Immutableness) {
-  switch (immutableness) {
-    case Immutableness.Immutable:
-      return "Immutable";
-    case Immutableness.ReadonlyDeep:
-      return "Readonly Deep";
-    case Immutableness.ReadonlyShallow:
-      return "Readonly Shallow";
-    case Immutableness.Mutable:
-      return "Mutable";
-    default:
-      return "Unknown";
-  }
-}
-
-/**
  * Run tests against "getTypeImmutableness".
  */
 export function runTestForGetTypeImmutableness(
@@ -87,5 +69,5 @@ export function runTestForGetTypeImmutableness(
   const { checker, type } = getType(code);
 
   const actual = getTypeImmutableness(checker, type, overrides, cache);
-  t.is(immutablenessToString(actual), immutablenessToString(expected), message);
+  t.is(Immutableness[actual], Immutableness[expected], message);
 }

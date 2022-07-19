@@ -1,7 +1,7 @@
 /**
  * The immutableness sorted ascendently.
  */
-export const enum Immutableness {
+export enum Immutableness {
   Unknown = -1,
   Mutable = 0,
   ReadonlyShallow = 1,
