@@ -7,7 +7,7 @@ import type ts from "typescript";
 export function hasSymbol(
   node: ts.Node
 ): node is ts.Node & { symbol: ts.Symbol } {
-  return Object.prototype.hasOwnProperty.call(node, "symbol");
+  return Object.hasOwn(node, "symbol");
 }
 
 /**
