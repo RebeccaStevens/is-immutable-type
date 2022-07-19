@@ -1,10 +1,6 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-import { parseForESLint } from "@typescript-eslint/parser";
-import type { TSESTree } from "@typescript-eslint/utils";
+import * as tsvfs from "@typescript/vfs";
 import type { ExecutionContext } from "ava";
-import type ts from "typescript";
+import ts from "typescript";
 
 import {
   getTypeImmutableness,
@@ -14,31 +10,51 @@ import {
 } from "../src";
 
 /**
- * The root dir to "fixtures".
+ * Create a TS environment to run the tests in.
  */
-const rootDir = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "fixtures"
-);
+function createTSTestEnvironment(code: string) {
+  const compilerOptions: ts.CompilerOptions = {
+    lib: ["ES2021"],
+    target: ts.ScriptTarget.ES2021,
+  };
+
+  const fsMap = tsvfs.createDefaultMapFromNodeModules(compilerOptions, ts);
+  fsMap.set("index.ts", code);
+
+  const system = tsvfs.createSystem(fsMap);
+  const env = tsvfs.createVirtualTypeScriptEnvironment(
+    system,
+    ["index.ts"],
+    ts,
+    compilerOptions
+  );
+
+  const program = env.languageService.getProgram();
+  if (program === undefined) {
+    throw new Error("Failed to get program.");
+  }
+
+  const ast = env.getSourceFile("index.ts");
+  if (ast === undefined) {
+    throw new Error("Failed to get ast.");
+  }
+
+  return { program, ast };
+}
 
 /**
  * Get the first type defined in the given code.
  */
-function getType(code: string): {
-  type: ts.Type;
-  checker: ts.TypeChecker;
-} {
-  const { ast, services } = parseForESLint(code, {
-    project: "./tsconfig.json",
-    filePath: path.join(rootDir, "file.ts"),
-    tsconfigRootDir: rootDir,
-  });
-  const checker = services.program.getTypeChecker();
-  const { esTreeNodeToTSNodeMap } = services;
+function getType(code: string, line: number) {
+  const { ast, program } = createTSTestEnvironment(code);
 
-  const declaration = ast.body[0] as TSESTree.TSTypeAliasDeclaration;
-  const node = esTreeNodeToTSNodeMap.get(declaration.id);
-  const type = checker.getTypeAtLocation(node);
+  if (line > ast.statements.length) {
+    throw new Error(`No statement found.`);
+  }
+
+  const statement = ast.statements[line - 1];
+  const checker = program.getTypeChecker();
+  const type = checker.getTypeAtLocation(statement);
 
   return {
     type,
@@ -55,18 +71,24 @@ export function runTestImmutableness(
     | string
     | Readonly<{
         code: string;
+        line?: number;
         overrides?: ImmutablenessOverrides;
         cache?: ImmutablenessCache;
       }>,
   expected: Immutableness,
   message?: string
 ): void {
-  const { code, overrides, cache } =
-    typeof test === "string"
-      ? { code: test, overrides: undefined, cache: undefined }
-      : test;
+  const {
+    code,
+    line: _line,
+    overrides,
+    cache,
+  } = typeof test === "string"
+    ? { code: test, line: 1, overrides: undefined, cache: undefined }
+    : test;
+  const line = _line ?? 1;
 
-  const { checker, type } = getType(code);
+  const { checker, type } = getType(code, line);
 
   const actual = getTypeImmutableness(checker, type, overrides, cache);
   t.is(Immutableness[actual], Immutableness[expected], message);
