@@ -18,11 +18,15 @@ export function typeToString(
   type: ts.Type
 ): {
   name: string;
+  alias: string | undefined;
   nameWithArguments: string | undefined;
 } {
+  const alias = type.aliasSymbol?.name;
+
   if (type.intrinsicName !== undefined) {
     return {
       name: type.intrinsicName,
+      alias,
       nameWithArguments: undefined,
     };
   }
@@ -31,6 +35,7 @@ export function typeToString(
   if (symbol === undefined) {
     return {
       name: type.toString(),
+      alias,
       nameWithArguments: undefined,
     };
   }
@@ -53,6 +58,7 @@ export function typeToString(
 
   return {
     name,
+    alias,
     nameWithArguments,
   };
 }

@@ -4,7 +4,51 @@ import { Immutableness, type ImmutablenessOverrides } from "../src";
 
 import { runTestImmutableness } from "./helpers";
 
-test("simple by name", (t) => {
+test("root by name", (t) => {
+  const overrides: ImmutablenessOverrides = [
+    {
+      name: "Test",
+      to: Immutableness.Immutable,
+    },
+  ];
+
+  // prettier-ignore
+  for (const code of [
+    "type Test = { foo: string };"
+  ]) {
+
+    runTestImmutableness(
+      t,
+      { code, overrides },
+      Immutableness.Immutable,
+      "can override a type name from an mutable type to be immutable by name"
+    );
+  }
+});
+
+test("root by pattern", (t) => {
+  const overrides: ImmutablenessOverrides = [
+    {
+      pattern: /^T.*/u,
+      to: Immutableness.Immutable,
+    },
+  ];
+
+  // prettier-ignore
+  for (const code of [
+    "type Test<G> = { foo: string };"
+  ]) {
+
+    runTestImmutableness(
+      t,
+      { code, overrides },
+      Immutableness.Immutable,
+      "can override a type name from an mutable type to be immutable by a pattern"
+    );
+  }
+});
+
+test("expression by name", (t) => {
   const overrides: ImmutablenessOverrides = [
     {
       name: "string",
@@ -26,12 +70,12 @@ test("simple by name", (t) => {
       t,
       { code, overrides },
       Immutableness.Mutable,
-      "can override an immutable type to be mutable by name"
+      "can override a type expression from an immutable type to be mutable by name"
     );
   }
 });
 
-test("simple by a pattern", (t) => {
+test("expression by a pattern", (t) => {
   const overrides: ImmutablenessOverrides = [
     {
       pattern: /^s.*g$/u,
@@ -53,12 +97,12 @@ test("simple by a pattern", (t) => {
       t,
       { code, overrides },
       Immutableness.Mutable,
-      "can override an immutable type to be mutable by a pattern"
+      "can override a type expression from an immutable type to be mutable by a pattern"
     );
   }
 });
 
-test("from lower by name", (t) => {
+test("expression from lower by name", (t) => {
   const overrides: ImmutablenessOverrides = [
     {
       name: "ReadonlyArray",
@@ -69,19 +113,19 @@ test("from lower by name", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<Readonly<{foo: string}>>;"
+    "type Test = ReadonlyArray<Readonly<{ foo: string }>>;"
   ]) {
     runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.Immutable,
-      "can override an deeply readonly type to be immutable by name"
+      "can override a type expression from an deeply readonly type to be immutable by name"
     );
   }
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<{foo: string}>;"
+    "type Test = ReadonlyArray<{ foo: string }>;"
   ]) {
     runTestImmutableness(
       t,
@@ -92,7 +136,7 @@ test("from lower by name", (t) => {
   }
 });
 
-test("from lower by a pattern", (t) => {
+test("expression from lower by a pattern", (t) => {
   const overrides: ImmutablenessOverrides = [
     {
       pattern: /^Readonly.+<.+>$/u,
@@ -103,19 +147,19 @@ test("from lower by a pattern", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<Readonly<{foo: string}>>;"
+    "type Test = ReadonlyArray<Readonly<{ foo: string }>>;"
   ]) {
     runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.Immutable,
-      "can override an deeply readonly type to be immutable by a pattern"
+      "can override a type expression from an deeply readonly type to be immutable by a pattern"
     );
   }
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<{foo: string}>;"
+    "type Test = ReadonlyArray<{ foo: string }>;"
   ]) {
     runTestImmutableness(
       t,
@@ -126,7 +170,7 @@ test("from lower by a pattern", (t) => {
   }
 });
 
-test("from hgiher by name", (t) => {
+test("expression from hgiher by name", (t) => {
   const overrides: ImmutablenessOverrides = [
     {
       name: "ReadonlyArray",
@@ -137,19 +181,19 @@ test("from hgiher by name", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<{foo: string}>;"
+    "type Test = ReadonlyArray<{ foo: string }>;"
   ]) {
     runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.Mutable,
-      "can override an shallowly readonly type to be mutable by name"
+      "can override a type expression from an shallowly readonly type to be mutable by name"
     );
   }
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<Readonly<{foo: string}>>;"
+    "type Test = ReadonlyArray<Readonly<{ foo: string }>>;"
   ]) {
     runTestImmutableness(
       t,
@@ -160,7 +204,7 @@ test("from hgiher by name", (t) => {
   }
 });
 
-test("from hgiher by a pattern", (t) => {
+test("expression from hgiher by a pattern", (t) => {
   const overrides: ImmutablenessOverrides = [
     {
       pattern: /^Readonly.+<.+>$/u,
@@ -171,19 +215,19 @@ test("from hgiher by a pattern", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<{foo: string}>;"
+    "type Test = ReadonlyArray<{ foo: string }>;"
   ]) {
     runTestImmutableness(
       t,
       { code, overrides },
       Immutableness.Mutable,
-      "can override an shallowly readonly type to be mutable by a pattern"
+      "can override a type expression from an shallowly readonly type to be mutable by a pattern"
     );
   }
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<Readonly<{foo: string}>>;"
+    "type Test = ReadonlyArray<Readonly<{ foo: string }>>;"
   ]) {
     runTestImmutableness(
       t,
