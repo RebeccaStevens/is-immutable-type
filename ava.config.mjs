@@ -1,5 +1,5 @@
 const avaConfig = {
-  files: ["tests/**/*.test.*"],
+  files: ["tests/**/*.test.*", "!tests/limitations.test.ts"],
   timeout: "5m",
   extensions: {
     ts: "module",
