@@ -126,10 +126,7 @@ function getOverride(
     if (potentialOverride.name === name) {
       return potentialOverride;
     }
-    if (
-      nameWithArguments !== undefined &&
-      potentialOverride.pattern?.test(nameWithArguments) === true
-    ) {
+    if (potentialOverride.pattern?.test(nameWithArguments ?? name) === true) {
       return potentialOverride;
     }
   }
