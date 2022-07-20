@@ -120,7 +120,10 @@ function getOverride(
   type: ts.Type,
   overrides: ImmutablenessOverridesFlattened
 ) {
-  const { name, alias, nameWithArguments } = typeToString(checker, type);
+  const { name, nameWithArguments, alias, aliasWithArguments } = typeToString(
+    checker,
+    type
+  );
 
   for (const potentialOverride of overrides) {
     if (
@@ -128,7 +131,9 @@ function getOverride(
       potentialOverride.pattern?.test(nameWithArguments ?? name) === true ||
       (alias !== undefined &&
         (potentialOverride.name === alias ||
-          potentialOverride.pattern?.test(alias) === true))
+          potentialOverride.pattern?.test(alias) === true)) ||
+      (aliasWithArguments !== undefined &&
+        potentialOverride.pattern?.test(aliasWithArguments) === true)
     ) {
       return potentialOverride;
     }

@@ -48,6 +48,28 @@ test("root by pattern", (t) => {
   }
 });
 
+test("use type parameters in pattern of root override", (t) => {
+  const overrides: ImmutablenessOverrides = [
+    {
+      pattern: /^Test<.+>/u,
+      to: Immutableness.Immutable,
+    },
+  ];
+
+  // prettier-ignore
+  for (const code of [
+    "type Test<G> = { foo: string };"
+  ]) {
+
+    runTestImmutableness(
+      t,
+      { code, overrides },
+      Immutableness.Immutable,
+      "can override a type name using a pattern with type parameters."
+    );
+  }
+});
+
 test("expression by name", (t) => {
   const overrides: ImmutablenessOverrides = [
     {
