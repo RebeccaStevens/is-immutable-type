@@ -57,7 +57,7 @@ export const defaultOverrides: ImmutablenessOverrides = [
 /**
  * A cache used to keep track of what types have already been calculated.
  */
-export type ImmutablenessCache = Map<ts.Type, Immutableness>;
+export type ImmutablenessCache = WeakMap<ts.Type, Immutableness>;
 
 /**
  * Get the immutableness of the given type.
@@ -66,7 +66,7 @@ export function getTypeImmutableness(
   checker: ts.TypeChecker,
   type: ts.Type,
   overrides: ImmutablenessOverrides = defaultOverrides,
-  cache: ImmutablenessCache = new Map()
+  cache: ImmutablenessCache = new WeakMap()
 ): Immutableness {
   const cached = cache.get(type);
   if (cached !== undefined) {
