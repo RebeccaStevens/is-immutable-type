@@ -18,8 +18,12 @@ import ts from "typescript";
 
 import {
   Immutableness,
-  getMaxImmutableness,
-  getMinImmutableness,
+  max,
+  min,
+  clamp,
+  greaterThanOrEqualTo,
+  lessThanOrEqualTo,
+  isClamped,
 } from "./immutableness";
 import { hasSymbol, typeToString } from "./utils";
 
@@ -80,7 +84,7 @@ export function getTypeImmutableness(
   if (
     overrideTo !== undefined &&
     (overrideFrom === undefined ||
-      (overrideFrom <= overrideTo && overrideTo <= Immutableness.Mutable))
+      isClamped(overrideFrom, overrideTo, Immutableness.Mutable))
   ) {
     cache.set(type, overrideTo);
     return overrideTo;
@@ -97,12 +101,12 @@ export function getTypeImmutableness(
 
   if (overrideTo !== undefined) {
     assert(overrideFrom !== undefined);
-    if (overrideFrom <= overrideTo) {
-      if (immutableness >= overrideFrom) {
+    if (lessThanOrEqualTo(overrideFrom, overrideTo)) {
+      if (greaterThanOrEqualTo(immutableness, overrideFrom)) {
         cache.set(type, overrideTo);
         return overrideTo;
       }
-    } else if (immutableness <= overrideFrom) {
+    } else if (lessThanOrEqualTo(immutableness, overrideFrom)) {
       cache.set(type, overrideTo);
       return overrideTo;
     }
@@ -155,7 +159,7 @@ function calculateTypeImmutableness(
   if (isUnionType(type)) {
     return unionTypeParts(type)
       .map((t) => getTypeImmutableness(checker, t, overrides, cache))
-      .reduce(getMinImmutableness);
+      .reduce(min);
   }
 
   // Intersection?
@@ -170,7 +174,7 @@ function calculateTypeImmutableness(
         const t = checker.getTypeFromTypeNode(tn);
         return getTypeImmutableness(checker, t, overrides, cache);
       })
-      .reduce(getMinImmutableness);
+      .reduce(min);
   }
 
   // (Non-namespace) Function?
@@ -230,9 +234,10 @@ function arrayImmutableness(
     cache
   );
 
-  return getMaxImmutableness(
-    Immutableness.ReadonlyShallow,
-    getMinImmutableness(shallowImmutableness, deepImmutableness)
+  return clamp(
+    shallowImmutableness,
+    deepImmutableness,
+    Immutableness.ReadonlyShallow
   );
 }
 
@@ -270,7 +275,7 @@ function objectImmutableness(
         hasSymbol(property.valueDeclaration) &&
         isSymbolFlagSet(property.valueDeclaration.symbol, ts.SymbolFlags.Method)
       ) {
-        m_maxImmutableness = getMinImmutableness(
+        m_maxImmutableness = min(
           m_maxImmutableness,
           Immutableness.ReadonlyDeep
         );
@@ -284,7 +289,7 @@ function objectImmutableness(
         lastDeclaration.type !== undefined &&
         isFunctionTypeNode(lastDeclaration.type)
       ) {
-        m_maxImmutableness = getMinImmutableness(
+        m_maxImmutableness = min(
           m_maxImmutableness,
           Immutableness.ReadonlyDeep
         );
@@ -311,8 +316,8 @@ function objectImmutableness(
         overrides,
         cache
       );
-      m_maxImmutableness = getMinImmutableness(m_maxImmutableness, result);
-      if (m_minImmutableness >= m_maxImmutableness) {
+      m_maxImmutableness = min(m_maxImmutableness, result);
+      if (greaterThanOrEqualTo(m_minImmutableness, m_maxImmutableness)) {
         return m_minImmutableness;
       }
     }
@@ -320,8 +325,8 @@ function objectImmutableness(
 
   if (isTypeReference(type)) {
     const result = typeArgumentsImmutableness(checker, type, overrides, cache);
-    m_maxImmutableness = getMinImmutableness(m_maxImmutableness, result);
-    if (m_minImmutableness >= m_maxImmutableness) {
+    m_maxImmutableness = min(m_maxImmutableness, result);
+    if (greaterThanOrEqualTo(m_minImmutableness, m_maxImmutableness)) {
       return m_minImmutableness;
     }
   }
@@ -333,11 +338,8 @@ function objectImmutableness(
     overrides,
     cache
   );
-  m_maxImmutableness = getMinImmutableness(
-    stringIndexSigImmutableness,
-    m_maxImmutableness
-  );
-  if (m_minImmutableness >= m_maxImmutableness) {
+  m_maxImmutableness = min(stringIndexSigImmutableness, m_maxImmutableness);
+  if (greaterThanOrEqualTo(m_minImmutableness, m_maxImmutableness)) {
     return m_minImmutableness;
   }
 
@@ -348,15 +350,12 @@ function objectImmutableness(
     overrides,
     cache
   );
-  m_maxImmutableness = getMinImmutableness(
-    numberIndexSigImmutableness,
-    m_maxImmutableness
-  );
-  if (m_minImmutableness >= m_maxImmutableness) {
+  m_maxImmutableness = min(numberIndexSigImmutableness, m_maxImmutableness);
+  if (greaterThanOrEqualTo(m_minImmutableness, m_maxImmutableness)) {
     return m_minImmutableness;
   }
 
-  return getMaxImmutableness(m_minImmutableness, m_maxImmutableness);
+  return max(m_minImmutableness, m_maxImmutableness);
 }
 
 /**
@@ -372,7 +371,7 @@ function typeArgumentsImmutableness(
   if (typeArguments.length > 0) {
     return typeArguments
       .map((t) => getTypeImmutableness(checker, t, overrides, cache))
-      .reduce(getMinImmutableness);
+      .reduce(min);
   }
 
   return Immutableness.Unknown;
@@ -394,7 +393,7 @@ function indexSignatureImmutableness(
   }
 
   if (indexInfo.isReadonly) {
-    return getMaxImmutableness(
+    return max(
       Immutableness.ReadonlyShallow,
       getTypeImmutableness(checker, indexInfo.type, overrides, cache)
     );

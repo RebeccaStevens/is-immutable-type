@@ -7,6 +7,12 @@ export {
 export {
   type KnownImmutableness,
   Immutableness,
-  getMinImmutableness,
-  getMaxImmutableness,
+  clamp,
+  equalTo,
+  greaterThan,
+  greaterThanOrEqualTo,
+  lessThan,
+  lessThanOrEqualTo,
+  max,
+  min,
 } from "./immutableness";
