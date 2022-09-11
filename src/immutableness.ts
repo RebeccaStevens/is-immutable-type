@@ -3,10 +3,13 @@
  */
 export enum Immutableness {
   Unknown = -1,
-  Mutable = 0,
-  ReadonlyShallow = 1,
-  ReadonlyDeep = 2,
-  Immutable = 3,
+  // MutableDeep = 1,
+  Mutable = 2,
+  // MutableShallow = 2,
+  // Readonly = 3,
+  ReadonlyShallow = 3,
+  ReadonlyDeep = 4,
+  Immutable = 5,
 }
 
 /**
