@@ -212,7 +212,7 @@ function arrayImmutableness(
   type: ts.TypeReference,
   overrides: ImmutablenessOverrides,
   cache: ImmutablenessCache
-): -1 | Immutableness {
+): Immutableness {
   const shallowImmutableness = objectImmutableness(
     checker,
     type,
