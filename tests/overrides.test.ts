@@ -192,7 +192,7 @@ test("expression from lower by a pattern", (t) => {
   }
 });
 
-test("expression from hgiher by name", (t) => {
+test("expression from higher by name", (t) => {
   const overrides: ImmutablenessOverrides = [
     {
       name: "ReadonlyArray",
