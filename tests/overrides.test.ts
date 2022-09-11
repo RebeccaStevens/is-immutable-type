@@ -259,3 +259,45 @@ test("expression from hgiher by a pattern", (t) => {
     );
   }
 });
+
+test("wrapper by name", (t) => {
+  const overrides: ImmutablenessOverrides = [
+    {
+      name: "ReadonlyDeep",
+      to: Immutableness.ReadonlyDeep,
+    },
+  ];
+
+  // prettier-ignore
+  for (const code of [
+    "type Test = ReadonlyDeep<{ foo: { bar: string; }; }>; type ReadonlyDeep<T> = T | {};"
+  ]) {
+    runTestImmutableness(
+      t,
+      { code, overrides },
+      Immutableness.ReadonlyDeep,
+      "can override a type expression from an shallowly readonly type to be mutable by a pattern"
+    );
+  }
+});
+
+test("wrapper by pattern", (t) => {
+  const overrides: ImmutablenessOverrides = [
+    {
+      pattern: /^ReadonlyDeep<.+>$/u,
+      to: Immutableness.ReadonlyDeep,
+    },
+  ];
+
+  // prettier-ignore
+  for (const code of [
+    "type Test = ReadonlyDeep<{ foo: { bar: string; }; }>; type ReadonlyDeep<T> = T | {};"
+  ]) {
+    runTestImmutableness(
+      t,
+      { code, overrides },
+      Immutableness.ReadonlyDeep,
+      "can override a type expression from an shallowly readonly type to be mutable by a pattern"
+    );
+  }
+});

@@ -1,4 +1,8 @@
-import { isTypeReference } from "tsutils";
+import {
+  isTypeAliasDeclaration,
+  isTypeReference,
+  isTypeReferenceNode,
+} from "tsutils";
 import type ts from "typescript";
 
 /**
@@ -17,7 +21,7 @@ export function typeToString(
   checker: ts.TypeChecker,
   type: ts.Type
 ): {
-  name: string;
+  name: string | undefined;
   nameWithArguments: string | undefined;
   alias: string | undefined;
   aliasWithArguments: string | undefined;
@@ -45,9 +49,33 @@ export function typeToString(
 
   const symbol = type.getSymbol();
   if (symbol === undefined) {
+    const wrapperDeclarations = type.aliasSymbol?.declarations;
+    const wrapperDeclaration =
+      wrapperDeclarations?.length === 1 ? wrapperDeclarations[0] : undefined;
+    const wrapperType =
+      wrapperDeclaration !== undefined &&
+      isTypeAliasDeclaration(wrapperDeclaration) &&
+      isTypeReferenceNode(wrapperDeclaration.type)
+        ? wrapperDeclaration.type
+        : undefined;
+    const wrapperName = wrapperType?.typeName.getText();
+    const wrapperArguments =
+      wrapperType?.typeArguments === undefined
+        ? undefined
+        : typeArgumentsToString(
+            checker,
+            wrapperType.typeArguments.map((node) =>
+              checker.getTypeFromTypeNode(node)
+            )
+          );
+    const wrapperWithArguments =
+      wrapperArguments === undefined
+        ? undefined
+        : `${wrapperName}${wrapperArguments}`;
+
     return {
-      name: type.toString(),
-      nameWithArguments: undefined,
+      name: wrapperName,
+      nameWithArguments: wrapperWithArguments,
       alias,
       aliasWithArguments,
     };

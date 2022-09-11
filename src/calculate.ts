@@ -131,8 +131,10 @@ function getOverride(
 
   for (const potentialOverride of overrides) {
     if (
-      potentialOverride.name === name ||
-      potentialOverride.pattern?.test(nameWithArguments ?? name) === true ||
+      (name !== undefined &&
+        (potentialOverride.name === name ||
+          potentialOverride.pattern?.test(nameWithArguments ?? name) ===
+            true)) ||
       (alias !== undefined &&
         (potentialOverride.name === alias ||
           potentialOverride.pattern?.test(alias) === true)) ||
