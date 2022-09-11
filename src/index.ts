@@ -5,6 +5,7 @@ export {
   defaultOverrides,
 } from "./calculate";
 export {
+  type KnownImmutableness,
   Immutableness,
   getMinImmutableness,
   getMaxImmutableness,

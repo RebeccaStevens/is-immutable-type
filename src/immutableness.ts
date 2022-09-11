@@ -13,6 +13,11 @@ export enum Immutableness {
 }
 
 /**
+ * The possible immutableness values that aren't unknown.
+ */
+export type KnownImmutableness = Exclude<Immutableness, Immutableness.Unknown>;
+
+/**
  * Get the minimum immutableness from the given values.
  *
  * Unknown immutableness will be discarded if possible.
