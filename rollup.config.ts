@@ -1,7 +1,7 @@
 import rollupPluginJSON from "@rollup/plugin-json";
 import rollupPluginNodeResolve from "@rollup/plugin-node-resolve";
 import rollupPluginTypescript from "@rollup/plugin-typescript";
-import { defineConfig } from "rollup";
+import { defineConfig, type Plugin } from "rollup";
 import rollupPluginAutoExternal from "rollup-plugin-auto-external";
 import rollupPluginDts from "rollup-plugin-dts";
 import rollupPluginUassert from "rollup-plugin-unassert";
@@ -11,9 +11,9 @@ import pkg from "./package.json";
 /**
  * Get new instances of all the common plugins.
  */
-function getPlugins() {
+function getPlugins(): Plugin[] {
   return [
-    rollupPluginAutoExternal(),
+    rollupPluginAutoExternal() as unknown as Plugin,
     rollupPluginNodeResolve(),
     rollupPluginTypescript({
       tsconfig: "tsconfig.build.json",
