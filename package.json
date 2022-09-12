@@ -52,7 +52,8 @@
     "lint:md": "markdownlint \"**/*.md\" --config=.markdownlint.json --ignore-path=.markdownlintignore",
     "prepare": "husky install",
     "spell-check": "yarn check-spelling",
-    "test": "c8 ava"
+    "test": "c8 ava",
+    "test:limitations": "ava tests/limitations.test.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
