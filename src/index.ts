@@ -5,9 +5,20 @@ export {
   getDefaultOverrides,
 } from "./calculate";
 export {
-  Immutableness,
   clamp,
-  isUnknownImmutableness,
+  isClamped,
+  isImmutable,
+  isMutable,
+  isReadonlyDeep,
+  isReadonlyShallow,
+  isUnknown,
   max,
   min,
-} from "./immutableness";
+} from "./compare";
+export { Immutableness } from "./immutableness";
+export {
+  isImmutableType,
+  isMutableType,
+  isReadonlyDeepType,
+  isReadonlyShallowType,
+} from "./is";

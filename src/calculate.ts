@@ -16,7 +16,8 @@ import {
 } from "tsutils";
 import ts from "typescript";
 
-import { Immutableness, max, min, clamp, isClamped } from "./immutableness";
+import { max, min, clamp, isClamped } from "./compare";
+import { Immutableness } from "./immutableness";
 import { hasSymbol, typeToString } from "./utils";
 
 /**
