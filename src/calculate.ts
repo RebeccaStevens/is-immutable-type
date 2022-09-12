@@ -58,14 +58,32 @@ export function getDefaultOverrides(): ImmutablenessOverrides {
 export type ImmutablenessCache = WeakMap<ts.Type, Immutableness>;
 
 /**
+ * A global cache that can be used between consumers.
+ */
+const globalCache: ImmutablenessCache = new WeakMap();
+
+/**
  * Get the immutableness of the given type.
+ *
+ * @param checker - The TypeScript Type Checker to use.
+ * @param type - The type to test the immutableness of.
+ * @param overrides - The overrides to use when calculating the immutableness.
+ * @param useCache - Either a custom cache to use, `true` to use the global
+ * cache, or `false` to not use any predefined cache.
  */
 export function getTypeImmutableness(
   checker: ts.TypeChecker,
   type: ts.Type,
   overrides: ImmutablenessOverrides = getDefaultOverrides(),
-  cache: ImmutablenessCache = new WeakMap()
+  useCache: ImmutablenessCache | boolean = true
 ): Immutableness {
+  const cache: ImmutablenessCache =
+    useCache === true
+      ? globalCache
+      : useCache === false
+      ? new WeakMap()
+      : useCache;
+
   const cached = cache.get(type);
   if (cached !== undefined) {
     return cached;
