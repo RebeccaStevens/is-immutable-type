@@ -2,7 +2,7 @@ export {
   type ImmutablenessCache,
   type ImmutablenessOverrides,
   getTypeImmutableness,
-  defaultOverrides,
+  getDefaultOverrides,
 } from "./calculate";
 export {
   Immutableness,

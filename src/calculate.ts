@@ -43,12 +43,14 @@ type ImmutablenessOverridesFlattened = ImmutablenessOverrides &
   }>;
 
 /**
- * The default overrides that are applied.
+ * Get the default overrides that are applied.
  */
-export const defaultOverrides: ImmutablenessOverrides = [
-  { name: "Map", to: Immutableness.Mutable },
-  { name: "Set", to: Immutableness.Mutable },
-];
+export function getDefaultOverrides(): ImmutablenessOverrides {
+  return [
+    { name: "Map", to: Immutableness.Mutable },
+    { name: "Set", to: Immutableness.Mutable },
+  ];
+}
 
 /**
  * A cache used to keep track of what types have already been calculated.
@@ -61,7 +63,7 @@ export type ImmutablenessCache = WeakMap<ts.Type, Immutableness>;
 export function getTypeImmutableness(
   checker: ts.TypeChecker,
   type: ts.Type,
-  overrides: ImmutablenessOverrides = defaultOverrides,
+  overrides: ImmutablenessOverrides = getDefaultOverrides(),
   cache: ImmutablenessCache = new WeakMap()
 ): Immutableness {
   const cached = cache.get(type);
@@ -146,7 +148,7 @@ function getOverride(
 function calculateTypeImmutableness(
   checker: ts.TypeChecker,
   type: ts.Type,
-  overrides: ImmutablenessOverrides = defaultOverrides,
+  overrides: ImmutablenessOverrides,
   cache: ImmutablenessCache
 ): Immutableness {
   // Union?
