@@ -16,15 +16,7 @@ import {
 } from "tsutils";
 import ts from "typescript";
 
-import {
-  Immutableness,
-  max,
-  min,
-  clamp,
-  greaterThanOrEqualTo,
-  lessThanOrEqualTo,
-  isClamped,
-} from "./immutableness";
+import { Immutableness, max, min, clamp, isClamped } from "./immutableness";
 import { hasSymbol, typeToString } from "./utils";
 
 /**
@@ -101,12 +93,12 @@ export function getTypeImmutableness(
 
   if (overrideTo !== undefined) {
     assert(overrideFrom !== undefined);
-    if (lessThanOrEqualTo(overrideFrom, overrideTo)) {
-      if (greaterThanOrEqualTo(immutableness, overrideFrom)) {
+    if (overrideFrom <= overrideTo) {
+      if (immutableness >= overrideFrom) {
         cache.set(type, overrideTo);
         return overrideTo;
       }
-    } else if (lessThanOrEqualTo(immutableness, overrideFrom)) {
+    } else if (immutableness <= overrideFrom) {
       cache.set(type, overrideTo);
       return overrideTo;
     }
@@ -319,7 +311,7 @@ function objectImmutableness(
         cache
       );
       m_maxImmutableness = min(m_maxImmutableness, result);
-      if (greaterThanOrEqualTo(m_minImmutableness, m_maxImmutableness)) {
+      if (m_minImmutableness >= m_maxImmutableness) {
         return m_minImmutableness;
       }
     }
@@ -328,7 +320,7 @@ function objectImmutableness(
   if (isTypeReference(type)) {
     const result = typeArgumentsImmutableness(checker, type, overrides, cache);
     m_maxImmutableness = min(m_maxImmutableness, result);
-    if (greaterThanOrEqualTo(m_minImmutableness, m_maxImmutableness)) {
+    if (m_minImmutableness >= m_maxImmutableness) {
       return m_minImmutableness;
     }
   }
@@ -341,7 +333,7 @@ function objectImmutableness(
     cache
   );
   m_maxImmutableness = min(stringIndexSigImmutableness, m_maxImmutableness);
-  if (greaterThanOrEqualTo(m_minImmutableness, m_maxImmutableness)) {
+  if (m_minImmutableness >= m_maxImmutableness) {
     return m_minImmutableness;
   }
 
@@ -353,7 +345,7 @@ function objectImmutableness(
     cache
   );
   m_maxImmutableness = min(numberIndexSigImmutableness, m_maxImmutableness);
-  if (greaterThanOrEqualTo(m_minImmutableness, m_maxImmutableness)) {
+  if (m_minImmutableness >= m_maxImmutableness) {
     return m_minImmutableness;
   }
 

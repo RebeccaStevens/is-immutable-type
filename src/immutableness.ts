@@ -2,7 +2,7 @@
  * The immutableness sorted ascendently.
  */
 export enum Immutableness {
-  Unknown = -1,
+  Unknown = Number.NaN,
   // MutableDeep = 1,
   Mutable = 2,
   // MutableShallow = 2,
@@ -13,20 +13,23 @@ export enum Immutableness {
 }
 
 /**
- * The possible immutableness values that aren't unknown.
+ * Is the given Immutableness value Unknown?
  */
-export type KnownImmutableness = Exclude<Immutableness, Immutableness.Unknown>;
+export function isUnknownImmutableness(value: Immutableness) {
+  return Number.isNaN(value);
+}
 
 /**
  * Get the minimum immutableness from the given values.
  *
- * Unknown immutableness will be discarded if possible.
+ * Note: Unknown immutableness will be ignore; thus Unknown will be return if
+ * and only if all values are Unknown.
  */
 export function min(a: Immutableness, b: Immutableness): Immutableness {
-  if (a === Immutableness.Unknown) {
+  if (isUnknownImmutableness(a)) {
     return b;
   }
-  if (b === Immutableness.Unknown) {
+  if (isUnknownImmutableness(b)) {
     return a;
   }
   return Math.min(a, b);
@@ -35,9 +38,16 @@ export function min(a: Immutableness, b: Immutableness): Immutableness {
 /**
  * Get the maximum immutableness from the given values.
  *
- * Unknown immutableness will be discarded if possible.
+ * Note: Unknown immutableness will be ignore; thus Unknown will be return if
+ * and only if all values are Unknown.
  */
 export function max(a: Immutableness, b: Immutableness): Immutableness {
+  if (isUnknownImmutableness(a)) {
+    return b;
+  }
+  if (isUnknownImmutableness(b)) {
+    return a;
+  }
   return Math.max(a, b);
 }
 
@@ -55,72 +65,12 @@ export function clamp(
 /**
  * Returns true if and only if `value` is inclusively between `min` and `max`.
  *
- * @throws When any of the given parameter are unknown immutableness.
+ * Note: Will always return false if any value is unknown.
  */
 export function isClamped(
   minValue: Immutableness,
   value: Immutableness,
   maxValue: Immutableness
 ) {
-  throwIfUnknownImmutableness(minValue, value, maxValue);
   return minValue <= value && value <= maxValue;
-}
-
-/**
- * Returns true if and only if `a` and `b` have equal immutableness.
- *
- * @throws When either `a` or `b` is unknown immutableness.
- */
-export function equalTo(a: Immutableness, b: Immutableness) {
-  throwIfUnknownImmutableness(a, b);
-  return a === b;
-}
-
-/**
- * Returns true if and only if `a` is more immutable than `b`.
- *
- * @throws When either `a` or `b` is unknown immutableness.
- */
-export function greaterThan(a: Immutableness, b: Immutableness) {
-  throwIfUnknownImmutableness(a, b);
-  return a > b;
-}
-
-/**
- * Returns true if and only if `a` is more or equally as immutable as `b`.
- *
- * @throws When either `a` or `b` is unknown immutableness.
- */
-export function greaterThanOrEqualTo(a: Immutableness, b: Immutableness) {
-  throwIfUnknownImmutableness(a, b);
-  return a >= b;
-}
-
-/**
- * Returns true if and only if `a` is less immutable than `b`.
- *
- * @throws When any of the given parameter are unknown immutableness.
- */
-export function lessThan(a: Immutableness, b: Immutableness) {
-  throwIfUnknownImmutableness(a, b);
-  return a < b;
-}
-
-/**
- * Returns true if and only if `a` is less or equally as immutable as `b`.
- *
- * @throws When any of the given parameter are unknown immutableness.
- */
-export function lessThanOrEqualTo(a: Immutableness, b: Immutableness) {
-  throwIfUnknownImmutableness(a, b);
-  return a <= b;
-}
-
-/**
- * Will throw if any of the given parameter are unknown immutableness.
- */
-function throwIfUnknownImmutableness(...values: ReadonlyArray<Immutableness>) {
-  if (values.includes(Immutableness.Unknown)) {
-    throw new Error("Unknown Immutableness");
-  }
 }

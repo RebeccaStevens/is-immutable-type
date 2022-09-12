@@ -5,14 +5,9 @@ export {
   defaultOverrides,
 } from "./calculate";
 export {
-  type KnownImmutableness,
   Immutableness,
   clamp,
-  equalTo,
-  greaterThan,
-  greaterThanOrEqualTo,
-  lessThan,
-  lessThanOrEqualTo,
+  isUnknownImmutableness,
   max,
   min,
 } from "./immutableness";
