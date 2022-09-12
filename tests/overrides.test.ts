@@ -135,7 +135,8 @@ test("expression from lower by name", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<Readonly<{ foo: string }>>;"
+    "type Test = ReadonlyArray<Readonly<{ foo: string }>>;",
+    "type Test = readonly Readonly<{ foo: string }>[];"
   ]) {
     runTestImmutableness(
       t,
@@ -147,7 +148,8 @@ test("expression from lower by name", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyArray<{ foo: string }>;"
+    "type Test = ReadonlyArray<{ foo: string }>;",
+    "type Test = readonly { foo: string }[];"
   ]) {
     runTestImmutableness(
       t,
