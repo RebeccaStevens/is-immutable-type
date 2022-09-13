@@ -6,22 +6,39 @@
 
 import test from "ava";
 
-import type { ImmutablenessOverrides } from "../src";
 import { Immutableness } from "../src";
 
 import { runTestImmutableness } from "./helpers";
 
-test("override an expression of alias to primitive", (t) => {
-  const overrides: ImmutablenessOverrides = [
+test("override primitive", (t) => {
+  const overrides = [
     {
-      name: "B",
+      name: "string",
       to: Immutableness.Mutable,
     },
   ];
 
   // prettier-ignore
   for (const code of [
-    "type A = B; type B = string;",
+    "type Test = string;"
+  ]) {
+    runTestImmutableness(
+      t,
+      { code, overrides },
+      Immutableness.Immutable,
+      "can override a primitive"
+    );
+  }
+});
+
+// Both `A` and `B` get discarded - TypeScript directly use `string`.
+test("alias of type primitive", (t) => {
+  const code = "type A = B; type B = string;";
+
+  // prettier-ignore
+  for (const overrides of [
+    [{ name: "A", to: Immutableness.Mutable }],
+    [{ name: "B", to: Immutableness.Mutable }]
   ]) {
     runTestImmutableness(
       t,

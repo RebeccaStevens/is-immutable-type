@@ -303,3 +303,57 @@ test("wrapper by pattern", (t) => {
     );
   }
 });
+
+test("rename alias with type parameter", (t) => {
+  const overrides: ImmutablenessOverrides = [
+    {
+      name: "ImmutableArray",
+      to: Immutableness.Immutable,
+    },
+  ];
+
+  // prettier-ignore
+  for (const code of [
+    "type ImmutableArray<T> = ReadonlyArray<T>;"
+  ]) {
+    runTestImmutableness(
+      t,
+      { code, overrides },
+      Immutableness.Immutable,
+      "can treat a rename alias with an type parameter differently to the original."
+    );
+  }
+
+  /* prettier-ignore */
+  for (const code of [
+    "type Test = ReadonlyArray<string>; type ImmutableArray<T> = ReadonlyArray<T>;",
+  ]) {
+    runTestImmutableness(
+      t,
+      { code, overrides },
+      Immutableness.ReadonlyDeep,
+      "ReadonlyArray is still treaded as `ReadonlyDeep`."
+    );
+  }
+});
+
+test("rename alias of type with type parameter", (t) => {
+  const overrides: ImmutablenessOverrides = [
+    {
+      name: "A",
+      to: Immutableness.Mutable,
+    },
+  ];
+
+  // prettier-ignore
+  for (const code of [
+    "type A = B<number>; type B<T> = string | T;"
+  ]) {
+  runTestImmutableness(
+    t,
+    { code, overrides },
+    Immutableness.Mutable,
+    "can treat a rename alias differently to the original with a type parameter."
+  );
+  }
+});
