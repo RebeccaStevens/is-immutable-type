@@ -1705,15 +1705,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"acorn@npm:^7.0.0":
-  version: 7.4.1
-  resolution: "acorn@npm:7.4.1"
-  bin:
-    acorn: bin/acorn
-  checksum: 1860f23c2107c910c6177b7b7be71be350db9e1080d814493fae143ae37605189504152d1ba8743ba3178d0b37269ce1ffc42b101547fdc1827078f82671e407
-  languageName: node
-  linkType: hard
-
 "acorn@npm:^8.4.1, acorn@npm:^8.7.1, acorn@npm:^8.8.0":
   version: 8.8.0
   resolution: "acorn@npm:8.8.0"
@@ -2269,17 +2260,6 @@ __metadata:
     function-bind: ^1.1.1
     get-intrinsic: ^1.0.2
   checksum: f8e31de9d19988a4b80f3e704788c4a2d6b6f3d17cfec4f57dc29ced450c53a49270dc66bf0fbd693329ee948dd33e6c90a329519aef17474a4d961e8d6426b0
-  languageName: node
-  linkType: hard
-
-"call-matcher@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "call-matcher@npm:2.0.0"
-  dependencies:
-    deep-equal: ^1.0.0
-    espurify: ^2.0.0
-    estraverse: ^4.0.0
-  checksum: b0c65d6839a41136ad2780dfc2a2e63e94b6c9fe5f3cf666e79d047333dc0c65606f94c00af6bcf7c760196eafdbc051c8d3295d8bfb5c5a8cf0308b1ee6fd23
   languageName: node
   linkType: hard
 
@@ -3136,20 +3116,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-equal@npm:^1.0.0":
-  version: 1.1.1
-  resolution: "deep-equal@npm:1.1.1"
-  dependencies:
-    is-arguments: ^1.0.4
-    is-date-object: ^1.0.1
-    is-regex: ^1.0.4
-    object-is: ^1.0.1
-    object-keys: ^1.1.1
-    regexp.prototype.flags: ^1.2.0
-  checksum: f92686f2c5bcdf714a75a5fa7a9e47cb374a8ec9307e717b8d1ce61f56a75aaebf5619c2a12b8087a705b5a2f60d0292c35f8b58cb1f72e3268a3a15cab9f78d
-  languageName: node
-  linkType: hard
-
 "deep-extend@npm:^0.6.0":
   version: 0.6.0
   resolution: "deep-extend@npm:0.6.0"
@@ -3912,7 +3878,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"espurify@npm:^2.0.0, espurify@npm:^2.0.1, espurify@npm:^2.1.1":
+"espurify@npm:^2.1.1":
   version: 2.1.1
   resolution: "espurify@npm:2.1.1"
   checksum: 7d92a7670e3d4833bd6e6ff29759bd2c30aaedfeb93330d8fcf78c1760b535ae0cc5f3aa84d2d49b065cad9ba14a0c4c04b21002e0a7b62580e58dfdfc6a67cf
@@ -3937,14 +3903,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"estraverse@npm:^4.0.0, estraverse@npm:^4.1.0, estraverse@npm:^4.1.1":
+"estraverse@npm:^4.1.1":
   version: 4.3.0
   resolution: "estraverse@npm:4.3.0"
   checksum: a6299491f9940bb246124a8d44b7b7a413a8336f5436f9837aaa9330209bd9ee8af7e91a654a3545aee9c54b3308e78ee360cef1d777d37cfef77d2fa33b5827
   languageName: node
   linkType: hard
 
-"estraverse@npm:^5.1.0, estraverse@npm:^5.2.0":
+"estraverse@npm:^5.0.0, estraverse@npm:^5.1.0, estraverse@npm:^5.2.0":
   version: 5.3.0
   resolution: "estraverse@npm:5.3.0"
   checksum: 072780882dc8416ad144f8fe199628d2b3e7bbc9989d9ed43795d2c90309a2047e6bc5979d7e2322a341163d22cfad9e21f4110597fe487519697389497e4e2b
@@ -5028,16 +4994,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-arguments@npm:^1.0.4":
-  version: 1.1.1
-  resolution: "is-arguments@npm:1.1.1"
-  dependencies:
-    call-bind: ^1.0.2
-    has-tostringtag: ^1.0.0
-  checksum: 7f02700ec2171b691ef3e4d0e3e6c0ba408e8434368504bb593d0d7c891c0dbfda6d19d30808b904a6cb1929bca648c061ba438c39f296c2a8ca083229c49f27
-  languageName: node
-  linkType: hard
-
 "is-arrayish@npm:^0.2.1":
   version: 0.2.1
   resolution: "is-arrayish@npm:0.2.1"
@@ -5229,7 +5185,7 @@ __metadata:
     rollup: ^2.76.0
     rollup-plugin-auto-external: ^2.0.0
     rollup-plugin-dts: ^4.2.2
-    rollup-plugin-unassert: ^0.4.0
+    rollup-plugin-unassert: ^0.5.0
     semantic-release: ^19.0.3
     ts-node: ^10.8.2
     ts-paths-esm-loader: ^1.3.1
@@ -5330,7 +5286,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-regex@npm:^1.0.4, is-regex@npm:^1.1.4":
+"is-regex@npm:^1.1.4":
   version: 1.1.4
   resolution: "is-regex@npm:1.1.4"
   dependencies:
@@ -6889,27 +6845,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-assign@npm:^4.1.0":
-  version: 4.1.1
-  resolution: "object-assign@npm:4.1.1"
-  checksum: fcc6e4ea8c7fe48abfbb552578b1c53e0d194086e2e6bbbf59e0a536381a292f39943c6e9628af05b5528aa5e3318bb30d6b2e53cadaf5b8fe9e12c4b69af23f
-  languageName: node
-  linkType: hard
-
 "object-inspect@npm:^1.12.0, object-inspect@npm:^1.12.2, object-inspect@npm:^1.9.0":
   version: 1.12.2
   resolution: "object-inspect@npm:1.12.2"
   checksum: a534fc1b8534284ed71f25ce3a496013b7ea030f3d1b77118f6b7b1713829262be9e6243acbcb3ef8c626e2b64186112cb7f6db74e37b2789b9c789ca23048b2
-  languageName: node
-  linkType: hard
-
-"object-is@npm:^1.0.1":
-  version: 1.1.5
-  resolution: "object-is@npm:1.1.5"
-  dependencies:
-    call-bind: ^1.0.2
-    define-properties: ^1.1.3
-  checksum: 989b18c4cba258a6b74dc1d74a41805c1a1425bce29f6cabb50dcb1a6a651ea9104a1b07046739a49a5bb1bc49727bcb00efd5c55f932f6ea04ec8927a7901fe
   languageName: node
   linkType: hard
 
@@ -7759,7 +7698,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regexp.prototype.flags@npm:^1.2.0, regexp.prototype.flags@npm:^1.4.3":
+"regexp.prototype.flags@npm:^1.4.3":
   version: 1.4.3
   resolution: "regexp.prototype.flags@npm:1.4.3"
   dependencies:
@@ -7974,17 +7913,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-unassert@npm:^0.4.0":
-  version: 0.4.0
-  resolution: "rollup-plugin-unassert@npm:0.4.0"
+"rollup-plugin-unassert@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "rollup-plugin-unassert@npm:0.5.0"
   dependencies:
     "@rollup/pluginutils": ^4.2.1
-    acorn: ^8.7.1
+    acorn: ^8.8.0
     convert-source-map: ^1.8.0
     escodegen: ^2.0.0
     multi-stage-sourcemap: ^0.3.1
-    unassert: ^1.6.0
-  checksum: b00845330a8b2bc0a3f206f55430d52834fc4569090ceb92a3094bf59f7f6142b7050ce911b77224097e276d0ad4618aa4c1077626602e2efe261a73bf867938
+    unassert: ^2.0.0
+  checksum: ae9c27174bcf2f3133a57cd11f68c682a5d3137801f7a5643c2bf908a0b0acb611fe5399d5b2be5ded35483128b3d30ed169f8c9939c55db03ed205bc3f80afa
   languageName: node
   linkType: hard
 
@@ -8983,18 +8922,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unassert@npm:^1.6.0":
-  version: 1.6.0
-  resolution: "unassert@npm:1.6.0"
+"unassert@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "unassert@npm:2.0.0"
   dependencies:
-    acorn: ^7.0.0
-    call-matcher: ^2.0.0
-    deep-equal: ^1.0.0
-    espurify: ^2.0.1
-    estraverse: ^4.1.0
-    esutils: ^2.0.2
-    object-assign: ^4.1.0
-  checksum: 2191f2c1bd50e624c6a64bb8004491624ac1b28bd26946e496c59be81435f49921ffa5a73ef9d3061e4829ef22c26c866bb8e42218f6d893927332574bf6e16f
+    estraverse: ^5.0.0
+  checksum: 745e6141b37995955e5e7a1ecd881b5d69f875e1589317de11081f34bc4f9fbc19ca7fdaa94c0b6489f3b708ff2fe0026553ba005855453c224a02b0b00686a2
   languageName: node
   linkType: hard
 
