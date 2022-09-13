@@ -51,7 +51,7 @@ function foo(checker: ts.TypeChecker, node: ts.Node) {
 ```
 
 Tip: You can also use comparator expression (such as `>` and `<`) to compare
-`Immutableness`.
+`Immutableness`.\
 Note: `Immutableness.Unknown` will always return `false` when used in a
 comparator expression. This includes `===` - use `isUnknown()` if you need to
 test if a value is `Unknown`.
@@ -78,14 +78,17 @@ may modify internal state and we cannot tell this just by the method's type. For
 this reason, we allow types to be overridden.
 
 To override a type, pass an `overrides` array of all the `override` objects you
-want to use to your function call. You can either override a type by `name` or
-by a regex `pattern`. Specify a `to` property with the new immutableness value
-that should be used. Additionally you may also only override a type if it is
-calculated to have a certain immutableness by specifying a `from` property.
+want to use to your function call.\
+You can either override a type by `name` or by a regex `pattern`.\
+You must specify a `to` property with the new immutableness value that should be
+used.\
+Additionally you may specify a `from` property which will make it so the
+override will only be applied if the calculated immutableness is between the
+`to` and `from` values (inclusively).
 
 ### Example 1
 
-Always treat `ReadonlyArray`s as Immutable
+Always treat `ReadonlyArray`s as `Immutable`.
 
 ```ts
 [{ name: "ReadonlyArray", to: Immutableness.Immutable }]
@@ -111,7 +114,7 @@ Note: When providing custom overrides, the default ones will not be used. Be
 sure to include the default overrides in your custom overrides if you don't want
 to lose them. You can obtain them with `getDefaultOverrides()`.
 
-### Another Use of Overrides
+### Another Use for Overrides
 
 Currently due to limitations in TypeScript, it is impossible to write a utility
 type that will transform any given type to an immutable version of it in all
