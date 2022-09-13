@@ -16,7 +16,7 @@ import {
 } from "tsutils";
 import ts from "typescript";
 
-import { max, min, clamp, isClamped } from "./compare";
+import { max, min, clamp } from "./compare";
 import { Immutableness } from "./immutableness";
 import { hasSymbol, typeToString } from "./utils";
 
@@ -94,11 +94,8 @@ export function getTypeImmutableness(
   const overrideTo = override?.to;
   const overrideFrom = override?.from;
 
-  if (
-    overrideTo !== undefined &&
-    (overrideFrom === undefined ||
-      isClamped(overrideFrom, overrideTo, Immutableness.Mutable))
-  ) {
+  // Early escape if we don't need to check the override from.
+  if (overrideTo !== undefined && overrideFrom === undefined) {
     cache.set(type, overrideTo);
     return overrideTo;
   }

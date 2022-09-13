@@ -6,7 +6,6 @@ export {
 } from "./calculate";
 export {
   clamp,
-  isClamped,
   isImmutable,
   isMutable,
   isReadonlyDeep,

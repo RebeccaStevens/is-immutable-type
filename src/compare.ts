@@ -44,19 +44,6 @@ export function clamp(
 }
 
 /**
- * Returns true if and only if `value` is inclusively between `min` and `max`.
- *
- * Note: Will always return false if any value is unknown.
- */
-export function isClamped(
-  minValue: Immutableness,
-  value: Immutableness,
-  maxValue: Immutableness
-) {
-  return minValue <= value && value <= maxValue;
-}
-
-/**
  * Is the given immutableness immutable?
  */
 export function isImmutable(immutableness: Immutableness) {
