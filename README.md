@@ -129,20 +129,21 @@ immutable regardless, you can provide an override stating as such.
 
 ### Limitations (when it comes to overrides)
 
-#### "Rename" aliases
+#### Primitives
 
-Currently we cannot process alias types that simply rename one alias to another.
+Currently we cannot override primitives or aliases of primitives.
 
 For example, if we have the following code:
 
 ```ts
-type A = { foo: "bar" };
-type B = A; // This is a "rename" alias.
+type A = string;
+type B = A;
 ```
 
-We cannot override `B` to be treated differently to `A`.
+We cannot override `A`, `B` or `string` here.
 
-This is because, internally, TypeScript discards `B` and just uses `A`.
+The reason we cannot override the aliases is because, internally, TypeScript
+discards both `A` and `B` and just uses `string` in their place.
 
 ## Caching
 
@@ -154,3 +155,31 @@ However, this cache assumes you are always using the same type checker. If you
 need to use multiple (such as in a testing environment), this can lead to
 issues. To prevent this, you can provide us with a custom cache (by passing a
 `WeakMap`) to use or tell us to use a temporary cache (by passing `false`).
+
+## Making `ReadonlyDeep` types `Immutable`
+
+Many types that you may expect to be immutable (including those defined
+internally by TypeScript itself) are not written with immutable methods and thus
+are not reported as immutable by this library. Luckily it is quite easy to make
+such type immutable. Just simply wrap them in `Readonly`.
+
+### Example
+
+These types are `ReadonlyDeep`:
+
+```ts
+type Foo = ReadonlySet<string>;
+type Bar = ReadonlyMap<string, number>;
+```
+
+While these types are `Immutable`:
+
+```ts
+type Foo = Readonly<ReadonlySet<string>>;
+type Bar = Readonly<ReadonlyMap<string, number>>;
+```
+
+However it should be noted that this does not work for arrays. TypeScript will
+treat `Readonly<Array<T>>` exactly the same as `ReadonlyArray<T>` and
+as a consequence `Readonly<ReadonlyArray<T>>` is also treated the same.
+Thus it is not as easy to make immutable arrays.
