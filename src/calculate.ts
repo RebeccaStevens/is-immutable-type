@@ -111,12 +111,10 @@ export function getTypeImmutableness(
 
   if (overrideTo !== undefined) {
     assert(overrideFrom !== undefined);
-    if (overrideFrom <= overrideTo) {
-      if (immutableness >= overrideFrom) {
-        cache.set(type, overrideTo);
-        return overrideTo;
-      }
-    } else if (immutableness <= overrideFrom) {
+    if (
+      (overrideFrom <= immutableness && immutableness <= overrideTo) ||
+      (overrideFrom >= immutableness && immutableness >= overrideTo)
+    ) {
       cache.set(type, overrideTo);
       return overrideTo;
     }
