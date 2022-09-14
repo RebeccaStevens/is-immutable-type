@@ -50,7 +50,7 @@ function foo(checker: ts.TypeChecker, node: ts.Node) {
 }
 ```
 
-Tip: You can also use comparator expression (such as `>` and `<`) to compare
+Tip: You can also use comparator expressions (such as `>` and `<`) to compare
 `Immutableness`.\
 Note: `Immutableness.Unknown` will always return `false` when used in a
 comparator expression. This includes `===` - use `isUnknown()` if you need to
@@ -60,7 +60,7 @@ test if a value is `Unknown`.
 
 ## Definitions
 
-- `Immutable`: Fully, deeply readonly. Everything is read only and nothing can be modified.
+- `Immutable`: Everything is deeply read only and nothing can be modified.
 - `ReadonlyDeep`: The data is deeply immutable but methods are not.
 - `ReadonlyShallow`: The data is shallowly immutable, but at least one deep value is not.
 - `Mutable`: The data is shallowly mutable.
@@ -156,8 +156,8 @@ the same types over and over again.
 
 However, this cache assumes you are always using the same type checker. If you
 need to use multiple (such as in a testing environment), this can lead to
-issues. To prevent this, you can provide us with a custom cache (by passing a
-`WeakMap`) to use or tell us to use a temporary cache (by passing `false`).
+issues. To prevent this, you can provide a custom cache (by passing a `WeakMap`)
+to be used or have a temporary cache be used (by passing `false`).
 
 ## Making `ReadonlyDeep` types `Immutable`
 
