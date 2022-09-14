@@ -2,7 +2,7 @@ branches:
   - main
   - name: next
     channel: next
-    prerelease: beta
+    prerelease: next
 plugins:
   - - "@semantic-release/commit-analyzer"
     - preset: angular
@@ -38,4 +38,4 @@ plugins:
   - "@semantic-release/npm"
   - - "@semantic-release/github"
     - releasedLabels:
-        - "<%= nextRelease.channel === 'next' ? 'Status: Beta Released' : 'Status: Released' %>"
+        - "<%= nextRelease.channel === 'next' ? 'Status: Released on Next' : 'Status: Released' %>"
