@@ -27,8 +27,10 @@ export type ImmutablenessOverrides = ReadonlyArray<
   (
     | {
         name: string;
+        pattern?: undefined;
       }
     | {
+        name?: undefined;
         pattern: RegExp;
       }
   ) & {
@@ -36,12 +38,6 @@ export type ImmutablenessOverrides = ReadonlyArray<
     from?: Immutableness;
   }
 >;
-
-type ImmutablenessOverridesFlattened = ImmutablenessOverrides &
-  ReadonlyArray<{
-    name?: string;
-    pattern?: RegExp;
-  }>;
 
 /**
  * Get the default overrides that are applied.
@@ -130,7 +126,7 @@ export function getTypeImmutableness(
 function getOverride(
   checker: ts.TypeChecker,
   type: ts.Type,
-  overrides: ImmutablenessOverridesFlattened
+  overrides: ImmutablenessOverrides
 ) {
   const { name, nameWithArguments, alias, aliasWithArguments } = typeToString(
     checker,
