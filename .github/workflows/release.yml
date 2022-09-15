@@ -24,8 +24,11 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable --ignore-scripts
 
-      - name: Build & Verify
-        run: yarn verify
+      - name: Build
+        run: yarn build
+
+      - name: Test
+        run: yarn test
 
       - name: Release
         run: npx semantic-release
