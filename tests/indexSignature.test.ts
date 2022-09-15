@@ -1,18 +1,18 @@
 import test from "ava";
 
-import { Immutableness } from "../src";
+import { Immutability } from "../src";
 
-import { runTestImmutableness } from "./helpers";
+import { runTestImmutability } from "./helpers";
 
 test("Property Signatures", (t) => {
   for (const code of [
     "type Test = { readonly [key: string]: string };",
     "type Test = { readonly [key: string]: { readonly foo: string; }; };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "handles immutable IndexSignatures"
     );
   }
@@ -21,10 +21,10 @@ test("Property Signatures", (t) => {
   for (const code of [
     "type Test = { readonly [key: string]: readonly string[] };"
   ]) {
-      runTestImmutableness(
+      runTestImmutability(
         t,
         code,
-        Immutableness.ReadonlyDeep,
+        Immutability.ReadonlyDeep,
         "handles deeply readonly IndexSignatures"
       );
     }
@@ -33,10 +33,10 @@ test("Property Signatures", (t) => {
   for (const code of [
     "type Test = { readonly [key: string]: { foo: string[]; }; };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.ReadonlyShallow,
+      Immutability.ReadonlyShallow,
       "handles shallowly readonly IndexSignatures"
     );
   }
@@ -45,10 +45,10 @@ test("Property Signatures", (t) => {
   for (const code of [
     "type Test = { [key: string]: string };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "handles mutable IndexSignatures"
     );
   }

@@ -1,12 +1,12 @@
-import { Immutableness } from "./immutableness";
+import { Immutability } from "./immutability";
 
 /**
- * Get the minimum immutableness from the given values.
+ * Get the minimum immutability from the given values.
  *
- * Note: Unknown immutableness will be ignore; thus Unknown will be return if
+ * Note: Unknown immutability will be ignore; thus Unknown will be return if
  * and only if all values are Unknown.
  */
-export function min(a: Immutableness, b: Immutableness): Immutableness {
+export function min(a: Immutability, b: Immutability): Immutability {
   if (isUnknown(a)) {
     return b;
   }
@@ -17,12 +17,12 @@ export function min(a: Immutableness, b: Immutableness): Immutableness {
 }
 
 /**
- * Get the maximum immutableness from the given values.
+ * Get the maximum immutability from the given values.
  *
- * Note: Unknown immutableness will be ignore; thus Unknown will be return if
+ * Note: Unknown immutability will be ignore; thus Unknown will be return if
  * and only if all values are Unknown.
  */
-export function max(a: Immutableness, b: Immutableness): Immutableness {
+export function max(a: Immutability, b: Immutability): Immutability {
   if (isUnknown(a)) {
     return b;
   }
@@ -33,47 +33,47 @@ export function max(a: Immutableness, b: Immutableness): Immutableness {
 }
 
 /**
- * Clamp the immutableness between min and max.
+ * Clamp the immutability between min and max.
  */
 export function clamp(
-  minValue: Immutableness,
-  value: Immutableness,
-  maxValue: Immutableness
+  minValue: Immutability,
+  value: Immutability,
+  maxValue: Immutability
 ) {
   return Math.max(minValue, Math.min(maxValue, value));
 }
 
 /**
- * Is the given immutableness immutable?
+ * Is the given immutability immutable?
  */
-export function isImmutable(immutableness: Immutableness) {
-  return immutableness >= Immutableness.Immutable;
+export function isImmutable(immutability: Immutability) {
+  return immutability >= Immutability.Immutable;
 }
 
 /**
- * Is the given immutableness at least ReadonlyDeep?
+ * Is the given immutability at least ReadonlyDeep?
  */
-export function isReadonlyDeep(immutableness: Immutableness) {
-  return immutableness >= Immutableness.ReadonlyDeep;
+export function isReadonlyDeep(immutability: Immutability) {
+  return immutability >= Immutability.ReadonlyDeep;
 }
 
 /**
- * Is the given immutableness at least ReadonlyShallow?
+ * Is the given immutability at least ReadonlyShallow?
  */
-export function isReadonlyShallow(immutableness: Immutableness) {
-  return immutableness >= Immutableness.ReadonlyShallow;
+export function isReadonlyShallow(immutability: Immutability) {
+  return immutability >= Immutability.ReadonlyShallow;
 }
 
 /**
- * Is the given immutableness Mutable?
+ * Is the given immutability Mutable?
  */
-export function isMutable(immutableness: Immutableness) {
-  return immutableness <= Immutableness.Mutable;
+export function isMutable(immutability: Immutability) {
+  return immutability <= Immutability.Mutable;
 }
 
 /**
- * Is the given immutableness unknown?
+ * Is the given immutability unknown?
  */
-export function isUnknown(value: Immutableness) {
+export function isUnknown(value: Immutability) {
   return Number.isNaN(value);
 }

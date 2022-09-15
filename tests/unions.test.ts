@@ -1,18 +1,18 @@
 import test from "ava";
 
-import { Immutableness } from "../src";
+import { Immutability } from "../src";
 
-import { runTestImmutableness } from "./helpers";
+import { runTestImmutability } from "./helpers";
 
 test("simple", (t) => {
   for (const code of [
     "type Test = string | number",
     "type Test = Readonly<{ foo: string; }> | number;",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "handles simple unions of immutable types"
     );
   }
@@ -21,10 +21,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test = readonly string[] | readonly number[];",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.ReadonlyDeep,
+      Immutability.ReadonlyDeep,
       "handles simple unions of deeply readonly types"
     );
   }
@@ -33,10 +33,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test = { foo: string; } | { bar: string; };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "handles simple unions of mutable types"
     );
   }
@@ -45,10 +45,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test = Readonly<{ foo: string; } | { bar: string; }>;",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "handles immutable unions of mutable types"
     );
   }

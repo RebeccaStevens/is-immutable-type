@@ -1,18 +1,18 @@
 import test from "ava";
 
-import { Immutableness } from "../src";
+import { Immutability } from "../src";
 
-import { runTestImmutableness } from "./helpers";
+import { runTestImmutability } from "./helpers";
 
 test("simple", (t) => {
   // prettier-ignore
   for (const code of [
     "type Test<G> = G extends number ? number : string;",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "handles simple contitional of immutable types"
     );
   }
@@ -21,10 +21,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test<G> = G extends number ? readonly number[] : readonly string[];",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.ReadonlyDeep,
+      Immutability.ReadonlyDeep,
       "handles simple contitional of deeply readonly types"
     );
   }
@@ -33,10 +33,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test<G> = G extends number ? { foo: number } : { foo: string };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "handles simple contitional of mutable types"
     );
   }
@@ -45,10 +45,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test<G> = Readonly<G extends number ? { foo: number } : { foo: string }>;",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "handles immutable contitional of mutable types"
     );
   }

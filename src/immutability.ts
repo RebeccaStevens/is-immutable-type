@@ -1,7 +1,7 @@
 /**
- * The immutableness sorted ascendently.
+ * The immutability sorted ascendently.
  */
-export enum Immutableness {
+export enum Immutability {
   Unknown = Number.NaN,
   // MutableDeep = 1,
   Mutable = 2,

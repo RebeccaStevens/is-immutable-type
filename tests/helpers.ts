@@ -3,10 +3,10 @@ import type { ExecutionContext } from "ava";
 import ts from "typescript";
 
 import {
-  getTypeImmutableness,
-  Immutableness,
-  type ImmutablenessCache,
-  type ImmutablenessOverrides,
+  getTypeImmutability,
+  Immutability,
+  type ImmutabilityCache,
+  type ImmutabilityOverrides,
 } from "../src";
 
 /**
@@ -63,19 +63,19 @@ function getType(code: string, line: number) {
 }
 
 /**
- * Run tests against "getTypeImmutableness".
+ * Run tests against "getTypeImmutability".
  */
-export function runTestImmutableness(
+export function runTestImmutability(
   t: ExecutionContext<unknown>,
   test:
     | string
     | Readonly<{
         code: string;
         line?: number;
-        overrides?: ImmutablenessOverrides;
-        cache?: ImmutablenessCache;
+        overrides?: ImmutabilityOverrides;
+        cache?: ImmutabilityCache;
       }>,
-  expected: Immutableness,
+  expected: Immutability,
   message?: string
 ): void {
   const {
@@ -90,6 +90,6 @@ export function runTestImmutableness(
 
   const { checker, type } = getType(code, line);
 
-  const actual = getTypeImmutableness(checker, type, overrides, cache);
-  t.is(Immutableness[actual], Immutableness[expected], message);
+  const actual = getTypeImmutability(checker, type, overrides, cache);
+  t.is(Immutability[actual], Immutability[expected], message);
 }

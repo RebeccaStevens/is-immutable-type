@@ -32,31 +32,31 @@ yarn add is-immutable-type
 # Usage
 
 ```ts
-import { getTypeImmutableness, Immutableness, isReadonlyDeep, isUnknown } from "is-immutable-type";
+import { getTypeImmutability, Immutability, isReadonlyDeep, isUnknown } from "is-immutable-type";
 import type ts from "typescript";
 
 function foo(checker: ts.TypeChecker, node: ts.Node) {
   const nodeType = checker.getTypeAtLocation(node);
   const constrainedNodeType = checker.getBaseConstraintOfType(nodeType);
-  const immutableness = getTypeImmutableness(checker, constrainedNodeType);
+  const immutability = getTypeImmutability(checker, constrainedNodeType);
 
-  if (isUnknown(immutableness)) {
-    console.log("`immutableness` is `Unknown`").
-  } else if (isReadonlyDeep(immutableness)) {
-    console.log("`immutableness` is `ReadonlyDeep` or `Immutable`").
+  if (isUnknown(immutability)) {
+    console.log("`immutability` is `Unknown`").
+  } else if (isReadonlyDeep(immutability)) {
+    console.log("`immutability` is `ReadonlyDeep` or `Immutable`").
   } else {
-    console.log("`immutableness` is `ReadonlyShallow` or `Mutable`").
+    console.log("`immutability` is `ReadonlyShallow` or `Mutable`").
   }
 }
 ```
 
 Tip: You can also use comparator expressions (such as `>` and `<`) to compare
-`Immutableness`.\
-Note: `Immutableness.Unknown` will always return `false` when used in a
+`Immutability`.\
+Note: `Immutability.Unknown` will always return `false` when used in a
 comparator expression. This includes `===` - use `isUnknown()` if you need to
 test if a value is `Unknown`.
 
-# Immutableness
+# Immutability
 
 ## Definitions
 
@@ -64,15 +64,15 @@ test if a value is `Unknown`.
 - `ReadonlyDeep`: The data is deeply immutable but methods are not.
 - `ReadonlyShallow`: The data is shallowly immutable, but at least one deep value is not.
 - `Mutable`: The data is shallowly mutable.
-- `Unknown`: We couldn't determine the immutableness of the type.
+- `Unknown`: We couldn't determine the immutability of the type.
 
 Note: Internally `Unknown` may also be used to mean that we are still
-calculating the immutableness of the type. This shouldn't be exposed to the
+calculating the immutability of the type. This shouldn't be exposed to the
 outside world though.
 
 ## Overrides
 
-Sometimes we cannot correctly tell what a type's immutableness is supposed to be
+Sometimes we cannot correctly tell what a type's immutability is supposed to be
 just by analyzing its type makeup. One common reason for this is because methods
 may modify internal state and we cannot tell this just by the method's type. For
 this reason, we allow types to be overridden.
@@ -80,10 +80,10 @@ this reason, we allow types to be overridden.
 To override a type, pass an `overrides` array of all the `override` objects you
 want to use to your function call.\
 You can either override a type by `name` or by a regex `pattern`.\
-You must specify a `to` property with the new immutableness value that should be
+You must specify a `to` property with the new immutability value that should be
 used.\
 Additionally you may specify a `from` property which will make it so the
-override will only be applied if the calculated immutableness is between the
+override will only be applied if the calculated immutability is between the
 `to` and `from` values (inclusively).
 
 ### Example 1
@@ -91,7 +91,7 @@ override will only be applied if the calculated immutableness is between the
 Always treat `ReadonlyArray`s as `Immutable`.
 
 ```ts
-[{ name: "ReadonlyArray", to: Immutableness.Immutable }]
+[{ name: "ReadonlyArray", to: Immutability.Immutable }]
 ```
 
 ### Example 2
@@ -100,7 +100,7 @@ Treat `ReadonlyArray`s as `Immutable` instead of `ReadonlyDeep`. But if the
 instance type was calculated as `ReadonlyShallow`, it will stay as such.
 
 ```ts
-[{ name: "ReadonlyArray", to: Immutableness.Immutable, from: Immutableness.ReadonlyDeep }]
+[{ name: "ReadonlyArray", to: Immutability.Immutable, from: Immutability.ReadonlyDeep }]
 ```
 
 ### Default Overrides
@@ -127,7 +127,7 @@ type. If you want this library to treat types wrapped in `ReadonlyDeep` as
 immutable regardless, you can provide an override stating as such.
 
 ```ts
-[{ pattern: /^ReadonlyDeep<.+>$/u, to: Immutableness.Immutable }]
+[{ pattern: /^ReadonlyDeep<.+>$/u, to: Immutability.Immutable }]
 ```
 
 ### Limitations (when it comes to overrides)
@@ -151,7 +151,7 @@ discards both `A` and `B` and just uses `string` in their place.
 ## Caching
 
 By default we use a global cache to speed up the calculation of multiple types'
-immutableness. This prevents us from needing to calculate the immutableness of
+immutability. This prevents us from needing to calculate the immutability of
 the same types over and over again.
 
 However, this cache assumes you are always using the same type checker. If you

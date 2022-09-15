@@ -1,14 +1,14 @@
 import test from "ava";
 
-import { Immutableness, type ImmutablenessOverrides } from "../src";
+import { Immutability, type ImmutabilityOverrides } from "../src";
 
-import { runTestImmutableness } from "./helpers";
+import { runTestImmutability } from "./helpers";
 
 test("root by name", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       name: "Test",
-      to: Immutableness.Immutable,
+      to: Immutability.Immutable,
     },
   ];
 
@@ -17,20 +17,20 @@ test("root by name", (t) => {
     "type Test = { foo: string };"
   ]) {
 
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "can override a type name from an mutable type to be immutable by name"
     );
   }
 });
 
 test("root by pattern", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       pattern: /^T.*/u,
-      to: Immutableness.Immutable,
+      to: Immutability.Immutable,
     },
   ];
 
@@ -39,20 +39,20 @@ test("root by pattern", (t) => {
     "type Test<G> = { foo: string };"
   ]) {
 
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "can override a type name from an mutable type to be immutable by a pattern"
     );
   }
 });
 
 test("use type parameters in pattern of root override", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       pattern: /^Test<.+>/u,
-      to: Immutableness.Immutable,
+      to: Immutability.Immutable,
     },
   ];
 
@@ -61,24 +61,24 @@ test("use type parameters in pattern of root override", (t) => {
     "type Test<G> = { foo: string };"
   ]) {
 
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "can override a type name using a pattern with type parameters."
     );
   }
 });
 
 test("expression by name", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       name: "string",
-      to: Immutableness.Mutable,
+      to: Immutability.Mutable,
     },
     {
       name: "ReadonlyArray",
-      to: Immutableness.Mutable,
+      to: Immutability.Mutable,
     },
   ];
 
@@ -88,24 +88,24 @@ test("expression by name", (t) => {
     "type Test = ReadonlyArray<string>",
   ]) {
 
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "can override a type expression from an immutable type to be mutable by name"
     );
   }
 });
 
 test("expression by a pattern", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       pattern: /^s.*g$/u,
-      to: Immutableness.Mutable,
+      to: Immutability.Mutable,
     },
     {
       pattern: /Readonly/u,
-      to: Immutableness.Mutable,
+      to: Immutability.Mutable,
     },
   ];
 
@@ -115,21 +115,21 @@ test("expression by a pattern", (t) => {
     "type Test = ReadonlyArray<string>",
   ]) {
 
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "can override a type expression from an immutable type to be mutable by a pattern"
     );
   }
 });
 
 test("expression from lower by name", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       name: "ReadonlyArray",
-      to: Immutableness.Immutable,
-      from: Immutableness.ReadonlyDeep,
+      to: Immutability.Immutable,
+      from: Immutability.ReadonlyDeep,
     },
   ];
 
@@ -138,10 +138,10 @@ test("expression from lower by name", (t) => {
     "type Test = ReadonlyArray<Readonly<{ foo: string }>>;",
     "type Test = readonly Readonly<{ foo: string }>[];"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "can override a type expression from an deeply readonly type to be immutable by name"
     );
   }
@@ -151,21 +151,21 @@ test("expression from lower by name", (t) => {
     "type Test = ReadonlyArray<{ foo: string }>;",
     "type Test = readonly { foo: string }[];"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.ReadonlyShallow,
-      "respects lower immutableness"
+      Immutability.ReadonlyShallow,
+      "respects lower immutability"
     );
   }
 });
 
 test("expression from lower by a pattern", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       pattern: /^Readonly.+<.+>$/u,
-      to: Immutableness.Immutable,
-      from: Immutableness.ReadonlyDeep,
+      to: Immutability.Immutable,
+      from: Immutability.ReadonlyDeep,
     },
   ];
 
@@ -173,10 +173,10 @@ test("expression from lower by a pattern", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<Readonly<{ foo: string }>>;"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "can override a type expression from an deeply readonly type to be immutable by a pattern"
     );
   }
@@ -185,21 +185,21 @@ test("expression from lower by a pattern", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<{ foo: string }>;"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.ReadonlyShallow,
-      "respects lower immutableness"
+      Immutability.ReadonlyShallow,
+      "respects lower immutability"
     );
   }
 });
 
 test("expression from higher by name", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       name: "ReadonlyArray",
-      to: Immutableness.Mutable,
-      from: Immutableness.ReadonlyShallow,
+      to: Immutability.Mutable,
+      from: Immutability.ReadonlyShallow,
     },
   ];
 
@@ -207,10 +207,10 @@ test("expression from higher by name", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<{ foo: string }>;"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "can override a type expression from an shallowly readonly type to be mutable by name"
     );
   }
@@ -219,21 +219,21 @@ test("expression from higher by name", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<Readonly<{ foo: string }>>;"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.ReadonlyDeep,
-      "respects higher immutableness"
+      Immutability.ReadonlyDeep,
+      "respects higher immutability"
     );
   }
 });
 
 test("expression from hgiher by a pattern", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       pattern: /^Readonly.+<.+>$/u,
-      to: Immutableness.Mutable,
-      from: Immutableness.ReadonlyShallow,
+      to: Immutability.Mutable,
+      from: Immutability.ReadonlyShallow,
     },
   ];
 
@@ -241,10 +241,10 @@ test("expression from hgiher by a pattern", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<{ foo: string }>;"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "can override a type expression from an shallowly readonly type to be mutable by a pattern"
     );
   }
@@ -253,20 +253,20 @@ test("expression from hgiher by a pattern", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<Readonly<{ foo: string }>>;"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.ReadonlyDeep,
-      "respects higher immutableness"
+      Immutability.ReadonlyDeep,
+      "respects higher immutability"
     );
   }
 });
 
 test("wrapper by name", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       name: "ReadonlyDeep",
-      to: Immutableness.ReadonlyDeep,
+      to: Immutability.ReadonlyDeep,
     },
   ];
 
@@ -274,20 +274,20 @@ test("wrapper by name", (t) => {
   for (const code of [
     "type Test = ReadonlyDeep<{ foo: { bar: string; }; }>; type ReadonlyDeep<T> = T | {};"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.ReadonlyDeep,
+      Immutability.ReadonlyDeep,
       "can override a type expression from an shallowly readonly type to be mutable by a pattern"
     );
   }
 });
 
 test("wrapper by pattern", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       pattern: /^ReadonlyDeep<.+>$/u,
-      to: Immutableness.ReadonlyDeep,
+      to: Immutability.ReadonlyDeep,
     },
   ];
 
@@ -295,20 +295,20 @@ test("wrapper by pattern", (t) => {
   for (const code of [
     "type Test = ReadonlyDeep<{ foo: { bar: string; }; }>; type ReadonlyDeep<T> = T | {};"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.ReadonlyDeep,
+      Immutability.ReadonlyDeep,
       "can override a type expression from an shallowly readonly type to be mutable by a pattern"
     );
   }
 });
 
 test("rename alias with type parameter", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       name: "ImmutableArray",
-      to: Immutableness.Immutable,
+      to: Immutability.Immutable,
     },
   ];
 
@@ -316,10 +316,10 @@ test("rename alias with type parameter", (t) => {
   for (const code of [
     "type ImmutableArray<T> = ReadonlyArray<T>;"
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "can treat a rename alias with an type parameter differently to the original."
     );
   }
@@ -328,20 +328,20 @@ test("rename alias with type parameter", (t) => {
   for (const code of [
     "type Test = ReadonlyArray<string>; type ImmutableArray<T> = ReadonlyArray<T>;",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       { code, overrides },
-      Immutableness.ReadonlyDeep,
+      Immutability.ReadonlyDeep,
       "ReadonlyArray is still treaded as `ReadonlyDeep`."
     );
   }
 });
 
 test("rename alias of type with type parameter", (t) => {
-  const overrides: ImmutablenessOverrides = [
+  const overrides: ImmutabilityOverrides = [
     {
       name: "A",
-      to: Immutableness.Mutable,
+      to: Immutability.Mutable,
     },
   ];
 
@@ -349,10 +349,10 @@ test("rename alias of type with type parameter", (t) => {
   for (const code of [
     "type A = B<number>; type B<T> = string | T;"
   ]) {
-  runTestImmutableness(
+  runTestImmutability(
     t,
     { code, overrides },
-    Immutableness.Mutable,
+    Immutability.Mutable,
     "can treat a rename alias differently to the original with a type parameter."
   );
   }

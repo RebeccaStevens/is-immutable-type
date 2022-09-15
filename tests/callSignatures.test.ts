@@ -1,8 +1,8 @@
 import test from "ava";
 
-import { Immutableness } from "../src";
+import { Immutability } from "../src";
 
-import { runTestImmutableness } from "./helpers";
+import { runTestImmutability } from "./helpers";
 
 test("simple", (t) => {
   for (const code of [
@@ -13,10 +13,10 @@ test("simple", (t) => {
     "type Test = { (foo: { baz: number }): string; readonly bar: number };",
     "type Test = Readonly<{ (foo: { baz: number }): string; bar: number }>;",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "handles immutable namespaces"
     );
   }
@@ -25,10 +25,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test = { (): void; readonly bar: readonly number[] };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.ReadonlyDeep,
+      Immutability.ReadonlyDeep,
       "handles mutable namespaces"
     );
   }
@@ -37,10 +37,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test = { (): void; readonly bar: readonly ({ foo: number })[] };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.ReadonlyShallow,
+      Immutability.ReadonlyShallow,
       "handles mutable namespaces"
     );
   }
@@ -51,10 +51,10 @@ test("simple", (t) => {
     "type Test = { (foo: string): void; bar: number };",
     "type Test = { (foo: { baz: number }): string; bar: number };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "handles mutable namespaces"
     );
   }

@@ -1,17 +1,17 @@
 import test from "ava";
 
-import { Immutableness } from "../src";
+import { Immutability } from "../src";
 
-import { runTestImmutableness } from "./helpers";
+import { runTestImmutability } from "./helpers";
 
 test("simple", (t) => {
   for (const code of [
     "type Test = Readonly<{ foo: string; }> & Readonly<{ bar: string; }>;",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "handles simple intersections of immutable types"
     );
   }
@@ -20,10 +20,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test = readonly (number | string)[] & readonly (number | boolean)[];",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.ReadonlyDeep,
+      Immutability.ReadonlyDeep,
       "handles simple intersections of deeply readonly types"
     );
   }
@@ -32,10 +32,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test = { foo: string; } & { bar: string; };",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Mutable,
+      Immutability.Mutable,
       "handles simple intersections of mutable types"
     );
   }
@@ -44,10 +44,10 @@ test("simple", (t) => {
   for (const code of [
     "type Test = Readonly<{ foo: string; } & { bar: string; }>;",
   ]) {
-    runTestImmutableness(
+    runTestImmutability(
       t,
       code,
-      Immutableness.Immutable,
+      Immutability.Immutable,
       "handles immutable intersections of mutable types"
     );
   }

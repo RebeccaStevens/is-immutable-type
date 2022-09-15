@@ -1,7 +1,7 @@
 export {
-  type ImmutablenessCache,
-  type ImmutablenessOverrides,
-  getTypeImmutableness,
+  type ImmutabilityCache,
+  type ImmutabilityOverrides,
+  getTypeImmutability,
   getDefaultOverrides,
 } from "./calculate";
 export {
@@ -14,7 +14,7 @@ export {
   max,
   min,
 } from "./compare";
-export { Immutableness } from "./immutableness";
+export { Immutability } from "./immutability";
 export {
   isImmutableType,
   isMutableType,
