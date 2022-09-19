@@ -6,6 +6,9 @@ branches:
 plugins:
   - - "@semantic-release/commit-analyzer"
     - preset: angular
+      parserOpts:
+        headerPattern: '^(\w*)(?:\((.*)\))?!?: (.*)$'
+        breakingHeaderPattern: '^(\w*)(?:\((.*)\))?!: (.*)$'
       releaseRules:
         - breaking: true
           release: major
@@ -18,6 +21,9 @@ plugins:
         - type: perf
           release: patch
         - type: build
+          scope: deps
+          release: patch
+        - type: build
           scope: release-patch
           release: patch
         - type: build
@@ -26,14 +32,17 @@ plugins:
         - type: build
           scope: release-major
           release: major
-  - "@semantic-release/release-notes-generator"
+  - - "@semantic-release/release-notes-generator"
+    - preset: angular
+      parserOpts:
+        headerPattern: '^(\w*)(?:\((.*)\))?!?: (.*)$'
+        breakingHeaderPattern: '^(\w*)(?:\((.*)\))?!: (.*)$'
   - - "@semantic-release/changelog"
     - changelogTitle: "# Changelog
 
         All notable changes to this project will be documented in this file. Dates are displayed in UTC."
   - - "@semantic-release/git"
     - assets:
-        - dist
         - CHANGELOG.md
   - "@semantic-release/npm"
   - - "@semantic-release/github"
