@@ -24,6 +24,9 @@ plugins:
           scope: deps
           release: patch
         - type: build
+          scope: peer-deps
+          release: patch
+        - type: build
           scope: release-patch
           release: patch
         - type: build
