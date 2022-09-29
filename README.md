@@ -185,4 +185,23 @@ type Bar = Readonly<ReadonlyMap<string, number>>;
 However it should be noted that this does not work for arrays. TypeScript will
 treat `Readonly<Array<T>>` exactly the same as `ReadonlyArray<T>` and
 as a consequence `Readonly<ReadonlyArray<T>>` is also treated the same.
-Thus it is not as easy to make immutable arrays.
+
+In order to get around this, we need to slightly tweak the `Readonly` definition
+like so:
+
+```ts
+type ImmutableShallow<T extends {}> = {
+  readonly [P in keyof T & {}]: T[P];
+};
+```
+
+Now the follow will correctly be marked as `Immutable`.
+
+```ts
+type Foo = ImmutableShallow<readonly string[]>;
+type Bar = ImmutableShallow<ReadonlyArray<string>>;
+```
+
+Note: `ImmutableShallow<string[]>` will also be marked as immutable but the type
+will still have methods such as `push` and `pop`. Be sure to pass a readonly
+array to `ImmutableShallow` to prevent this.

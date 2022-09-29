@@ -50,6 +50,22 @@ test("records", (t) => {
 });
 
 test("arrays", (t) => {
+  const ImmutableShallow = `type ImmutableShallow<T extends {}> = {
+    readonly [P in keyof T & {}]: T[P];
+  };`;
+
+  for (const code of [
+    `type Test = ImmutableShallow<readonly string[]>; ${ImmutableShallow}`,
+    `type Test = ImmutableShallow<ReadonlyArray<string>>; ${ImmutableShallow}`,
+  ]) {
+    runTestImmutability(
+      t,
+      code,
+      Immutability.Immutable,
+      "handles immutable arrays"
+    );
+  }
+
   for (const code of [
     "type Test = readonly string[];",
     "type Test = ReadonlyArray<string>;",
