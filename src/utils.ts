@@ -36,7 +36,7 @@ export function typeToString(
       ? undefined
       : typeArgumentsToString(checker, aliasType.aliasTypeArguments);
   const aliasWithArguments =
-    aliasArguments === undefined ? undefined : `${alias}${aliasArguments}`;
+    aliasArguments === undefined ? undefined : `${alias}<${aliasArguments}>`;
 
   if (type.intrinsicName !== undefined) {
     return {
@@ -71,7 +71,7 @@ export function typeToString(
     const wrapperWithArguments =
       wrapperArguments === undefined
         ? undefined
-        : `${wrapperName}${wrapperArguments}`;
+        : `${wrapperName}<${wrapperArguments}>`;
 
     return {
       name: wrapperName,
@@ -107,10 +107,10 @@ function typeArgumentsToString(
   checker: ts.TypeChecker,
   typeArguments: ReadonlyArray<ts.Type>
 ) {
-  return `<${typeArguments
+  return `${typeArguments
     .map((t) => {
       const strings = typeToString(checker, t);
       return strings.nameWithArguments ?? strings.name;
     })
-    .join(",")}>`;
+    .join(",")}`;
 }
