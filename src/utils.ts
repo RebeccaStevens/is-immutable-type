@@ -25,7 +25,10 @@ export function typeToString(
   nameWithArguments: string | undefined;
   alias: string | undefined;
   aliasWithArguments: string | undefined;
+  evaluated: string;
 } {
+  const evaluated = checker.typeToString(type);
+
   const alias = type.aliasSymbol?.name;
   const aliasType =
     type.aliasSymbol === undefined
@@ -44,6 +47,7 @@ export function typeToString(
       nameWithArguments: undefined,
       alias,
       aliasWithArguments,
+      evaluated,
     };
   }
 
@@ -78,6 +82,7 @@ export function typeToString(
       nameWithArguments: wrapperWithArguments,
       alias,
       aliasWithArguments,
+      evaluated,
     };
   }
 
@@ -97,6 +102,7 @@ export function typeToString(
     nameWithArguments,
     alias,
     aliasWithArguments,
+    evaluated,
   };
 }
 
