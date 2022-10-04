@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.0.2](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.0.1...v1.0.2) (2022-10-04)
+
+
+### Bug Fixes
+
+* allow for overrides to test against the evaluated type ([21f8fa8](https://github.com/RebeccaStevens/is-immutable-type/commit/21f8fa8ef6441fd59bf53bbd0ce3df8a4c90a450))
+
 ## [1.0.1](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.0.0...v1.0.1) (2022-10-04)
 
 
