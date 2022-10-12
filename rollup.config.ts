@@ -6,7 +6,7 @@ import rollupPluginAutoExternal from "rollup-plugin-auto-external";
 import rollupPluginDts from "rollup-plugin-dts";
 import rollupPluginUassert from "rollup-plugin-unassert";
 
-import pkg from "./package.json";
+import pkg from "./package.json" assert { type: "json" };
 
 /**
  * Get new instances of all the common plugins.
