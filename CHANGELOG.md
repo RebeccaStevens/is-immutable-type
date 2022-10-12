@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+# [1.1.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.0.2...v1.1.0) (2022-10-12)
+
+
+### Features
+
+* add option `maxImmutability` to `getTypeImmutability` ([00449da](https://github.com/RebeccaStevens/is-immutable-type/commit/00449da9e9a528c787d1361068227e7b5fa7fa45))
+
 ## [1.0.2](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.0.1...v1.0.2) (2022-10-04)
 
 
