@@ -12,6 +12,7 @@ import {
   isReadonlyShallow,
   isMutable,
 } from "./compare";
+import { Immutability } from "./immutability";
 
 /**
  * Is the immutability of the given type immutable.
@@ -28,7 +29,13 @@ export function isImmutableType(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
-  const immutability = getTypeImmutability(checker, type, overrides, useCache);
+  const immutability = getTypeImmutability(
+    checker,
+    type,
+    overrides,
+    useCache,
+    Immutability.Immutable
+  );
   return isImmutable(immutability);
 }
 
@@ -47,7 +54,13 @@ export function isReadonlyDeepType(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
-  const immutability = getTypeImmutability(checker, type, overrides, useCache);
+  const immutability = getTypeImmutability(
+    checker,
+    type,
+    overrides,
+    useCache,
+    Immutability.ReadonlyDeep
+  );
   return isReadonlyDeep(immutability);
 }
 
@@ -66,7 +79,13 @@ export function isReadonlyShallowType(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
-  const immutability = getTypeImmutability(checker, type, overrides, useCache);
+  const immutability = getTypeImmutability(
+    checker,
+    type,
+    overrides,
+    useCache,
+    Immutability.ReadonlyShallow
+  );
   return isReadonlyShallow(immutability);
 }
 
@@ -85,6 +104,12 @@ export function isMutableType(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
-  const immutability = getTypeImmutability(checker, type, overrides, useCache);
+  const immutability = getTypeImmutability(
+    checker,
+    type,
+    overrides,
+    useCache,
+    Immutability.Mutable
+  );
   return isMutable(immutability);
 }

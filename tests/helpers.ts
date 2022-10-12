@@ -5,6 +5,10 @@ import ts from "typescript";
 import {
   getTypeImmutability,
   Immutability,
+  isImmutableType,
+  isMutableType,
+  isReadonlyDeepType,
+  isReadonlyShallowType,
   type ImmutabilityCache,
   type ImmutabilityOverrides,
 } from "../src";
@@ -92,4 +96,21 @@ export function runTestImmutability(
 
   const actual = getTypeImmutability(checker, type, overrides, cache);
   t.is(Immutability[actual], Immutability[expected], message);
+
+  const immutable = isImmutableType(checker, type, overrides, cache);
+  t.is(expected >= Immutability.Immutable, immutable);
+
+  const readonlyDeep = isReadonlyDeepType(checker, type, overrides, cache);
+  t.is(expected >= Immutability.ReadonlyDeep, readonlyDeep);
+
+  const readonlyShallow = isReadonlyShallowType(
+    checker,
+    type,
+    overrides,
+    cache
+  );
+  t.is(expected >= Immutability.ReadonlyShallow, readonlyShallow);
+
+  const mutable = isMutableType(checker, type, overrides, cache);
+  t.is(expected === Immutability.Mutable, mutable);
 }
