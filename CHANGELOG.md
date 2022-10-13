@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+# [1.2.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.1.0...v1.2.0) (2022-10-13)
+
+
+### Features
+
+* allow passing a TypeNode instead of a Type ([46160e8](https://github.com/RebeccaStevens/is-immutable-type/commit/46160e84c610cc02ebfcfb885aa23c6647b24d75))
+
 # [1.1.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.0.2...v1.1.0) (2022-10-12)
 
 
