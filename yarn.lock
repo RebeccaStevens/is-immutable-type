@@ -5156,7 +5156,7 @@ __metadata:
     eslint-plugin-unicorn: 44.0.2
     husky: 8.0.1
     lint-staged: 13.0.3
-    markdownlint-cli: 0.32.0
+    markdownlint-cli: 0.32.2
     marked: 4.0.17
     prettier: 2.7.1
     prettier-plugin-packagejson: 2.3.0
@@ -6077,9 +6077,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"markdownlint-cli@npm:0.32.0":
-  version: 0.32.0
-  resolution: "markdownlint-cli@npm:0.32.0"
+"markdownlint-cli@npm:0.32.2":
+  version: 0.32.2
+  resolution: "markdownlint-cli@npm:0.32.2"
   dependencies:
     commander: ~9.4.0
     get-stdin: ~9.0.0
@@ -6087,24 +6087,24 @@ __metadata:
     ignore: ~5.2.0
     js-yaml: ^4.1.0
     jsonc-parser: ~3.1.0
-    markdownlint: ~0.26.0
-    markdownlint-rule-helpers: ~0.17.0
+    markdownlint: ~0.26.2
+    markdownlint-rule-helpers: ~0.17.2
     minimatch: ~5.1.0
     run-con: ~1.2.11
   bin:
     markdownlint: markdownlint.js
-  checksum: 63a22ea0b0db4bfcb11830514b921d19d58c3a7763a1ed4652cef744a791af3384ac79198be29720ee3a7a9ed4b334a9543bab52e990f3a821644155a3f9c3af
+  checksum: 131cb66b0d6da54f0feee4a73edda6337bf81ee5fbf3afcc6417faf4d0ec6f0231b2b471614e43588f6ea19f080b1a2bc5f4312e9dbf87656934fba0edb51231
   languageName: node
   linkType: hard
 
-"markdownlint-rule-helpers@npm:~0.17.0":
+"markdownlint-rule-helpers@npm:~0.17.2":
   version: 0.17.2
   resolution: "markdownlint-rule-helpers@npm:0.17.2"
   checksum: e34c0266ffc0e1102fdd839dd70228b719c3120e8b61d0e21d4e21388a87203b7ec69d5dceb00d7bdc02fe215d2b51b14a7a72d89caa3acc7498edb38877cb40
   languageName: node
   linkType: hard
 
-"markdownlint@npm:~0.26.0":
+"markdownlint@npm:~0.26.2":
   version: 0.26.2
   resolution: "markdownlint@npm:0.26.2"
   dependencies:
