@@ -62,6 +62,7 @@ function getType(code: string, line: number) {
 
   return {
     type,
+    typeNode: (statement as any).type as ts.TypeNode | undefined,
     checker,
   };
 }
@@ -92,9 +93,14 @@ export function runTestImmutability(
     : test;
   const line = _line ?? 1;
 
-  const { checker, type } = getType(code, line);
+  const { checker, type, typeNode } = getType(code, line);
 
-  const actual = getTypeImmutability(checker, type, overrides, cache);
+  const actual = getTypeImmutability(
+    checker,
+    typeNode ?? type,
+    overrides,
+    cache
+  );
   t.is(Immutability[actual], Immutability[expected], message);
 
   const immutable = isImmutableType(checker, type, overrides, cache);

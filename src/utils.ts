@@ -14,19 +14,34 @@ export function hasSymbol(
   return Object.hasOwn(node, "symbol");
 }
 
+export function isTypeNode(
+  typeLike: ts.Type | ts.TypeNode
+): typeLike is ts.TypeNode {
+  return Object.hasOwn(typeLike, "kind");
+}
+
 /**
  * Get string representations of the given type.
  */
 export function typeToString(
   checker: ts.TypeChecker,
-  type: ts.Type
+  typeOrTypeNode: ts.Type | ts.TypeNode
 ): {
   name: string | undefined;
   nameWithArguments: string | undefined;
   alias: string | undefined;
   aliasWithArguments: string | undefined;
   evaluated: string;
+  written: string | undefined;
 } {
+  const typeIsTypeNode = isTypeNode(typeOrTypeNode);
+  const type = typeIsTypeNode
+    ? checker.getTypeFromTypeNode(typeOrTypeNode)
+    : typeOrTypeNode;
+  const typeNode = typeIsTypeNode ? typeOrTypeNode : undefined;
+
+  const written = typeNode?.getText();
+
   const evaluated = checker.typeToString(type);
 
   const alias = type.aliasSymbol?.name;
@@ -48,6 +63,7 @@ export function typeToString(
       alias,
       aliasWithArguments,
       evaluated,
+      written,
     };
   }
 
@@ -83,6 +99,7 @@ export function typeToString(
       alias,
       aliasWithArguments,
       evaluated,
+      written,
     };
   }
 
@@ -103,6 +120,7 @@ export function typeToString(
     alias,
     aliasWithArguments,
     evaluated,
+    written,
   };
 }
 

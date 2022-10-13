@@ -127,10 +127,7 @@ type. If you want this library to treat types wrapped in `ReadonlyDeep` as
 immutable regardless, you can provide an override stating as such.
 
 ```ts
-[
-  { pattern: /^ReadonlyDeep<.+>$/u, to: Immutability.Immutable },
-  { pattern: /^ReadonlyObjectDeep<.+>$/u, to: Immutability.Immutable },
-]
+[{ pattern: /^ReadonlyDeep<.+>$/u, to: Immutability.Immutable }]
 ```
 
 Note here the inclusion of `ReadonlyObjectDeep`, this comes from the internal

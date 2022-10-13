@@ -18,7 +18,7 @@ import ts from "typescript";
 
 import { max, min, clamp } from "./compare";
 import { Immutability } from "./immutability";
-import { hasSymbol, typeToString } from "./utils";
+import { hasSymbol, isTypeNode, typeToString } from "./utils";
 
 /**
  * A list of immutability overrides.
@@ -66,7 +66,7 @@ const globalCache: ImmutabilityCache = new WeakMap();
  * `maxImmutability` can be specified to help improve performance.
  *
  * @param checker - The TypeScript Type Checker to use.
- * @param type - The type to test the immutability of.
+ * @param typeOrTypeNode - The type to test the immutability of.
  * @param overrides - The overrides to use when calculating the immutability.
  * @param useCache - Either a custom cache to use, `true` to use the global
  * cache, or `false` to not use any predefined cache.
@@ -76,7 +76,7 @@ const globalCache: ImmutabilityCache = new WeakMap();
  */
 export function getTypeImmutability(
   checker: ts.TypeChecker,
-  type: ts.Type,
+  typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
   maxImmutability = Immutability.Immutable
@@ -88,12 +88,15 @@ export function getTypeImmutability(
       ? new WeakMap()
       : useCache;
 
+  const type = isTypeNode(typeOrTypeNode)
+    ? checker.getTypeFromTypeNode(typeOrTypeNode)
+    : typeOrTypeNode;
   const cached = cache.get(type);
   if (cached !== undefined) {
     return cached;
   }
 
-  const override = getOverride(checker, type, overrides);
+  const override = getOverride(checker, typeOrTypeNode, overrides);
   const overrideTo = override?.to;
   const overrideFrom = override?.from;
 
@@ -133,11 +136,17 @@ export function getTypeImmutability(
  */
 function getOverride(
   checker: ts.TypeChecker,
-  type: ts.Type,
+  typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides
 ) {
-  const { name, nameWithArguments, alias, aliasWithArguments, evaluated } =
-    typeToString(checker, type);
+  const {
+    name,
+    nameWithArguments,
+    alias,
+    aliasWithArguments,
+    evaluated,
+    written,
+  } = typeToString(checker, typeOrTypeNode);
 
   for (const potentialOverride of overrides) {
     if (
@@ -150,7 +159,9 @@ function getOverride(
           potentialOverride.pattern?.test(alias) === true)) ||
       (aliasWithArguments !== undefined &&
         potentialOverride.pattern?.test(aliasWithArguments) === true) ||
-      potentialOverride.pattern?.test(evaluated) === true
+      potentialOverride.pattern?.test(evaluated) === true ||
+      (written !== undefined &&
+        potentialOverride.pattern?.test(written) === true)
     ) {
       return potentialOverride;
     }

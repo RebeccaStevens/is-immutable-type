@@ -293,7 +293,7 @@ test("wrapper by pattern", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyDeep<{ foo: { bar: string; }; }>; type ReadonlyDeep<T> = T | {};"
+    "type Test = ReadonlyDeep<{ foo: { bar: string; }; }>; type ReadonlyDeep<T> = T extends object ? ReadonlyDeepInternal<T> : string; type ReadonlyDeepInternal<T> = { [K in keyof T]: Readonly<T[K]> }"
   ]) {
     runTestImmutability(
       t,
