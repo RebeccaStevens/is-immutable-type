@@ -5135,7 +5135,7 @@ __metadata:
     husky: 8.0.1
     lint-staged: 13.0.3
     markdownlint-cli: 0.32.2
-    marked: 4.0.17
+    marked: 4.1.1
     prettier: 2.7.1
     prettier-plugin-packagejson: 2.3.0
     rimraf: 3.0.2
@@ -6114,16 +6114,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:4.0.17":
-  version: 4.0.17
-  resolution: "marked@npm:4.0.17"
-  bin:
-    marked: bin/marked.js
-  checksum: 33a3c43a20b47bddaf045a59bfc7c3d41cc321931cc663ed231ca3b5b3b195fb2ac2973e687c2afd65b79539c14619baa07d19793f70130160f0af80c06d9b3a
-  languageName: node
-  linkType: hard
-
-"marked@npm:^4.0.10":
+"marked@npm:4.1.1, marked@npm:^4.0.10":
   version: 4.1.1
   resolution: "marked@npm:4.1.1"
   bin:
