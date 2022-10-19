@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.2.1](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.0...v1.2.1) (2022-10-19)
+
+
+### Bug Fixes
+
+* remove reliance on tsutils as it no longer seems to be maintained ([c759e91](https://github.com/RebeccaStevens/is-immutable-type/commit/c759e918144d23b4103a639afbd1623fdda1870b))
+
 # [1.2.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.1.0...v1.2.0) (2022-10-13)
 
 
