@@ -1,9 +1,10 @@
+import type ts from "typescript";
+
 import {
   isTypeAliasDeclaration,
   isTypeReference,
   isTypeReferenceNode,
-} from "tsutils";
-import type ts from "typescript";
+} from "./tsutils";
 
 /**
  * Type guard to check if a Node has a Symbol.

@@ -19,7 +19,8 @@
     "/dist/",
     "/**/*.cjs",
     "/**/*.js",
-    "/**/*.md"
+    "/**/*.md",
+    "/src/tsutils.ts"
   ],
   "rules": {
     "@typescript-eslint/prefer-readonly-parameter-types": "off",

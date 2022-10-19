@@ -2,6 +2,10 @@ import assert from "node:assert";
 
 import { getTypeOfPropertyOfType } from "@typescript-eslint/type-utils";
 import { ESLintUtils } from "@typescript-eslint/utils";
+import ts from "typescript";
+
+import { max, min, clamp } from "./compare";
+import { Immutability } from "./immutability";
 import {
   isConditionalType,
   isObjectType,
@@ -13,11 +17,7 @@ import {
   isPropertySignature,
   isFunctionTypeNode,
   isTypeReference,
-} from "tsutils";
-import ts from "typescript";
-
-import { max, min, clamp } from "./compare";
-import { Immutability } from "./immutability";
+} from "./tsutils";
 import { hasSymbol, isTypeNode, typeToString } from "./utils";
 
 /**
