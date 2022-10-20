@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.2.2](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.1...v1.2.2) (2022-10-20)
+
+
+### Bug Fixes
+
+* detection of readonly modifier ([18070a8](https://github.com/RebeccaStevens/is-immutable-type/commit/18070a8319b2dd2cca7945e98e034f4decbe54ad))
+
 ## [1.2.1](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.0...v1.2.1) (2022-10-19)
 
 
