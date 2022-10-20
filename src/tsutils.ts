@@ -129,12 +129,12 @@ function isReadonlyPropertyIntersection(
         // `undefined` falls through
       }
     }
-    return (
+    const result =
       // members of namespace import
       isSymbolFlagSet(prop, ts.SymbolFlags.ValueModule) ||
       // we unwrapped every mapped type, now we can check the actual declarations
-      symbolHasReadonlyDeclaration(prop, checker)
-    );
+      symbolHasReadonlyDeclaration(prop, checker);
+    return result;
   });
 }
 
