@@ -1169,11 +1169,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-typescript@npm:9.0.1":
-  version: 9.0.1
-  resolution: "@rollup/plugin-typescript@npm:9.0.1"
+"@rollup/plugin-typescript@npm:9.0.2":
+  version: 9.0.2
+  resolution: "@rollup/plugin-typescript@npm:9.0.2"
   dependencies:
-    "@rollup/pluginutils": ^4.2.1
+    "@rollup/pluginutils": ^5.0.1
     resolve: ^1.22.1
   peerDependencies:
     rollup: ^2.14.0||^3.0.0
@@ -1184,7 +1184,7 @@ __metadata:
       optional: true
     tslib:
       optional: true
-  checksum: 58754e4f8f6429f1eb1b499bb9e4854c0e473644f830defbbc082bc75570f5c539d94118a904684d94d574f1651176b3376d0d91c1d94e96f539e86c72d47e76
+  checksum: 0b3a15e7402a8cf46a491003a0bfe6bf50294939133cf898c1dee0b9f1f8f4742242e81abd15effd8de2e9f3fe5fd81d01a03020341e1d3d0b7f4c6be21d989f
   languageName: node
   linkType: hard
 
@@ -5129,7 +5129,7 @@ __metadata:
     "@rebeccastevens/eslint-config": 1.3.22
     "@rollup/plugin-json": 5.0.1
     "@rollup/plugin-node-resolve": 15.0.1
-    "@rollup/plugin-typescript": 9.0.1
+    "@rollup/plugin-typescript": 9.0.2
     "@semantic-release/changelog": 6.0.1
     "@semantic-release/commit-analyzer": 9.0.2
     "@semantic-release/git": 10.0.1
