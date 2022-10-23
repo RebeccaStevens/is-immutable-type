@@ -76,7 +76,7 @@
     "@typescript-eslint/type-utils": "5.40.1",
     "@typescript-eslint/utils": "5.40.1",
     "@typescript/vfs": "1.4.0",
-    "ava": "4.3.3",
+    "ava": "5.0.1",
     "c8": "7.12.0",
     "commitizen": "4.2.5",
     "cspell": "6.12.0",
