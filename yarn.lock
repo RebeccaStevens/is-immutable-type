@@ -5187,7 +5187,7 @@ __metadata:
     rollup-plugin-unassert: 0.5.0
     semantic-release: 19.0.5
     ts-node: 10.9.1
-    ts-paths-esm-loader: 1.3.1
+    ts-paths-esm-loader: 1.3.2
     tslib: 2.4.1
     typescript: 4.8.4
   peerDependencies:
@@ -8829,13 +8829,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-paths-esm-loader@npm:1.3.1":
-  version: 1.3.1
-  resolution: "ts-paths-esm-loader@npm:1.3.1"
+"ts-paths-esm-loader@npm:1.3.2":
+  version: 1.3.2
+  resolution: "ts-paths-esm-loader@npm:1.3.2"
   peerDependencies:
     ts-node: ^10.4.0
     tsconfig-paths: ^3.12.0
-  checksum: 37c31101d75e374ab527523ac2cff91ca93932f033988732f2be009fdbb4de11c9ae09aff022bcff7ff3e1f40d35ae14dbfb9b13cace26120a1b3f109fa07a5c
+  checksum: ba634a5c0473b522ad01e6337b1f4a649fe1149877d8da9dc868cc98d345e6972d5f5ddbdcdb4503e2388db213f4028d71cceab5512b787e3f6d15e3c3fad51c
   languageName: node
   linkType: hard
 
