@@ -8,6 +8,7 @@ test("simple", (t) => {
   for (const code of [
     "type Test<G> = Readonly<{ foo: Test<string> | string; }>;",
     "type Test<G> = G extends string ? Readonly<{ foo: string }> : Test<string>",
+    "interface Test { readonly [key: string]: Test };",
   ]) {
     runTestImmutability(
       t,
