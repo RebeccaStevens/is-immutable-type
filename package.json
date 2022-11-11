@@ -79,7 +79,7 @@
     "ava": "5.0.1",
     "c8": "7.12.0",
     "commitizen": "4.2.5",
-    "cspell": "6.14.1",
+    "cspell": "6.14.2",
     "eslint": "8.27.0",
     "eslint-config-prettier": "8.5.0",
     "eslint-import-resolver-typescript": "3.5.2",
