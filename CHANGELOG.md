@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.2.3](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.2...v1.2.3) (2022-11-11)
+
+
+### Bug Fixes
+
+* support for circular index signatures ([8e13105](https://github.com/RebeccaStevens/is-immutable-type/commit/8e1310586a446b04d49fa552773aaa0fd34929df))
+
 ## [1.2.2](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.1...v1.2.2) (2022-10-20)
 
 
