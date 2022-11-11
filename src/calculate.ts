@@ -444,6 +444,10 @@ function indexSignatureImmutability(
   }
 
   if (indexInfo.isReadonly) {
+    if (indexInfo.type === type) {
+      return maxImmutability;
+    }
+
     return max(
       Immutability.ReadonlyShallow,
       getTypeImmutability(
