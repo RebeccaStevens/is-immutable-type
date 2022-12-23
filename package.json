@@ -105,7 +105,7 @@
     "rimraf": "3.0.2",
     "rollup": "3.8.1",
     "rollup-plugin-auto-external": "2.0.0",
-    "rollup-plugin-dts": "5.0.0",
+    "rollup-plugin-dts": "5.1.0",
     "rollup-plugin-unassert": "0.5.0",
     "semantic-release": "19.0.5",
     "ts-node": "10.9.1",
