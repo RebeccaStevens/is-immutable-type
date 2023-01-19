@@ -78,7 +78,7 @@
     "@typescript/vfs": "1.4.0",
     "ava": "5.1.1",
     "c8": "7.12.0",
-    "commitizen": "4.2.6",
+    "commitizen": "4.3.0",
     "cspell": "6.19.2",
     "eslint": "8.32.0",
     "eslint-config-prettier": "8.6.0",
