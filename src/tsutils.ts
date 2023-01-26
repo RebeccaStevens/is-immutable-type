@@ -2,7 +2,7 @@
  * Need functions from tsutils.
  * Copied here so they can be patched.
  * Should in future be removed and replaced with a new lib.
- * @see https://github.com/typescript-eslint/typescript-eslint/pull/4436
+ * @see https://github.com/typescript-eslint/typescript-eslint/issues/5552
  */
 
 import ts from "typescript";
