@@ -10,7 +10,6 @@ import {
   isConditionalType,
   isObjectType,
   isUnionType,
-  unionTypeParts,
   isPropertyReadonlyInType,
   isSymbolFlagSet,
   isIntersectionType,
@@ -185,7 +184,7 @@ function calculateTypeImmutability(
 ): Immutability {
   // Union?
   if (isUnionType(type)) {
-    return unionTypeParts(type)
+    return type.types
       .map((t) =>
         getTypeImmutability(checker, t, overrides, cache, maxImmutability)
       )
@@ -313,24 +312,30 @@ function objectImmutability(
         continue;
       }
 
-      if (
-        property.valueDeclaration !== undefined &&
-        hasSymbol(property.valueDeclaration) &&
-        isSymbolFlagSet(property.valueDeclaration.symbol, ts.SymbolFlags.Method)
-      ) {
-        m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);
-        continue;
-      }
+      const declarations = property.getDeclarations() ?? [];
+      if (declarations.length > 0) {
+        if (
+          declarations.some(
+            (declaration) =>
+              hasSymbol(declaration) &&
+              isSymbolFlagSet(declaration.symbol, ts.SymbolFlags.Method)
+          )
+        ) {
+          m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);
+          continue;
+        }
 
-      const lastDeclaration = property.getDeclarations()?.at(-1);
-      if (
-        lastDeclaration !== undefined &&
-        isPropertySignature(lastDeclaration) &&
-        lastDeclaration.type !== undefined &&
-        isFunctionTypeNode(lastDeclaration.type)
-      ) {
-        m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);
-        continue;
+        if (
+          declarations.every(
+            (declaration) =>
+              isPropertySignature(declaration) &&
+              declaration.type !== undefined &&
+              isFunctionTypeNode(declaration.type)
+          )
+        ) {
+          m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);
+          continue;
+        }
       }
 
       return Immutability.Mutable;
@@ -375,27 +380,39 @@ function objectImmutability(
     }
   }
 
-  const stringIndexSigImmutability = indexSignatureImmutability(
-    checker,
-    type,
-    ts.IndexKind.String,
-    overrides,
-    cache,
-    maxImmutability
-  );
+  const types = isIntersectionType(type) ? type.types : [type];
+
+  const stringIndexSigImmutability = types
+    .map((t) =>
+      indexSignatureImmutability(
+        checker,
+        t,
+        ts.IndexKind.String,
+        overrides,
+        cache,
+        maxImmutability
+      )
+    )
+    .reduce(max);
+
   m_maxImmutability = min(stringIndexSigImmutability, m_maxImmutability);
   if (m_minImmutability >= m_maxImmutability) {
     return m_minImmutability;
   }
 
-  const numberIndexSigImmutability = indexSignatureImmutability(
-    checker,
-    type,
-    ts.IndexKind.Number,
-    overrides,
-    cache,
-    maxImmutability
-  );
+  const numberIndexSigImmutability = types
+    .map((t) =>
+      indexSignatureImmutability(
+        checker,
+        t,
+        ts.IndexKind.Number,
+        overrides,
+        cache,
+        maxImmutability
+      )
+    )
+    .reduce(max);
+
   m_maxImmutability = min(numberIndexSigImmutability, m_maxImmutability);
   if (m_minImmutability >= m_maxImmutability) {
     return m_minImmutability;
