@@ -14,6 +14,15 @@ import {
 } from "../src";
 
 /**
+ * Type guard to check if a Statement has a type.
+ */
+export function hasTypeNode(
+  node: ts.Statement
+): node is ts.Statement & { type: ts.TypeNode } {
+  return Object.hasOwn(node, "type");
+}
+
+/**
  * Create a TS environment to run the tests in.
  */
 function createTSTestEnvironment(code: string) {
@@ -62,7 +71,7 @@ function getType(code: string, line: number) {
 
   return {
     type,
-    typeNode: (statement as any).type as ts.TypeNode | undefined,
+    typeNode: hasTypeNode(statement) ? statement.type : undefined,
     checker,
   };
 }
@@ -71,7 +80,7 @@ function getType(code: string, line: number) {
  * Run tests against "getTypeImmutability".
  */
 export function runTestImmutability(
-  t: ExecutionContext<unknown>,
+  t: Readonly<ExecutionContext<unknown>>,
   test:
     | string
     | Readonly<{

@@ -76,7 +76,7 @@ const globalCache: ImmutabilityCache = new WeakMap();
  */
 export function getTypeImmutability(
   checker: ts.TypeChecker,
-  typeOrTypeNode: ts.Type | ts.TypeNode,
+  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
   maxImmutability = Immutability.Immutable
@@ -136,7 +136,7 @@ export function getTypeImmutability(
  */
 function getOverride(
   checker: ts.TypeChecker,
-  typeOrTypeNode: ts.Type | ts.TypeNode,
+  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
   overrides: ImmutabilityOverrides
 ) {
   const {
@@ -175,7 +175,7 @@ function getOverride(
  */
 function calculateTypeImmutability(
   checker: ts.TypeChecker,
-  type: ts.Type,
+  type: Readonly<ts.Type>,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability
@@ -246,7 +246,7 @@ function calculateTypeImmutability(
  */
 function arrayImmutability(
   checker: ts.TypeChecker,
-  type: ts.TypeReference,
+  type: Readonly<ts.TypeReference>,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability
@@ -285,7 +285,7 @@ function arrayImmutability(
  */
 function objectImmutability(
   checker: ts.TypeChecker,
-  type: ts.Type,
+  type: Readonly<ts.Type>,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability
@@ -406,7 +406,7 @@ function objectImmutability(
  */
 function typeArgumentsImmutability(
   checker: ts.TypeChecker,
-  type: ts.TypeReference,
+  type: Readonly<ts.TypeReference>,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability
@@ -428,7 +428,7 @@ function typeArgumentsImmutability(
  */
 function indexSignatureImmutability(
   checker: ts.TypeChecker,
-  type: ts.Type,
+  type: Readonly<ts.Type>,
   kind: ts.IndexKind,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
