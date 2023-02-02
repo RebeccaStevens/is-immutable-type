@@ -15,6 +15,9 @@ export function hasSymbol(
   return Object.hasOwn(node, "symbol");
 }
 
+/**
+ * Type guard to check if a Type is TypeNode.
+ */
 export function isTypeNode(
   typeLike: ts.Type | ts.TypeNode
 ): typeLike is ts.TypeNode {
@@ -26,7 +29,7 @@ export function isTypeNode(
  */
 export function typeToString(
   checker: ts.TypeChecker,
-  typeOrTypeNode: ts.Type | ts.TypeNode
+  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>
 ): {
   name: string | undefined;
   nameWithArguments: string | undefined;

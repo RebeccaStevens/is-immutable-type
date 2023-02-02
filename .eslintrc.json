@@ -32,6 +32,7 @@
       "files": ["./tests/**"],
       "rules": {
         "import/no-relative-parent-imports": "off",
+        "functional/no-loop-statements": "off",
         "unicorn/filename-case": "off"
       }
     },
@@ -43,8 +44,10 @@
     },
     {
       "files": ["./typings/**"],
+      "extends": ["plugin:functional/off"],
       "rules": {
-        "import/no-unassigned-import": "off"
+        "import/no-unassigned-import": "off",
+        "jsdoc/require-jsdoc": "off"
       }
     }
   ]
