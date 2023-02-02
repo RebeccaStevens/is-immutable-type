@@ -46,6 +46,9 @@ export function getDefaultOverrides(): ImmutabilityOverrides {
   return [
     { name: "Map", to: Immutability.Mutable },
     { name: "Set", to: Immutability.Mutable },
+    { name: "Date", to: Immutability.Mutable },
+    { name: "URL", to: Immutability.Mutable },
+    { name: "URLSearchParams", to: Immutability.Mutable },
   ];
 }
 
