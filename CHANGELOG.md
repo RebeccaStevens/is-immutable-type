@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.2.4](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.3...v1.2.4) (2023-02-02)
+
+
+### Bug Fixes
+
+* improve calculation of immutability involving intersections ([2d86f3d](https://github.com/RebeccaStevens/is-immutable-type/commit/2d86f3dae7ef3540b3ad42c08e45c67b4aa4ab33)), closes [#40](https://github.com/RebeccaStevens/is-immutable-type/issues/40)
+* increase the list of default overrides ([7dacc68](https://github.com/RebeccaStevens/is-immutable-type/commit/7dacc681eb2435cd9b36b24cae4df1366c3d0e0a)), closes [#41](https://github.com/RebeccaStevens/is-immutable-type/issues/41)
+
 ## [1.2.3](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.2...v1.2.3) (2022-11-11)
 
 
