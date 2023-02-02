@@ -105,9 +105,15 @@ instance type was calculated as `ReadonlyShallow`, it will stay as such.
 
 ### Default Overrides
 
-By default the types `Map` and `Set` are overridden to be `Mutable`.
+By default the following types are overridden to be `Mutable`:
 
-If you know of any other internally defined TypeScript types that need to be
+- `Map`
+- `Set`
+- `Date`
+- `URL`
+- `URLSearchParams`
+
+If you know of any other TypeScript types that need to be
 overridden, please open an issue.
 
 Note: When providing custom overrides, the default ones will not be used. Be
