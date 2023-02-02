@@ -5,6 +5,7 @@ import { Immutability } from "../src";
 import { runTestImmutability } from "./helpers";
 
 test("simple", (t) => {
+  // prettier-ignore
   for (const code of [
     "type Test = Readonly<{ foo: string; }> & Readonly<{ bar: string; }>;",
   ]) {
@@ -49,6 +50,34 @@ test("simple", (t) => {
       code,
       Immutability.Immutable,
       "handles immutable intersections of mutable types"
+    );
+  }
+});
+
+test("same props", (t) => {
+  // prettier-ignore
+  for (const code of [
+    "type Test = { readonly foo: ReadonlyArray<string>; } & { readonly foo: Array<string>; };",
+  ]) {
+    runTestImmutability(
+      t,
+      code,
+      Immutability.ReadonlyDeep,
+      "handles intersections of deeply readonly prop with shallowly readonly prop"
+    );
+  }
+});
+
+test("arrays", (t) => {
+  // prettier-ignore
+  for (const code of [
+    "type Test = ReadonlyArray<number> & { readonly 0: number; };",
+  ]) {
+    runTestImmutability(
+      t,
+      code,
+      Immutability.ReadonlyDeep,
+      "handles intersections involving readonly arrays"
     );
   }
 });
