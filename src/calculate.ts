@@ -1,10 +1,6 @@
 import assert from "node:assert";
 
 import { getTypeOfPropertyOfType } from "@typescript-eslint/type-utils";
-import ts from "typescript";
-
-import { max, min, clamp } from "./compare";
-import { Immutability } from "./immutability";
 import {
   isConditionalType,
   isObjectType,
@@ -12,10 +8,12 @@ import {
   isPropertyReadonlyInType,
   isSymbolFlagSet,
   isIntersectionType,
-  isPropertySignature,
-  isFunctionTypeNode,
   isTypeReference,
-} from "./tsutils";
+} from "ts-api-utils";
+import ts from "typescript";
+
+import { max, min, clamp } from "./compare";
+import { Immutability } from "./immutability";
 import { hasSymbol, isTypeNode, typeToString } from "./utils";
 
 /**
@@ -353,9 +351,9 @@ function objectImmutability(
         if (
           declarations.every(
             (declaration) =>
-              isPropertySignature(declaration) &&
+              ts.isPropertySignature(declaration) &&
               declaration.type !== undefined &&
-              isFunctionTypeNode(declaration.type)
+              ts.isFunctionTypeNode(declaration.type)
           )
         ) {
           m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);

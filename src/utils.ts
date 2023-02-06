@@ -1,10 +1,5 @@
-import type ts from "typescript";
-
-import {
-  isTypeAliasDeclaration,
-  isTypeReference,
-  isTypeReferenceNode,
-} from "./tsutils";
+import { isTypeReference } from "ts-api-utils";
+import ts from "typescript";
 
 /**
  * Type guard to check if a Node has a Symbol.
@@ -84,8 +79,8 @@ export function typeToString(
       wrapperDeclarations?.length === 1 ? wrapperDeclarations[0] : undefined;
     const wrapperType =
       wrapperDeclaration !== undefined &&
-      isTypeAliasDeclaration(wrapperDeclaration) &&
-      isTypeReferenceNode(wrapperDeclaration.type)
+      ts.isTypeAliasDeclaration(wrapperDeclaration) &&
+      ts.isTypeReferenceNode(wrapperDeclaration.type)
         ? wrapperDeclaration.type
         : undefined;
     const wrapperName = wrapperType?.typeName.getText();
