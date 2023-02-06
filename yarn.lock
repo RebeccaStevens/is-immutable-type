@@ -1152,9 +1152,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rebeccastevens/eslint-config@npm:1.5.0":
-  version: 1.5.0
-  resolution: "@rebeccastevens/eslint-config@npm:1.5.0"
+"@rebeccastevens/eslint-config@npm:1.5.2":
+  version: 1.5.2
+  resolution: "@rebeccastevens/eslint-config@npm:1.5.2"
   dependencies:
     deepmerge-ts: ^4.2.2
   peerDependencies:
@@ -1172,7 +1172,7 @@ __metadata:
     eslint-plugin-promise: "*"
     eslint-plugin-sonarjs: "*"
     eslint-plugin-unicorn: "*"
-  checksum: 4ee3add33f453e58854a67509337153fab54e1d2d84aeed095990c33b944188ab5b2faf99197fc0132aea948da2bc9640b7a1a2d2072e55a445c01f85580be71
+  checksum: 9205881cd9f9ac2878c74c4cbb77652d492a6b60584f972ba463c8798ebd5fd8a2a2764cb1eedd9f9edde2da01c8fe8e0017131857f4065e431ae17b460cbca1
   languageName: node
   linkType: hard
 
@@ -5253,7 +5253,7 @@ __metadata:
     "@commitlint/cli": 17.4.2
     "@commitlint/config-conventional": 17.4.2
     "@cspell/dict-cryptocurrencies": 3.0.1
-    "@rebeccastevens/eslint-config": 1.5.0
+    "@rebeccastevens/eslint-config": 1.5.2
     "@rollup/plugin-json": 6.0.0
     "@rollup/plugin-node-resolve": 15.0.1
     "@rollup/plugin-typescript": 11.0.0
