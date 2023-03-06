@@ -757,6 +757,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@javascript-obfuscator/escodegen@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "@javascript-obfuscator/escodegen@npm:2.3.0"
+  dependencies:
+    "@javascript-obfuscator/estraverse": ^5.3.0
+    esprima: ^4.0.1
+    esutils: ^2.0.2
+    optionator: ^0.8.1
+    source-map: ~0.6.1
+  dependenciesMeta:
+    source-map:
+      optional: true
+  checksum: a7209d74540a99491dd62b509b09e8d6147dad2209666a394237c98d9657354c6ae0825b87c23372ed41d0ce8385b5420fd0fe087170a4d6e9e8ec2f198cb2c3
+  languageName: node
+  linkType: hard
+
+"@javascript-obfuscator/estraverse@npm:^5.3.0":
+  version: 5.4.0
+  resolution: "@javascript-obfuscator/estraverse@npm:5.4.0"
+  checksum: 8b3342a549cc6e5a7fccd26323cc628cc76d8cd4196ebf5de4e3c59872d4cb1f550703de594899050bb2dc74903430165d0c5ed6297898ec17b498fe0321e219
+  languageName: node
+  linkType: hard
+
 "@jridgewell/resolve-uri@npm:^3.0.3":
   version: 3.1.0
   resolution: "@jridgewell/resolve-uri@npm:3.1.0"
@@ -3567,25 +3590,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"escodegen@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "escodegen@npm:2.0.0"
-  dependencies:
-    esprima: ^4.0.1
-    estraverse: ^5.2.0
-    esutils: ^2.0.2
-    optionator: ^0.8.1
-    source-map: ~0.6.1
-  dependenciesMeta:
-    source-map:
-      optional: true
-  bin:
-    escodegen: bin/escodegen.js
-    esgenerate: bin/esgenerate.js
-  checksum: 5aa6b2966fafe0545e4e77936300cc94ad57cfe4dc4ebff9950492eaba83eef634503f12d7e3cbd644ecc1bab388ad0e92b06fd32222c9281a75d1cf02ec6cef
-  languageName: node
-  linkType: hard
-
 "eslint-config-prettier@npm:8.6.0":
   version: 8.6.0
   resolution: "eslint-config-prettier@npm:8.6.0"
@@ -5370,7 +5374,7 @@ __metadata:
     rollup: 3.18.0
     rollup-plugin-auto-external: 2.0.0
     rollup-plugin-dts: 5.1.1
-    rollup-plugin-unassert: 0.5.0
+    rollup-plugin-unassert: 0.6.0
     semantic-release: 20.1.1
     ts-node: 10.9.1
     ts-paths-esm-loader: 1.4.1
@@ -8276,17 +8280,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-unassert@npm:0.5.0":
-  version: 0.5.0
-  resolution: "rollup-plugin-unassert@npm:0.5.0"
+"rollup-plugin-unassert@npm:0.6.0":
+  version: 0.6.0
+  resolution: "rollup-plugin-unassert@npm:0.6.0"
   dependencies:
+    "@javascript-obfuscator/escodegen": ^2.3.0
     "@rollup/pluginutils": ^4.2.1
     acorn: ^8.8.0
     convert-source-map: ^1.8.0
-    escodegen: ^2.0.0
     multi-stage-sourcemap: ^0.3.1
     unassert: ^2.0.0
-  checksum: ae9c27174bcf2f3133a57cd11f68c682a5d3137801f7a5643c2bf908a0b0acb611fe5399d5b2be5ded35483128b3d30ed169f8c9939c55db03ed205bc3f80afa
+  checksum: 4e31358b42461d84d50b1d2a037f2560759208f4bcf541267d097ebaeec8ddee1970232f326881c0f969fcc4aa8e84c653c33663f2ff15252798c09aa0e69fc0
   languageName: node
   linkType: hard
 
