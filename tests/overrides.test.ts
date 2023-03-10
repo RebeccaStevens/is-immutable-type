@@ -272,7 +272,10 @@ test("wrapper by name", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyDeep<{ foo: { bar: string; }; }>; type ReadonlyDeep<T> = T | {};"
+    `
+      type ReadonlyDeep<T> = T | {};
+      type Test = ReadonlyDeep<{ foo: { bar: string; }; }>;
+    `
   ]) {
     runTestImmutability(
       t,
@@ -293,7 +296,11 @@ test("wrapper by pattern", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type Test = ReadonlyDeep<{ foo: { bar: string; }; }>; type ReadonlyDeep<T> = T extends object ? ReadonlyDeepInternal<T> : string; type ReadonlyDeepInternal<T> = { [K in keyof T]: Readonly<T[K]> }"
+    `
+      type ReadonlyDeep<T> = T extends object ? ReadonlyDeepInternal<T> : string;
+      type ReadonlyDeepInternal<T> = { [K in keyof T]: Readonly<T[K]> }
+      type Test = ReadonlyDeep<{ foo: { bar: string; }; }>;
+    `
   ]) {
     runTestImmutability(
       t,
@@ -326,7 +333,10 @@ test("rename alias with type parameter", (t) => {
 
   /* prettier-ignore */
   for (const code of [
-    "type Test = ReadonlyArray<string>; type ImmutableArray<T> = ReadonlyArray<T>;",
+    `
+      type ImmutableArray<T> = ReadonlyArray<T>;
+      type Test = ReadonlyArray<string>;
+    `,
   ]) {
     runTestImmutability(
       t,
@@ -347,7 +357,10 @@ test("rename alias of type with type parameter", (t) => {
 
   // prettier-ignore
   for (const code of [
-    "type A = B<number>; type B<T> = string | T;"
+    `
+      type B<T> = string | T;
+      type A = B<number>;
+    `
   ]) {
   runTestImmutability(
     t,
