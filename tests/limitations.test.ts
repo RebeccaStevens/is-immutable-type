@@ -33,7 +33,10 @@ test("override primitive", (t) => {
 
 // Both `A` and `B` get discarded - TypeScript directly use `string`.
 test("alias of type primitive", (t) => {
-  const code = "type A = B; type B = string;";
+  const code = `
+    type A = string;
+    type B = A;
+  `;
 
   // prettier-ignore
   for (const overrides of [

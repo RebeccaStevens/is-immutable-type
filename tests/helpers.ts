@@ -58,14 +58,14 @@ function createTSTestEnvironment(code: string) {
 /**
  * Get the first type defined in the given code.
  */
-function getType(code: string, line: number) {
+function getType(code: string, line?: number) {
   const { ast, program } = createTSTestEnvironment(code);
 
-  if (line > ast.statements.length) {
+  if (line !== undefined && line > ast.statements.length) {
     throw new Error(`No statement found.`);
   }
 
-  const statement = ast.statements[line - 1];
+  const statement = ast.statements[(line ?? ast.statements.length) - 1];
   const checker = program.getTypeChecker();
   const type = checker.getTypeAtLocation(statement);
 
@@ -92,15 +92,10 @@ export function runTestImmutability(
   expected: Immutability,
   message?: string
 ): void {
-  const {
-    code,
-    line: _line,
-    overrides,
-    cache,
-  } = typeof test === "string"
-    ? { code: test, line: 1, overrides: undefined, cache: undefined }
-    : test;
-  const line = _line ?? 1;
+  const { code, line, overrides, cache } =
+    typeof test === "string"
+      ? { code: test, line: undefined, overrides: undefined, cache: undefined }
+      : test;
 
   const { checker, type, typeNode } = getType(code, line);
 
