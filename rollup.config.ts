@@ -91,7 +91,7 @@ const dts = defineConfig({
       tsconfig: "tsconfig.build.json",
     }),
     rollupPluginDts(),
-  ],
+  ] as Plugin[],
 });
 
 export default [cjs, esm, dts];

@@ -27,6 +27,9 @@ npm install is-immutable-type
 
 # Install with yarn
 yarn add is-immutable-type
+
+# Install with pnpm
+pnpm add is-immutable-type
 ```
 
 # Usage

@@ -1,15 +1,12 @@
 {
   "default": false,
+
   // MD001/heading-increment/header-increment - Heading levels should only increment by one level at a time
   "MD001": true,
   // MD003/heading-style/header-style - Heading style
-  "MD003": {
-    "style": "atx"
-  },
+  "MD003": { "style": "atx" },
   // MD004/ul-style - Unordered list style
-  "MD004": {
-    "style": "dash"
-  },
+  "MD004": { "style": "dash" },
   // MD005/list-indent - Inconsistent indentation for list items at the same level
   "MD005": true,
   // MD007/ul-indent - Unordered list indentation
@@ -23,9 +20,7 @@
   // MD012/no-multiple-blanks - Multiple consecutive blank lines
   "MD012": true,
   // MD013/line-length - Line length
-  "MD013": {
-    "line_length": 99999
-  }, // no line length
+  "MD013": { "line_length": 99999 }, // no line length
   // MD014/commands-show-output - Dollar signs used before commands without showing output
   "MD014": false,
   // MD018/no-missing-space-atx - No space after hash on atx style heading
@@ -41,11 +36,9 @@
   // MD023/heading-start-left/header-start-left - Headings must start at the beginning of the line
   "MD023": true,
   // MD024/no-duplicate-heading/no-duplicate-header - Multiple headings with the same content
-  "MD024": {
-    "siblings_only": true
-  },
+  "MD024": { "siblings_only": true },
   // MD025/single-title/single-h1 - Multiple top level headings in the same document
-  "MD025": true,
+  "MD025": false,
   // MD026/no-trailing-punctuation - Trailing punctuation in heading
   "MD026": true,
   // MD027/no-multiple-space-blockquote - Multiple spaces after blockquote symbol
@@ -76,9 +69,7 @@
   // MD034/no-bare-urls - Bare URL used
   "MD034": true,
   // MD035/hr-style - Horizontal rule style
-  "MD035": {
-    "style": "---"
-  },
+  "MD035": { "style": "---" },
   // MD036/no-emphasis-as-heading/no-emphasis-as-header - Emphasis used instead of a heading
   "MD036": true,
   // MD037/no-space-in-emphasis - Spaces inside emphasis markers
@@ -103,13 +94,9 @@
   // MD045/no-alt-text - Images should have alternate text (alt text)
   "MD045": true,
   // MD046/code-block-style - Code block style
-  "MD046": {
-    "style": "fenced"
-  },
+  "MD046": { "style": "fenced" },
   // MD047/single-trailing-newline - Files should end with a single newline character
   "MD047": true,
   // MD048/code-fence-style - Code fence style
-  "MD048": {
-    "style": "backtick"
-  }
+  "MD048": { "style": "backtick" }
 }

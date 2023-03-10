@@ -5,7 +5,7 @@ const avaConfig = {
     ts: "module",
   },
   nodeArguments: [
-    "--loader=ts-paths-esm-loader/transpile-only",
+    "--loader=ts-node/esm/transpile-only",
     "--experimental-specifier-resolution=node",
   ],
 };

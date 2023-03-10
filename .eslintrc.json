@@ -14,26 +14,26 @@
   "parserOptions": {
     "project": ["./tsconfig.json"]
   },
-  "ignorePatterns": [
-    "/coverage/",
-    "/dist/",
-    "/**/*.cjs",
-    "/**/*.js",
-    "/**/*.md",
-    "/src/tsutils.ts"
-  ],
+  "ignorePatterns": ["/coverage/", "/dist/", "/**/*.md", "/src/tsutils.ts"],
   "rules": {
     "@typescript-eslint/prefer-readonly-parameter-types": "off",
     "functional/no-loop-statement": "off",
-    "functional/prefer-readonly-type": "off"
+    "functional/prefer-readonly-type": "off",
+    "import/no-relative-parent-imports": "off"
   },
   "overrides": [
     {
       "files": ["./tests/**"],
+      "plugins": ["ava"],
+      "extends": ["plugin:ava/recommended", "plugin:functional/off"],
       "rules": {
-        "import/no-relative-parent-imports": "off",
-        "functional/no-loop-statements": "off",
         "unicorn/filename-case": "off"
+      }
+    },
+    {
+      "files": ["./tests/limitations.test.ts"],
+      "rules": {
+        "ava/no-ignored-test-files": "off"
       }
     },
     {

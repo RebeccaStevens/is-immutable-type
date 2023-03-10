@@ -2,66 +2,62 @@
   "version": "0.2",
   "language": "en",
   "ignorePaths": [
-    "**/coverage/**",
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/**/CHANGELOG.md",
-    "**/*.{json}",
-    ".cspell.json",
-    "yarn.lock",
     ".github/workflows/**",
-    ".vscode/*.json"
+    "**/*.json",
+    "**/*.jsonc",
+    "**/CHANGELOG.md",
+    "**/coverage/**",
+    "**/dist/**",
+    "**/node_modules/**",
+    "pnpm-lock.yaml"
   ],
   "dictionaries": [
-    "typescript",
-    "softwareTerms",
-    "node",
     "en_US",
-    "npm",
+    "filetypes",
     "misc",
-    "filetypes"
+    "node",
+    "npm",
+    "softwareTerms",
+    "typescript"
   ],
-  "import": [
-    "./node_modules/@cspell/dict-cryptocurrencies/cspell-ext.json"
-  ],
+  "import": ["./node_modules/@cspell/dict-cryptocurrencies/cspell-ext.json"],
   "ignoreRegExpList": [
+    "/[^\\s@]+@([^\\s@]+\\.)+[^\\s@]{2,4}/",
+    "/[A-Fa-f0-9]{6}/",
+    "/[A-Za-z0-9]{32,}/",
+    "// @ts-.*",
+    "/\\STS\\S+/",
+    "/`[^`]*`/",
+    "/``[\\w\\W]*?``/",
     "/```[\\w\\W]*?```/",
     "/~~~[\\w\\W]*?~~~/",
-    "/``[\\w\\W]*?``/",
-    "/`[^`]*`/",
-    "/\\.\\/docs\\/rules\\/[^.]*.md/",
-    "/TS[^\\s]+/",
-    "\\(#.+?\\)",
-    "// @ts-.*",
-    "/[A-Za-z0-9]{32,}/"
+    "\\(#.+?\\)"
   ],
   "words": [
-    "ascendently",
-    "litecoin",
-    "monero",
-    "codesandbox",
-    "builtins",
-    "foo",
     "bar",
     "baz",
-    "qux",
-    "quux",
     "corge",
-    "grault",
-    "garply",
-    "waldo",
+    "foo",
     "fred",
+    "garply",
+    "grault",
+    "litecoin",
+    "monero",
+    "noreply",
     "plugh",
-    "xyzzy",
+    "quux",
+    "qux",
+    "Rebecca",
+    "rebeccastevens",
+    "sonarjs",
     "thud",
+    "waldo",
+    "xyzzy"
   ],
   "overrides": [
     {
       "filename": "**/*.{ts,js}",
-      "ignoreRegExpList": [
-        "/@[a-z]+/",
-        "/#(end)?region/"
-      ],
+      "ignoreRegExpList": ["/@[a-z]+/", "/#(end)?region/"],
       "includeRegExpList": [
         "/\\/\\*[\\s\\S]*?\\*\\/|([^\\\\:]|^)\\/\\/.*$/",
         "/(\\/\\/[^\\n\\r]*[\\n\\r]+)/"
