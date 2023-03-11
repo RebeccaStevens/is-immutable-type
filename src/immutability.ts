@@ -1,5 +1,5 @@
 /**
- * The immutability sorted ascendently.
+ * The immutability values are sorted in ascending order.
  */
 export enum Immutability {
   Unknown = Number.NaN,

@@ -297,7 +297,7 @@ export function isReadonlyAssignmentDeclaration(
   checker: ts.TypeChecker
 ) {
   if (!isBindableObjectDefinePropertyCall(node)) return false;
-  const descriptorType = checker.getTypeAtLocation(node.arguments[2]);
+  const descriptorType = checker.getTypeAtLocation(node.arguments[2]!);
   if (descriptorType.getProperty("value") === undefined)
     return descriptorType.getProperty("set") === undefined;
   const writableProp = descriptorType.getProperty("writable");
@@ -306,15 +306,15 @@ export function isReadonlyAssignmentDeclaration(
     writableProp.valueDeclaration !== undefined &&
     isPropertyAssignment(writableProp.valueDeclaration)
       ? checker.getTypeAtLocation(writableProp.valueDeclaration.initializer)
-      : checker.getTypeOfSymbolAtLocation(writableProp, node.arguments[2]);
+      : checker.getTypeOfSymbolAtLocation(writableProp, node.arguments[2]!);
   return isBooleanLiteralType(writableType, false);
 }
 
 export function isBindableObjectDefinePropertyCall(node: ts.CallExpression) {
   return (
     node.arguments.length === 3 &&
-    isEntityNameExpression(node.arguments[0]) &&
-    isNumericOrStringLikeLiteral(node.arguments[1]) &&
+    isEntityNameExpression(node.arguments[0]!) &&
+    isNumericOrStringLikeLiteral(node.arguments[1]!) &&
     isPropertyAccessExpression(node.expression) &&
     node.expression.name.escapedText === "defineProperty" &&
     isIdentifier(node.expression.expression) &&

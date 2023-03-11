@@ -12,8 +12,6 @@
 /.releaserc linguist-language=yaml
 /.vscode/*.json linguist-language=jsonc
 
-/.yarn/** linguist-vendored
-
 /dist/** linguist-generated
 /CHANGELOG.md linguist-generated
 

@@ -65,7 +65,7 @@ function getType(code: string, line?: number) {
     throw new Error(`No statement found.`);
   }
 
-  const statement = ast.statements[(line ?? ast.statements.length) - 1];
+  const statement = ast.statements[(line ?? ast.statements.length) - 1]!;
   const checker = program.getTypeChecker();
   const type = checker.getTypeAtLocation(statement);
 
