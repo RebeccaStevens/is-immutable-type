@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.2.5](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.4...v1.2.5) (2023-03-11)
+
+
+### Bug Fixes
+
+* support for recursive types in the form `type Foo = ReadonlyArray<Foo>` ([#88](https://github.com/RebeccaStevens/is-immutable-type/issues/88)) ([a2582a7](https://github.com/RebeccaStevens/is-immutable-type/commit/a2582a74dd916df0f2241d482d1d673c06bdc502))
+
 ## [1.2.4](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.3...v1.2.4) (2023-02-02)
 
 
