@@ -435,7 +435,9 @@ function typeArgumentsImmutability(
   if (typeArguments.length > 0) {
     return typeArguments
       .map((t) =>
-        getTypeImmutability(checker, t, overrides, cache, maxImmutability)
+        t === type
+          ? Immutability.Immutable
+          : getTypeImmutability(checker, t, overrides, cache, maxImmutability)
       )
       .reduce(min);
   }

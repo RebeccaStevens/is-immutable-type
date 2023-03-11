@@ -56,7 +56,12 @@ export function typeToString(
   const aliasArguments =
     aliasType?.aliasTypeArguments === undefined
       ? undefined
-      : typeArgumentsToString(checker, aliasType.aliasTypeArguments);
+      : typeArgumentsToString(
+          checker,
+          aliasType,
+          alias,
+          aliasType.aliasTypeArguments
+        );
   const aliasWithArguments =
     aliasArguments === undefined ? undefined : `${alias}<${aliasArguments}>`;
 
@@ -88,10 +93,13 @@ export function typeToString(
         ? undefined
         : typeArgumentsToString(
             checker,
+            checker.getTypeFromTypeNode(wrapperType),
+            wrapperName,
             wrapperType.typeArguments.map((node) =>
               checker.getTypeFromTypeNode(node)
             )
           );
+
     const wrapperWithArguments =
       wrapperArguments === undefined
         ? undefined
@@ -115,7 +123,7 @@ export function typeToString(
 
   const nameWithArguments =
     typeArguments !== undefined && typeArguments.length > 0
-      ? `${name}<${typeArgumentsToString(checker, typeArguments)}>`
+      ? `${name}<${typeArgumentsToString(checker, type, name, typeArguments)}>`
       : undefined;
 
   return {
@@ -133,12 +141,24 @@ export function typeToString(
  */
 function typeArgumentsToString(
   checker: ts.TypeChecker,
+  type: Readonly<ts.Type>,
+  typeName: string | undefined,
   typeArguments: ReadonlyArray<ts.Type>
 ) {
-  return `${typeArguments
-    .map((t) => {
-      const strings = typeToString(checker, t);
-      return strings.nameWithArguments ?? strings.name;
-    })
-    .join(",")}`;
+  const typeArgumentStrings = typeArguments.map((t) => {
+    if (type === t) {
+      return typeName;
+    }
+    const strings = typeToString(checker, t);
+    return strings.nameWithArguments ?? strings.name;
+  });
+
+  if (typeArgumentStrings.includes(undefined)) {
+    console.warn(
+      "type argument strings contains `undefined`, this is likely a bug in `is-immutable-type`"
+    );
+    return undefined;
+  }
+
+  return `${typeArgumentStrings.join(",")}`;
 }
