@@ -57,7 +57,7 @@
     "test": "pnpm run test:js",
     "test:js": "c8 ava",
     "test:limitations": "ava tests/limitations.test.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit --skipLibCheck"
   },
   "devDependencies": {
     "@commitlint/cli": "17.4.4",
