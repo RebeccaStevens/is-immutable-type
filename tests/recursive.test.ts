@@ -4,17 +4,54 @@ import { Immutability } from "../src";
 
 import { runTestImmutability } from "./helpers";
 
-test("simple", (t) => {
+test("direct", (t) => {
+  for (const code of ["interface Test { readonly [key: string]: Test };"]) {
+    runTestImmutability(
+      t,
+      code,
+      Immutability.Immutable,
+      "handles direct recursive immutable types"
+    );
+  }
+
+  for (const code of ["type Test = ReadonlyArray<Test>;"]) {
+    runTestImmutability(
+      t,
+      code,
+      Immutability.ReadonlyDeep,
+      "handles direct recursive deeply readonly types"
+    );
+  }
+
+  for (const code of ["type Test = ReadonlyArray<Test | { foo: 1 }>;"]) {
+    runTestImmutability(
+      t,
+      code,
+      Immutability.ReadonlyShallow,
+      "handles direct recursive shallowly readonly types"
+    );
+  }
+
+  for (const code of ["type Test = Test[];"]) {
+    runTestImmutability(
+      t,
+      code,
+      Immutability.Mutable,
+      "handles direct recursive mutable types"
+    );
+  }
+});
+
+test("generics", (t) => {
   for (const code of [
     "type Test<G> = Readonly<{ foo: Test<string> | string; }>;",
     "type Test<G> = G extends string ? Readonly<{ foo: string }> : Test<string>",
-    "interface Test { readonly [key: string]: Test };",
   ]) {
     runTestImmutability(
       t,
       code,
       Immutability.Immutable,
-      "handles recursive immutable types"
+      "handles generic recursive immutable types"
     );
   }
 
@@ -26,7 +63,7 @@ test("simple", (t) => {
       t,
       code,
       Immutability.ReadonlyDeep,
-      "handles recursive deeply readonly types"
+      "handles generic recursive deeply readonly types"
     );
   }
 
@@ -38,7 +75,7 @@ test("simple", (t) => {
       t,
       code,
       Immutability.ReadonlyShallow,
-      "handles recursive shallowly readonly types"
+      "handles generic recursive shallowly readonly types"
     );
   }
 
@@ -50,7 +87,7 @@ test("simple", (t) => {
       t,
       code,
       Immutability.Mutable,
-      "handles recursive mutable types"
+      "handles generic recursive mutable types"
     );
   }
 });
