@@ -121,5 +121,5 @@
     "@typescript-eslint/utils": ">=5.30.5",
     "typescript": ">=4.7.4"
   },
-  "packageManager": "pnpm@7.29.0"
+  "packageManager": "pnpm@7.29.1"
 }
