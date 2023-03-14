@@ -28,8 +28,7 @@ export function isTypeNode(
  * Get string representations of the given type.
  */
 export function typeToString(
-  checker: ts.TypeChecker,
-  // eslint-disable-next-line functional/prefer-immutable-types
+  program: ts.Program,
   typeOrTypeNode: ts.Type | ts.TypeNode
 ): {
   name: string | undefined;
@@ -39,6 +38,7 @@ export function typeToString(
   evaluated: string;
   written: string | undefined;
 } {
+  const checker = program.getTypeChecker();
   const typeIsTypeNode = isTypeNode(typeOrTypeNode);
   const type = typeIsTypeNode
     ? checker.getTypeFromTypeNode(typeOrTypeNode)
@@ -58,7 +58,7 @@ export function typeToString(
     aliasType?.aliasTypeArguments === undefined
       ? undefined
       : typeArgumentsToString(
-          checker,
+          program,
           aliasType,
           alias,
           aliasType.aliasTypeArguments
@@ -93,7 +93,7 @@ export function typeToString(
       wrapperType?.typeArguments === undefined
         ? undefined
         : typeArgumentsToString(
-            checker,
+            program,
             checker.getTypeFromTypeNode(wrapperType),
             wrapperName,
             wrapperType.typeArguments.map((node) =>
@@ -124,7 +124,7 @@ export function typeToString(
 
   const nameWithArguments =
     typeArguments !== undefined && typeArguments.length > 0
-      ? `${name}<${typeArgumentsToString(checker, type, name, typeArguments)}>`
+      ? `${name}<${typeArgumentsToString(program, type, name, typeArguments)}>`
       : undefined;
 
   return {
@@ -141,7 +141,7 @@ export function typeToString(
  * Get string representations of the given type arguments.
  */
 function typeArgumentsToString(
-  checker: ts.TypeChecker,
+  program: ts.Program,
   type: Readonly<ts.Type>,
   typeName: string | undefined,
   typeArguments: ReadonlyArray<ts.Type>
@@ -150,7 +150,7 @@ function typeArgumentsToString(
     if (type === t) {
       return typeName;
     }
-    const strings = typeToString(checker, t);
+    const strings = typeToString(program, t);
     return strings.nameWithArguments ?? strings.name ?? strings.evaluated;
   });
 

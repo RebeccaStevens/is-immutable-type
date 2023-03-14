@@ -17,20 +17,20 @@ import { Immutability } from "./immutability";
 /**
  * Is the immutability of the given type immutable.
  *
- * @param checker - The TypeScript Type Checker to use.
+ * @param program - The TypeScript Program to use.
  * @param typeOrTypeNode - The type to test the immutability of.
  * @param overrides - The overrides to use when calculating the immutability.
  * @param useCache - Either a custom cache to use, `true` to use the global
  * cache, or `false` to not use any predefined cache.
  */
 export function isImmutableType(
-  checker: ts.TypeChecker,
+  program: ts.Program,
   typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
   const immutability = getTypeImmutability(
-    checker,
+    program,
     typeOrTypeNode,
     overrides,
     useCache,
@@ -42,20 +42,20 @@ export function isImmutableType(
 /**
  * Is the immutability of the given type at least readonly deep.
  *
- * @param checker - The TypeScript Type Checker to use.
+ * @param program - The TypeScript Program to use.
  * @param typeOrTypeNode - The type to test the immutability of.
  * @param overrides - The overrides to use when calculating the immutability.
  * @param useCache - Either a custom cache to use, `true` to use the global
  * cache, or `false` to not use any predefined cache.
  */
 export function isReadonlyDeepType(
-  checker: ts.TypeChecker,
+  program: ts.Program,
   typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
   const immutability = getTypeImmutability(
-    checker,
+    program,
     typeOrTypeNode,
     overrides,
     useCache,
@@ -67,20 +67,20 @@ export function isReadonlyDeepType(
 /**
  * Is the immutability of the given type at least readonly shallow.
  *
- * @param checker - The TypeScript Type Checker to use.
+ * @param program - The TypeScript Program to use.
  * @param typeOrTypeNode - The type to test the immutability of.
  * @param overrides - The overrides to use when calculating the immutability.
  * @param useCache - Either a custom cache to use, `true` to use the global
  * cache, or `false` to not use any predefined cache.
  */
 export function isReadonlyShallowType(
-  checker: ts.TypeChecker,
+  program: ts.Program,
   typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
   const immutability = getTypeImmutability(
-    checker,
+    program,
     typeOrTypeNode,
     overrides,
     useCache,
@@ -92,20 +92,20 @@ export function isReadonlyShallowType(
 /**
  * Is the immutability of the given type mutable.
  *
- * @param checker - The TypeScript Type Checker to use.
+ * @param program - The TypeScript Program to use.
  * @param typeOrTypeNode - The type to test the immutability of.
  * @param overrides - The overrides to use when calculating the immutability.
  * @param useCache - Either a custom cache to use, `true` to use the global
  * cache, or `false` to not use any predefined cache.
  */
 export function isMutableType(
-  checker: ts.TypeChecker,
+  program: ts.Program,
   typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
   const immutability = getTypeImmutability(
-    checker,
+    program,
     typeOrTypeNode,
     overrides,
     useCache,
