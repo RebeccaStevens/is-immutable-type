@@ -1,7 +1,6 @@
 import assert from "node:assert";
 
 import { getTypeOfPropertyOfType } from "@typescript-eslint/type-utils";
-import { ESLintUtils } from "@typescript-eslint/utils";
 import ts from "typescript";
 
 import { max, min, clamp } from "./compare";
@@ -344,13 +343,10 @@ function objectImmutability(
     m_minImmutability = Immutability.ReadonlyShallow;
 
     for (const property of properties) {
-      const propertyType = ESLintUtils.nullThrows(
-        getTypeOfPropertyOfType(checker, type, property),
-        ESLintUtils.NullThrowsReasons.MissingToken(
-          `property "${property.name}"`,
-          "type"
-        )
-      );
+      const propertyType = getTypeOfPropertyOfType(checker, type, property);
+      if (propertyType === undefined) {
+        return Immutability.Unknown;
+      }
 
       const result = getTypeImmutability(
         checker,
