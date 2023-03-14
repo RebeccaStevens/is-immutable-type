@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.2.6](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.5...v1.2.6) (2023-03-14)
+
+
+### Bug Fixes
+
+* remove @typescript-eslint/utils peerdep ([#99](https://github.com/RebeccaStevens/is-immutable-type/issues/99)) ([cbf0b7a](https://github.com/RebeccaStevens/is-immutable-type/commit/cbf0b7aeda2d421f946f6b0863e645a3f602639d))
+
 ## [1.2.5](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.4...v1.2.5) (2023-03-11)
 
 
