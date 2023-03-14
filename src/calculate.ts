@@ -53,12 +53,37 @@ export function getDefaultOverrides(): ImmutabilityOverrides {
 /**
  * A cache used to keep track of what types have already been calculated.
  */
-export type ImmutabilityCache = WeakMap<ts.Type, Immutability>;
+export type ImmutabilityCache = WeakMap<object, Immutability>;
 
 /**
  * A global cache that can be used between consumers.
  */
 const globalCache: ImmutabilityCache = new WeakMap();
+
+/**
+ * Cache a type's immutability.
+ */
+function cacheTypeImmutability(
+  checker: ts.TypeChecker,
+  cache: ImmutabilityCache,
+  type: Readonly<ts.Type>,
+  value: Immutability
+) {
+  const identity = checker.getRecursionIdentity(type);
+  cache.set(identity, value);
+}
+
+/**
+ * Get a type's cashed immutability.
+ */
+function getCachedTypeImmutability(
+  checker: ts.TypeChecker,
+  cache: ImmutabilityCache,
+  type: Readonly<ts.Type>
+) {
+  const identity = checker.getRecursionIdentity(type);
+  return cache.get(identity);
+}
 
 /**
  * Get the immutability of the given type.
@@ -92,7 +117,7 @@ export function getTypeImmutability(
   const type = isTypeNode(typeOrTypeNode)
     ? checker.getTypeFromTypeNode(typeOrTypeNode)
     : typeOrTypeNode;
-  const cached = cache.get(type);
+  const cached = getCachedTypeImmutability(checker, cache, type);
   if (cached !== undefined) {
     return cached;
   }
@@ -103,11 +128,11 @@ export function getTypeImmutability(
 
   // Early escape if we don't need to check the override from.
   if (overrideTo !== undefined && overrideFrom === undefined) {
-    cache.set(type, overrideTo);
+    cacheTypeImmutability(checker, cache, type, overrideTo);
     return overrideTo;
   }
 
-  cache.set(type, Immutability.Unknown);
+  cacheTypeImmutability(checker, cache, type, Immutability.Calculating);
 
   const immutability = calculateTypeImmutability(
     checker,
@@ -123,12 +148,12 @@ export function getTypeImmutability(
       (overrideFrom <= immutability && immutability <= overrideTo) ||
       (overrideFrom >= immutability && immutability >= overrideTo)
     ) {
-      cache.set(type, overrideTo);
+      cacheTypeImmutability(checker, cache, type, overrideTo);
       return overrideTo;
     }
   }
 
-  cache.set(type, immutability);
+  cacheTypeImmutability(checker, cache, type, immutability);
   return immutability;
 }
 
@@ -431,9 +456,7 @@ function typeArgumentsImmutability(
   if (typeArguments.length > 0) {
     return typeArguments
       .map((t) =>
-        t === type
-          ? Immutability.Immutable
-          : getTypeImmutability(checker, t, overrides, cache, maxImmutability)
+        getTypeImmutability(checker, t, overrides, cache, maxImmutability)
       )
       .reduce(min);
   }

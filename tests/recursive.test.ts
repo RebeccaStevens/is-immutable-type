@@ -56,7 +56,7 @@ test("generics", (t) => {
   }
 
   for (const code of [
-    "type Test<G> = Readonly<{ foo: ReadonlyArray<Test<string>> | string; }>;",
+    "type Test<G> = Readonly<{ foo: ReadonlyArray<Test<string>> | G; }>;",
     "type Test<G> = G extends string ? ReadonlyArray<string> : Test<string>",
   ]) {
     runTestImmutability(
@@ -88,6 +88,17 @@ test("generics", (t) => {
       code,
       Immutability.Mutable,
       "handles generic recursive mutable types"
+    );
+  }
+});
+
+test("nested", (t) => {
+  for (const code of ["type Foo<U> = { readonly foo: Foo<Foo<U>>; };"]) {
+    runTestImmutability(
+      t,
+      code,
+      Immutability.Immutable,
+      "handles nested recursive immutable types"
     );
   }
 });
