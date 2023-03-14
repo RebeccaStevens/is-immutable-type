@@ -150,7 +150,7 @@ function typeArgumentsToString(
       return typeName;
     }
     const strings = typeToString(checker, t);
-    return strings.nameWithArguments ?? strings.name;
+    return strings.nameWithArguments ?? strings.name ?? strings.evaluated;
   });
 
   if (typeArgumentStrings.includes(undefined)) {
