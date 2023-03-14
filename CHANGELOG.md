@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.2.7](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.6...v1.2.7) (2023-03-14)
+
+
+### Bug Fixes
+
+* **typeArgumentsToString:** use evaluated type if its name isn't available ([#101](https://github.com/RebeccaStevens/is-immutable-type/issues/101)) ([988f34a](https://github.com/RebeccaStevens/is-immutable-type/commit/988f34a8cf1676590805ed91c65eb8c6238affa4))
+* use a recursion identity to test if a type has already been looked at ([#100](https://github.com/RebeccaStevens/is-immutable-type/issues/100)) ([fb2aaa5](https://github.com/RebeccaStevens/is-immutable-type/commit/fb2aaa59b8482c7b10501218f23a2dac049df449))
+
 ## [1.2.6](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.5...v1.2.6) (2023-03-14)
 
 
