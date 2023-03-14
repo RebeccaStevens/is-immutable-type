@@ -70,7 +70,7 @@ test if a value is `Unknown`.
 - `Unknown`: We couldn't determine the immutability of the type.
 
 Note: `Calculating` is used internally to mean that we are still calculating the
-immutability of the type. You shouldn't every need to use this value.
+immutability of the type. You shouldn't ever need to use this value.
 
 ## Overrides
 
