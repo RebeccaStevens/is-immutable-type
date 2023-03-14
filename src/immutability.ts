@@ -10,4 +10,5 @@ export enum Immutability {
   ReadonlyShallow = 3,
   ReadonlyDeep = 4,
   Immutable = 5,
+  Calculating = Number.POSITIVE_INFINITY,
 }

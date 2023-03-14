@@ -69,9 +69,8 @@ test if a value is `Unknown`.
 - `Mutable`: The data is shallowly mutable.
 - `Unknown`: We couldn't determine the immutability of the type.
 
-Note: Internally `Unknown` may also be used to mean that we are still
-calculating the immutability of the type. This shouldn't be exposed to the
-outside world though.
+Note: `Calculating` is used internally to mean that we are still calculating the
+immutability of the type. You shouldn't ever need to use this value.
 
 ## Overrides
 
