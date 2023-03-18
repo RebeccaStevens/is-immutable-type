@@ -7,9 +7,6 @@
 
 **/tsconfig.json linguist-language=jsonc
 **/tsconfig.*.json linguist-language=jsonc
-/.lintstagedrc linguist-language=json
-/.prettierrc linguist-language=json
-/.releaserc linguist-language=yaml
 /.vscode/*.json linguist-language=jsonc
 
 /dist/** linguist-generated

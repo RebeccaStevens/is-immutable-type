@@ -16,7 +16,6 @@
   },
   "ignorePatterns": ["/coverage/", "/dist/", "/**/*.md", "/src/tsutils.ts"],
   "rules": {
-    "@typescript-eslint/prefer-readonly-parameter-types": "off",
     "functional/no-loop-statement": "off",
     "functional/prefer-readonly-type": "off",
     "import/no-relative-parent-imports": "off"

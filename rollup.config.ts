@@ -8,29 +8,6 @@ import rollupPluginUassert from "rollup-plugin-unassert";
 
 import pkg from "./package.json" assert { type: "json" };
 
-/**
- * Get new instances of all the common plugins.
- */
-function getPlugins(): Plugin[] {
-  return [
-    rollupPluginAutoExternal() as unknown as Plugin,
-    rollupPluginNodeResolve(),
-    rollupPluginTypescript({
-      tsconfig: "tsconfig.build.json",
-    }),
-    rollupPluginUassert({
-      include: ["**/*.ts"],
-      importPatterns: [
-        'import assert from "node:assert"',
-        'import * as assert from "node:assert"',
-      ],
-    }),
-    rollupPluginJSON({
-      preferConst: true,
-    }),
-  ];
-}
-
 const common = defineConfig({
   input: "src/index.ts",
 
@@ -48,39 +25,52 @@ const common = defineConfig({
   },
 });
 
-const cjs = defineConfig({
-  ...common,
-
-  output: {
-    ...common.output,
-    file: pkg.main,
-    format: "cjs",
-  },
-
-  plugins: getPlugins(),
-});
-
-const esm = defineConfig({
-  ...common,
-
-  output: {
-    ...common.output,
-    file: pkg.module,
-    format: "esm",
-  },
-
-  plugins: getPlugins(),
-});
-
-const dts = defineConfig({
+const runtimes = defineConfig({
   ...common,
 
   output: [
     {
+      ...common.output,
+      file: pkg.exports.import,
+      format: "esm",
+    },
+    {
+      ...common.output,
+      file: pkg.exports.require,
+      format: "cjs",
+    },
+  ],
+
+  plugins: [
+    rollupPluginAutoExternal(),
+    rollupPluginNodeResolve(),
+    rollupPluginTypescript({
+      tsconfig: "tsconfig.build.json",
+    }),
+    rollupPluginUassert({
+      include: ["**/*.ts"],
+      importPatterns: [
+        'import assert from "node:assert"',
+        'import * as assert from "node:assert"',
+      ],
+    }),
+    rollupPluginJSON({
+      preferConst: true,
+    }),
+  ],
+});
+
+const types = defineConfig({
+  ...common,
+
+  output: [
+    {
+      ...common.output,
       file: pkg.exports.types.import,
       format: "esm",
     },
     {
+      ...common.output,
       file: pkg.exports.types.require,
       format: "cjs",
     },
@@ -94,4 +84,4 @@ const dts = defineConfig({
   ] as Plugin[],
 });
 
-export default [cjs, esm, dts];
+export default [runtimes, types];
