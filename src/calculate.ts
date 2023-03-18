@@ -102,7 +102,8 @@ function getCachedTypeImmutability(
  */
 export function getTypeImmutability(
   checker: ts.TypeChecker,
-  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
+  // eslint-disable-next-line functional/prefer-immutable-types
+  typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
   maxImmutability = Immutability.Immutable

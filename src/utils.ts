@@ -29,7 +29,8 @@ export function isTypeNode(
  */
 export function typeToString(
   checker: ts.TypeChecker,
-  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>
+  // eslint-disable-next-line functional/prefer-immutable-types
+  typeOrTypeNode: ts.Type | ts.TypeNode
 ): {
   name: string | undefined;
   nameWithArguments: string | undefined;
