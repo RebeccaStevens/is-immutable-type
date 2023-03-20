@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [1.2.9](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.8...v1.2.9) (2023-03-20)
+
+
+### Bug Fixes
+
+* add eslint peer dependency ([#113](https://github.com/RebeccaStevens/is-immutable-type/issues/113)) ([05af716](https://github.com/RebeccaStevens/is-immutable-type/commit/05af7161fb7a58cd89a071a05ae77d439950362c))
+
 ## [1.2.8](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.7...v1.2.8) (2023-03-14)
 
 
