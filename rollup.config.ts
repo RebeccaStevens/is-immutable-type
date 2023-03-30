@@ -47,10 +47,6 @@ const runtimes = defineConfig({
     }),
     rollupPluginUassert({
       include: ["**/*.ts"],
-      importPatterns: [
-        'import assert from "node:assert"',
-        'import * as assert from "node:assert"',
-      ],
     }),
     rollupPluginJSON({
       preferConst: true,

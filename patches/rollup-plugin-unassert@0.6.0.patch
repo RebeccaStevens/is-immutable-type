@@ -1,0 +1,258 @@
+diff --git a/dist/rollup-plugin-unassert.cjs.js b/dist/rollup-plugin-unassert.cjs.js
+index b8c3bd5bb074134a1cc429a00e2ecd0f79279971..2245d36ba438822598e1b26c5fda4e2cc3e28e4b 100644
+--- a/dist/rollup-plugin-unassert.cjs.js
++++ b/dist/rollup-plugin-unassert.cjs.js
+@@ -1,102 +1,28 @@
+ 'use strict';
+ 
+ var pluginutils = require('@rollup/pluginutils');
+-var acorn = require('acorn');
+-var escodegen = require('@javascript-obfuscator/escodegen');
+ var unassert$1 = require('unassert');
+-var convert = require('convert-source-map');
+-var multiStageSourcemap = require('multi-stage-sourcemap');
+-
+-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+-
+-var acorn__default = /*#__PURE__*/_interopDefaultLegacy(acorn);
+-var escodegen__default = /*#__PURE__*/_interopDefaultLegacy(escodegen);
+-var convert__default = /*#__PURE__*/_interopDefaultLegacy(convert);
+-
+-// Adapted from https://github.com/unassert-js/unassertify/blob/master/index.js
+-// by Takuto Wada (MIT-licensed)
+-
+-function handleIncomingSourceMap(originalCode) {
+-    const commented = convert__default["default"].fromSource(originalCode);
+-    if (commented) {
+-        return commented.toObject();
+-    }
+-    return null;
+-}
+-
+-function overwritePropertyIfExists(name, from, to) {
+-    // eslint-disable-next-line no-prototype-builtins
+-    if (from.hasOwnProperty(name)) {
+-        to.setProperty(name, from[name]);
+-    }
+-}
+-function reconnectSourceMap(inMap, outMap) {
+-    const mergedRawMap = mergeSourceMap(inMap, outMap.toObject());
+-    const reMap = convert__default["default"].fromObject(mergedRawMap);
+-    overwritePropertyIfExists('sources', inMap, reMap);
+-    overwritePropertyIfExists('sourceRoot', inMap, reMap);
+-    overwritePropertyIfExists('sourcesContent', inMap, reMap);
+-    return reMap;
+-}
+-
+-function mergeSourceMap(incomingSourceMap, outgoingSourceMap) {
+-    if (typeof outgoingSourceMap === 'string' || outgoingSourceMap instanceof String) {
+-        outgoingSourceMap = JSON.parse(outgoingSourceMap);
+-    }
+-    if (!incomingSourceMap) {
+-        return outgoingSourceMap;
+-    }
+-    return JSON.parse(multiStageSourcemap.transfer({fromSourceMap: outgoingSourceMap, toSourceMap: incomingSourceMap}));
+-}
+ 
+ function unassert(options = {}) {
+-    if (options.sourcemap === undefined) {
+-        options.sourcemap = true;
+-    }
+-
+     const filter = pluginutils.createFilter(
+-        options.include || ['*.js', '**/*.js'],
++        options.include ?? ['*.js', '**/*.js'],
+         options.exclude
+     );
+ 
+     return {
+         name: 'unassert',
+         transform(code, id) {
+-            if (!filter(id)) { return null; }
+-
+-            return new Promise((resolve) => {
+-                const comments = [];
+-                const tokens = [];
+-
+-                const ast = acorn__default["default"].parse(code, {
+-                    sourceType: 'module',
+-                    ecmaVersion: 'latest',
+-                    locations: true,
+-                    ranges: true,
+-                    onComment: comments,
+-                    onToken: tokens,
+-                });
+-
+-                escodegen__default["default"].attachComments(ast, comments, tokens);
+-                const unassertedAst = escodegen__default["default"].generate(unassert$1.unassertAst(ast), {
+-                    sourceMap: id,
+-                    sourceContent: code,
+-                    sourceMapWithCode: true,
+-                    comment: true,
+-                });
+-
+-                const inMap = options.sourcemap && handleIncomingSourceMap(code);
+-                let outMap = convert__default["default"].fromJSON(unassertedAst.map.toString());
+-                if (inMap) {
+-                    outMap = reconnectSourceMap(inMap, outMap);
+-                }
+-
+-                resolve({
+-                    code: unassertedAst.code,
+-                    map: outMap.toObject()
+-                });
++            if (!filter(id)) {
++                return null;
++            }
++
++            const ast = this.parse(code);
++            return unassert$1.unassertCode(code, ast, {
++                sourceMap: options.sourcemap !== false ?
++                    { hires: true } :
++                    false,
+             });
+-        }
++        },
+     };
+ }
+ 
+diff --git a/dist/rollup-plugin-unassert.es.js b/dist/rollup-plugin-unassert.es.js
+index e9e5996a5467703ae9d4e87ab377ac855cd877d0..c5d0a3e3e9f87095f457c9a671464e2ee44f6970 100644
+--- a/dist/rollup-plugin-unassert.es.js
++++ b/dist/rollup-plugin-unassert.es.js
+@@ -1,94 +1,26 @@
+ import { createFilter } from '@rollup/pluginutils';
+-import acorn from 'acorn';
+-import escodegen from '@javascript-obfuscator/escodegen';
+-import { unassertAst } from 'unassert';
+-import convert from 'convert-source-map';
+-import { transfer } from 'multi-stage-sourcemap';
+-
+-// Adapted from https://github.com/unassert-js/unassertify/blob/master/index.js
+-// by Takuto Wada (MIT-licensed)
+-
+-function handleIncomingSourceMap(originalCode) {
+-    const commented = convert.fromSource(originalCode);
+-    if (commented) {
+-        return commented.toObject();
+-    }
+-    return null;
+-}
+-
+-function overwritePropertyIfExists(name, from, to) {
+-    // eslint-disable-next-line no-prototype-builtins
+-    if (from.hasOwnProperty(name)) {
+-        to.setProperty(name, from[name]);
+-    }
+-}
+-function reconnectSourceMap(inMap, outMap) {
+-    const mergedRawMap = mergeSourceMap(inMap, outMap.toObject());
+-    const reMap = convert.fromObject(mergedRawMap);
+-    overwritePropertyIfExists('sources', inMap, reMap);
+-    overwritePropertyIfExists('sourceRoot', inMap, reMap);
+-    overwritePropertyIfExists('sourcesContent', inMap, reMap);
+-    return reMap;
+-}
+-
+-function mergeSourceMap(incomingSourceMap, outgoingSourceMap) {
+-    if (typeof outgoingSourceMap === 'string' || outgoingSourceMap instanceof String) {
+-        outgoingSourceMap = JSON.parse(outgoingSourceMap);
+-    }
+-    if (!incomingSourceMap) {
+-        return outgoingSourceMap;
+-    }
+-    return JSON.parse(transfer({fromSourceMap: outgoingSourceMap, toSourceMap: incomingSourceMap}));
+-}
++import { unassertCode } from 'unassert';
+ 
+ function unassert(options = {}) {
+-    if (options.sourcemap === undefined) {
+-        options.sourcemap = true;
+-    }
+-
+     const filter = createFilter(
+-        options.include || ['*.js', '**/*.js'],
++        options.include ?? ['*.js', '**/*.js'],
+         options.exclude
+     );
+ 
+     return {
+         name: 'unassert',
+         transform(code, id) {
+-            if (!filter(id)) { return null; }
+-
+-            return new Promise((resolve) => {
+-                const comments = [];
+-                const tokens = [];
+-
+-                const ast = acorn.parse(code, {
+-                    sourceType: 'module',
+-                    ecmaVersion: 'latest',
+-                    locations: true,
+-                    ranges: true,
+-                    onComment: comments,
+-                    onToken: tokens,
+-                });
+-
+-                escodegen.attachComments(ast, comments, tokens);
+-                const unassertedAst = escodegen.generate(unassertAst(ast), {
+-                    sourceMap: id,
+-                    sourceContent: code,
+-                    sourceMapWithCode: true,
+-                    comment: true,
+-                });
+-
+-                const inMap = options.sourcemap && handleIncomingSourceMap(code);
+-                let outMap = convert.fromJSON(unassertedAst.map.toString());
+-                if (inMap) {
+-                    outMap = reconnectSourceMap(inMap, outMap);
+-                }
+-
+-                resolve({
+-                    code: unassertedAst.code,
+-                    map: outMap.toObject()
+-                });
++            if (!filter(id)) {
++                return null;
++            }
++
++            const ast = this.parse(code);
++            return unassertCode(code, ast, {
++                sourceMap: options.sourcemap !== false ?
++                    { hires: true } :
++                    false,
+             });
+-        }
++        },
+     };
+ }
+ 
+diff --git a/package.json b/package.json
+index 4a60adcbb85dadafeffa1dc84703dc46d40ac41a..afd54a063bf85d7cd35aa2013a38ffbfb1a8a895 100644
+--- a/package.json
++++ b/package.json
+@@ -9,11 +9,7 @@
+     "dist"
+   ],
+   "dependencies": {
+-    "@javascript-obfuscator/escodegen": "^2.3.0",
+     "@rollup/pluginutils": "^4.2.1",
+-    "acorn": "^8.8.0",
+-    "convert-source-map": "^1.8.0",
+-    "multi-stage-sourcemap": "^0.3.1",
+     "unassert": "^2.0.0"
+   },
+   "devDependencies": {
+@@ -31,6 +27,9 @@
+   },
+   "eslintConfig": {
+     "extends": "mourner",
++    "parserOptions": {
++      "ecmaVersion": "latest"
++    },
+     "rules": {
+       "no-process-exit": 0
+     }
+diff --git a/src/unassert.js b/src/unassert.js
+deleted file mode 100644
+index da1cab07a15f9802efcad8f36246b5b5d63d4afc..0000000000000000000000000000000000000000
