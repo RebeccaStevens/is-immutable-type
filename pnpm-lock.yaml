@@ -4,6 +4,9 @@ patchedDependencies:
   '@rollup/plugin-typescript@11.0.0':
     hash: zfsjaw7rp2cmcctc6vb5a4tp3e
     path: patches/@rollup__plugin-typescript@11.0.0.patch
+  eslint-plugin-jsdoc@40.1.0:
+    hash: 42cfpwiawuqq7wtwf2jwrsca3a
+    path: patches/eslint-plugin-jsdoc@40.1.0.patch
 
 dependencies:
   '@typescript-eslint/type-utils':
@@ -103,7 +106,7 @@ devDependencies:
     version: 2.27.5(@typescript-eslint/parser@6.0.0-alpha.106)(eslint-import-resolver-typescript@3.5.4)(eslint@8.37.0)
   eslint-plugin-jsdoc:
     specifier: 40.1.0
-    version: 40.1.0(eslint@8.37.0)
+    version: 40.1.0(patch_hash=42cfpwiawuqq7wtwf2jwrsca3a)(eslint@8.37.0)
   eslint-plugin-markdown:
     specifier: 3.0.0
     version: 3.0.0(eslint@8.37.0)
@@ -956,7 +959,7 @@ packages:
       eslint-plugin-eslint-comments: 3.2.0(eslint@8.37.0)
       eslint-plugin-functional: 5.0.7(eslint@8.37.0)(typescript@5.0.2)
       eslint-plugin-import: 2.27.5(@typescript-eslint/parser@6.0.0-alpha.106)(eslint-import-resolver-typescript@3.5.4)(eslint@8.37.0)
-      eslint-plugin-jsdoc: 40.1.0(eslint@8.37.0)
+      eslint-plugin-jsdoc: 40.1.0(patch_hash=42cfpwiawuqq7wtwf2jwrsca3a)(eslint@8.37.0)
       eslint-plugin-markdown: 3.0.0(eslint@8.37.0)
       eslint-plugin-node: 11.1.0(eslint@8.37.0)
       eslint-plugin-optimize-regex: 1.2.1
@@ -2944,7 +2947,7 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-plugin-jsdoc@40.1.0(eslint@8.37.0):
+  /eslint-plugin-jsdoc@40.1.0(patch_hash=42cfpwiawuqq7wtwf2jwrsca3a)(eslint@8.37.0):
     resolution: {integrity: sha512-ANvrhiu62VlSorARM0hup60VQsS3hNyp0Ca7cnJDj8tpJzM7tNhBVqMVYXSuLzEmqrpwx6aAh+NAN2DdAGG5fQ==}
     engines: {node: ^14 || ^16 || ^17 || ^18 || ^19}
     peerDependencies:
@@ -2961,6 +2964,7 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+    patched: true
 
   /eslint-plugin-markdown@3.0.0(eslint@8.37.0):
     resolution: {integrity: sha512-hRs5RUJGbeHDLfS7ELanT0e29Ocyssf/7kBM+p7KluY5AwngGkDf8Oyu4658/NZSGTTq05FZeWbkxXtbVyHPwg==}
