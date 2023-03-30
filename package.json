@@ -63,7 +63,8 @@
     "type-check": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
-    "@typescript-eslint/type-utils": "^5.55.0"
+    "@typescript-eslint/type-utils": "^5.55.0",
+    "ts-api-utils": "^1.0.1"
   },
   "devDependencies": {
     "@commitlint/cli": "17.5.1",

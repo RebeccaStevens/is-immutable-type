@@ -1,9 +1,16 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@typescript-eslint/type-utils':
     specifier: ^5.55.0
     version: 5.57.1(eslint@8.38.0)(typescript@5.0.4)
+  ts-api-utils:
+    specifier: ^1.0.1
+    version: 1.0.1(typescript@5.0.4)
 
 devDependencies:
   '@commitlint/cli':
@@ -6359,6 +6366,15 @@ packages:
     resolution: {integrity: sha512-c1PTsA3tYrIsLGkJkzHF+w9F2EyxfXGo4UyJc4pFL++FMjnq0HJS69T3M7d//gKrFKwy429bouPescbjecU+Zw==}
     engines: {node: '>=8'}
     dev: true
+
+  /ts-api-utils@1.0.1(typescript@5.0.4):
+    resolution: {integrity: sha512-lC/RGlPmwdrIBFTX59wwNzqh7aR2otPNPR/5brHZm/XKFYKsfqxihXUe9pU3JI+3vGkl+vyCoNNnPhJn3aLK1A==}
+    engines: {node: '>=16.13.0'}
+    peerDependencies:
+      typescript: '>=4.2.0'
+    dependencies:
+      typescript: 5.0.4
+    dev: false
 
   /ts-node@10.9.1(@types/node@18.15.11)(typescript@5.0.4):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}

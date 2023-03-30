@@ -14,7 +14,7 @@
   "parserOptions": {
     "project": ["./tsconfig.json"]
   },
-  "ignorePatterns": ["/coverage/", "/dist/", "/**/*.md", "/src/tsutils.ts"],
+  "ignorePatterns": ["/coverage/", "/dist/", "/**/*.md"],
   "rules": {
     "functional/no-loop-statement": "off",
     "functional/prefer-readonly-type": "off",
