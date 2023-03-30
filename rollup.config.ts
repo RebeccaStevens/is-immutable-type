@@ -1,5 +1,4 @@
 import rollupPluginJSON from "@rollup/plugin-json";
-import rollupPluginNodeResolve from "@rollup/plugin-node-resolve";
 import rollupPluginTypescript from "@rollup/plugin-typescript";
 import { defineConfig, type Plugin } from "rollup";
 import rollupPluginAutoExternal from "rollup-plugin-auto-external";
@@ -43,7 +42,6 @@ const runtimes = defineConfig({
 
   plugins: [
     rollupPluginAutoExternal(),
-    rollupPluginNodeResolve(),
     rollupPluginTypescript({
       tsconfig: "tsconfig.build.json",
     }),
