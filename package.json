@@ -63,7 +63,8 @@
     "type-check": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
-    "@typescript-eslint/type-utils": "^5.55.0"
+    "@typescript-eslint/type-utils": "^5.55.0",
+    "ts-api-utils": "^0.0.45"
   },
   "devDependencies": {
     "@commitlint/cli": "17.5.0",
@@ -124,5 +125,5 @@
     "eslint": "*",
     "typescript": ">=4.7.4"
   },
-  "packageManager": "pnpm@7.30.5"
+  "packageManager": "pnpm@8.0.0"
 }
