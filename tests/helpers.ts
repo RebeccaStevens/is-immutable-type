@@ -72,7 +72,7 @@ function getType(code: string, line?: number) {
   return {
     type,
     typeNode: hasTypeNode(statement) ? statement.type : undefined,
-    checker,
+    program,
   };
 }
 
@@ -97,30 +97,30 @@ export function runTestImmutability(
       ? { code: test, line: undefined, overrides: undefined, cache: undefined }
       : test;
 
-  const { checker, type, typeNode } = getType(code, line);
+  const { program, type, typeNode } = getType(code, line);
 
   const actual = getTypeImmutability(
-    checker,
+    program,
     typeNode ?? type,
     overrides,
     cache
   );
   t.is(Immutability[actual], Immutability[expected], message);
 
-  const immutable = isImmutableType(checker, type, overrides, cache);
+  const immutable = isImmutableType(program, type, overrides, cache);
   t.is(expected >= Immutability.Immutable, immutable);
 
-  const readonlyDeep = isReadonlyDeepType(checker, type, overrides, cache);
+  const readonlyDeep = isReadonlyDeepType(program, type, overrides, cache);
   t.is(expected >= Immutability.ReadonlyDeep, readonlyDeep);
 
   const readonlyShallow = isReadonlyShallowType(
-    checker,
+    program,
     type,
     overrides,
     cache
   );
   t.is(expected >= Immutability.ReadonlyShallow, readonlyShallow);
 
-  const mutable = isMutableType(checker, type, overrides, cache);
+  const mutable = isMutableType(program, type, overrides, cache);
   t.is(expected === Immutability.Mutable, mutable);
 }

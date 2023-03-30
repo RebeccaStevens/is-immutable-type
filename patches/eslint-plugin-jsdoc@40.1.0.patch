@@ -1,0 +1,50 @@
+diff --git a/dist/jsdocUtils.js b/dist/jsdocUtils.js
+index 732ea2fd4e1ef91eaa6f9e94d79f313cc6e5c1d1..2abcd83f334151356e9fbd1a09dee50ead45902d 100644
+--- a/dist/jsdocUtils.js
++++ b/dist/jsdocUtils.js
+@@ -106,7 +106,7 @@ const getFunctionParameterNames = (functionNode, checkDefaultObjects) => {
+     const hasLeftTypeAnnotation = 'left' in param && 'typeAnnotation' in param.left;
+     if ('typeAnnotation' in param || hasLeftTypeAnnotation) {
+       const typeAnnotation = hasLeftTypeAnnotation ? param.left.typeAnnotation : param.typeAnnotation;
+-      if (typeAnnotation.typeAnnotation.type === 'TSTypeLiteral') {
++      if (typeAnnotation?.typeAnnotation.type === 'TSTypeLiteral') {
+         const propertyNames = typeAnnotation.typeAnnotation.members.map(member => {
+           return getPropertiesFromPropertySignature(member);
+         });
+@@ -182,8 +182,8 @@ const getFunctionParameterNames = (functionNode, checkDefaultObjects) => {
+         // The key of an object could also be a string or number
+         case 'Literal':
+           return param.key.raw ||
+-          // istanbul ignore next -- `raw` may not be present in all parsers
+-          param.key.value;
++            // istanbul ignore next -- `raw` may not be present in all parsers
++            param.key.value;
+ 
+         // case 'MemberExpression':
+         default:
+@@ -398,10 +398,10 @@ const mayBeUndefinedTypeTag = (tag, mode) => {
+     // Ignore
+   }
+   if (
+-  // We do not traverse deeply as it could be, e.g., `Promise<void>`
+-  parsedTypes && parsedTypes.type === 'JsdocTypeUnion' && parsedTypes.elements.find(elem => {
+-    return elem.type === 'JsdocTypeUndefined' || elem.type === 'JsdocTypeName' && elem.value === 'void';
+-  })) {
++    // We do not traverse deeply as it could be, e.g., `Promise<void>`
++    parsedTypes && parsedTypes.type === 'JsdocTypeUnion' && parsedTypes.elements.find(elem => {
++      return elem.type === 'JsdocTypeUndefined' || elem.type === 'JsdocTypeName' && elem.value === 'void';
++    })) {
+     return true;
+   }
+ 
+@@ -886,8 +886,8 @@ const filterTags = (tags, filter) => {
+   });
+ };
+ const tagsWithNamesAndDescriptions = new Set(['param', 'arg', 'argument', 'property', 'prop', 'template',
+-// These two are parsed by our custom parser as though having a `name`
+-'returns', 'return']);
++  // These two are parsed by our custom parser as though having a `name`
++  'returns', 'return']);
+ const getTagsByType = (context, mode, tags, tagPreference) => {
+   const descName = getPreferredTagName(context, mode, 'description', tagPreference);
+   const tagsWithoutNames = [];
