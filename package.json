@@ -128,7 +128,9 @@
   "pnpm": {
     "patchedDependencies": {
       "@rollup/plugin-typescript@11.0.0": "patches/@rollup__plugin-typescript@11.0.0.patch",
-      "eslint-plugin-jsdoc@40.1.0": "patches/eslint-plugin-jsdoc@40.1.0.patch"
+      "eslint-plugin-jsdoc@40.1.0": "patches/eslint-plugin-jsdoc@40.1.0.patch",
+      "unassert@2.0.0": "patches/unassert@2.0.0.patch",
+      "rollup-plugin-unassert@0.6.0": "patches/rollup-plugin-unassert@0.6.0.patch"
     }
   }
 }
