@@ -175,8 +175,8 @@ function getOverride(
     written,
   } = typeToString(program, typeOrTypeNode);
 
-  for (const potentialOverride of overrides) {
-    if (
+  return overrides.find((potentialOverride) => {
+    return (
       (name !== undefined &&
         (potentialOverride.name === name ||
           potentialOverride.pattern?.test(nameWithArguments ?? name) ===
@@ -189,12 +189,8 @@ function getOverride(
       potentialOverride.pattern?.test(evaluated) === true ||
       (written !== undefined &&
         potentialOverride.pattern?.test(written) === true)
-    ) {
-      return potentialOverride;
-    }
-  }
-
-  return undefined;
+    );
+  });
 }
 
 /**
@@ -326,7 +322,9 @@ function objectImmutability(
   let m_minImmutability = Immutability.Mutable;
 
   const properties = type.getProperties();
+  // eslint-disable-next-line functional/no-conditional-statements
   if (properties.length > 0) {
+    // eslint-disable-next-line functional/no-loop-statements
     for (const property of properties) {
       if (
         isPropertyReadonlyInType(type, property.getEscapedName(), checker) ||
@@ -373,6 +371,7 @@ function objectImmutability(
 
     m_minImmutability = Immutability.ReadonlyShallow;
 
+    // eslint-disable-next-line functional/no-loop-statements
     for (const property of properties) {
       const propertyType = getTypeOfPropertyOfType(checker, type, property);
       if (propertyType === undefined) {
