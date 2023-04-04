@@ -114,7 +114,6 @@ test("expression by a pattern", (t) => {
     "type Test = string;",
     "type Test = ReadonlyArray<string>",
   ]) {
-
     runTestImmutability(
       t,
       { code, overrides },
@@ -228,7 +227,7 @@ test("expression from higher by name", (t) => {
   }
 });
 
-test("expression from hgiher by a pattern", (t) => {
+test("expression from higher by a pattern", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
       pattern: /^Readonly.+<.+>$/u,
