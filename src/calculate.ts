@@ -14,37 +14,47 @@ import ts from "typescript";
 
 import { max, min, clamp } from "./compare";
 import { Immutability } from "./immutability";
-import { hasSymbol, isTypeNode, typeToString } from "./utils";
+import {
+  type TypeSpecifier,
+  typeMatchesSpecifier,
+  hasSymbol,
+  isTypeNode,
+} from "./utils";
 
 /**
  * A list of immutability overrides.
  */
-export type ImmutabilityOverrides = ReadonlyArray<
-  (
-    | {
-        name: string;
-        pattern?: undefined;
-      }
-    | {
-        name?: undefined;
-        pattern: RegExp;
-      }
-  ) & {
-    to: Immutability;
-    from?: Immutability;
-  }
->;
+export type ImmutabilityOverrides = ReadonlyArray<{
+  type: TypeSpecifier;
+  to: Immutability;
+  from?: Immutability;
+}>;
 
 /**
  * Get the default overrides that are applied.
  */
 export function getDefaultOverrides(): ImmutabilityOverrides {
   return [
-    { name: "Map", to: Immutability.Mutable },
-    { name: "Set", to: Immutability.Mutable },
-    { name: "Date", to: Immutability.Mutable },
-    { name: "URL", to: Immutability.Mutable },
-    { name: "URLSearchParams", to: Immutability.Mutable },
+    {
+      type: { from: "lib", name: "Map" },
+      to: Immutability.Mutable,
+    },
+    {
+      type: { from: "lib", name: "Set" },
+      to: Immutability.Mutable,
+    },
+    {
+      type: { from: "lib", name: "Date" },
+      to: Immutability.Mutable,
+    },
+    {
+      type: { from: "lib", name: "URL" },
+      to: Immutability.Mutable,
+    },
+    {
+      type: { from: "lib", name: "URLSearchParams" },
+      to: Immutability.Mutable,
+    },
   ];
 }
 
@@ -166,31 +176,9 @@ function getOverride(
   typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides,
 ) {
-  const {
-    name,
-    nameWithArguments,
-    alias,
-    aliasWithArguments,
-    evaluated,
-    written,
-  } = typeToString(program, typeOrTypeNode);
-
-  return overrides.find((potentialOverride) => {
-    return (
-      (name !== undefined &&
-        (potentialOverride.name === name ||
-          potentialOverride.pattern?.test(nameWithArguments ?? name) ===
-            true)) ||
-      (alias !== undefined &&
-        (potentialOverride.name === alias ||
-          potentialOverride.pattern?.test(alias) === true)) ||
-      (aliasWithArguments !== undefined &&
-        potentialOverride.pattern?.test(aliasWithArguments) === true) ||
-      potentialOverride.pattern?.test(evaluated) === true ||
-      (written !== undefined &&
-        potentialOverride.pattern?.test(written) === true)
-    );
-  });
+  return overrides.find((potentialOverride) =>
+    typeMatchesSpecifier(typeOrTypeNode, potentialOverride.type, program)
+  );
 }
 
 /**
