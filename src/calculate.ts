@@ -300,9 +300,9 @@ function arrayImmutability(
   );
 
   return clamp(
-    shallowImmutability,
+    Immutability.ReadonlyShallow,
     deepImmutability,
-    Immutability.ReadonlyShallow
+    shallowImmutability
   );
 }
 
