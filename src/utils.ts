@@ -137,7 +137,7 @@ export function typeToString(
  */
 function typeArgumentsToString(
   program: ts.Program,
-  type: Readonly<ts.Type>,
+  type: ts.Type,
   typeName: string | undefined,
   typeArguments: ReadonlyArray<ts.Type>
 ) {

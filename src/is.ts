@@ -25,7 +25,7 @@ import { Immutability } from "./immutability";
  */
 export function isImmutableType(
   program: ts.Program,
-  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
+  typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
@@ -50,7 +50,7 @@ export function isImmutableType(
  */
 export function isReadonlyDeepType(
   program: ts.Program,
-  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
+  typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
@@ -75,7 +75,7 @@ export function isReadonlyDeepType(
  */
 export function isReadonlyShallowType(
   program: ts.Program,
-  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
+  typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {
@@ -100,7 +100,7 @@ export function isReadonlyShallowType(
  */
 export function isMutableType(
   program: ts.Program,
-  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
+  typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true
 ) {

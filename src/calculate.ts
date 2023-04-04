@@ -64,7 +64,7 @@ const globalCache: ImmutabilityCache = new WeakMap();
 function cacheTypeImmutability(
   program: ts.Program,
   cache: ImmutabilityCache,
-  type: Readonly<ts.Type>,
+  type: ts.Type,
   value: Immutability
 ) {
   const checker = program.getTypeChecker();
@@ -78,7 +78,7 @@ function cacheTypeImmutability(
 function getCachedTypeImmutability(
   program: ts.Program,
   cache: ImmutabilityCache,
-  type: Readonly<ts.Type>
+  type: ts.Type
 ) {
   const checker = program.getTypeChecker();
   const identity = checker.getRecursionIdentity(type);
@@ -163,7 +163,7 @@ export function getTypeImmutability(
  */
 function getOverride(
   program: ts.Program,
-  typeOrTypeNode: Readonly<ts.Type | ts.TypeNode>,
+  typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides
 ) {
   const {
@@ -198,7 +198,7 @@ function getOverride(
  */
 function calculateTypeImmutability(
   program: ts.Program,
-  type: Readonly<ts.Type>,
+  type: ts.Type,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability
@@ -272,7 +272,7 @@ function calculateTypeImmutability(
  */
 function arrayImmutability(
   program: ts.Program,
-  type: Readonly<ts.TypeReference>,
+  type: ts.TypeReference,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability
@@ -311,7 +311,7 @@ function arrayImmutability(
  */
 function objectImmutability(
   program: ts.Program,
-  type: Readonly<ts.Type>,
+  type: ts.Type,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability
@@ -452,7 +452,7 @@ function objectImmutability(
  */
 function typeArgumentsImmutability(
   program: ts.Program,
-  type: Readonly<ts.TypeReference>,
+  type: ts.TypeReference,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability
@@ -475,7 +475,7 @@ function typeArgumentsImmutability(
  */
 function indexSignatureImmutability(
   program: ts.Program,
-  type: Readonly<ts.Type>,
+  type: ts.Type,
   kind: ts.IndexKind,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
