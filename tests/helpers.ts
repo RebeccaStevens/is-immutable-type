@@ -1,5 +1,6 @@
 import * as tsvfs from "@typescript/vfs";
-import type { ExecutionContext } from "ava";
+// eslint-disable-next-line ava/use-test -- see https://github.com/avajs/eslint-plugin-ava/issues/351
+import { type ExecutionContext } from "ava";
 import ts from "typescript";
 
 import {
@@ -24,6 +25,8 @@ export function hasTypeNode(
 
 /**
  * Create a TS environment to run the tests in.
+ *
+ * @throws When something goes wrong.
  */
 function createTSTestEnvironment(code: string) {
   const compilerOptions: ts.CompilerOptions = {
@@ -57,6 +60,8 @@ function createTSTestEnvironment(code: string) {
 
 /**
  * Get the first type defined in the given code.
+ *
+ * @throws When failed to find the statement.
  */
 function getType(code: string, line?: number) {
   const { ast, program } = createTSTestEnvironment(code);
