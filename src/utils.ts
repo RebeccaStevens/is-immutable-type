@@ -58,22 +58,96 @@ export function isTypeNode(
 }
 
 /**
+ * The type data to work with.
+ */
+export type TypeData = {
+  type: ts.Type;
+  typeNode: ts.TypeNode | null;
+};
+
+/**
+ * Get the type data from the given type or type node.
+ */
+export function getTypeData(
+  program: ts.Program,
+  typeLike: ts.Type | ts.TypeNode,
+): TypeData {
+  if (isTypeNode(typeLike)) {
+    const checker = program.getTypeChecker();
+    const type = isTypeNode(typeLike)
+      ? checker.getTypeFromTypeNode(typeLike)
+      : typeLike;
+
+    return {
+      type,
+      typeNode: typeLike,
+    };
+  }
+
+  return {
+    type: typeLike,
+    typeNode: null,
+  };
+}
+
+/**
+ * Treat a type as a type data.
+ */
+export function asTypeData(type: ts.Type): TypeData {
+  return {
+    type,
+    typeNode: null,
+  };
+}
+
+/**
+ * Cache a value by its type
+ */
+export function cacheData<V>(
+  program: ts.Program,
+  cache: WeakMap<object, V>,
+  typeData: Readonly<TypeData>,
+  value: V,
+) {
+  const checker = program.getTypeChecker();
+  const identity = checker.getRecursionIdentity(typeData.type);
+  // eslint-disable-next-line functional/no-conditional-statements
+  if (typeData.typeNode !== null) {
+    cache.set(typeData.typeNode, value);
+  }
+  cache.set(identity, value);
+}
+
+/**
+ * Get a value by its cashed type.
+ */
+export function getCachedData<V>(
+  program: ts.Program,
+  cache: WeakMap<object, V>,
+  typeData: Readonly<TypeData>,
+): V | undefined {
+  const checker = program.getTypeChecker();
+  const identity =
+    typeData.typeNode ?? checker.getRecursionIdentity(typeData.type);
+  return cache.get(identity);
+}
+
+/**
  * Does the given type/typeNode match the given specifier.
  */
 export function typeMatchesSpecifier(
-  typeOrTypeNode: ts.Type | ts.TypeNode,
+  typeData: Readonly<TypeData>,
   specifier: TypeSpecifier,
   program: ts.Program,
 ): boolean {
-  const type = isTypeNode(typeOrTypeNode)
-    ? program.getTypeChecker().getTypeFromTypeNode(typeOrTypeNode)
-    : typeOrTypeNode;
-
-  if (isIntrinsicType(type) && type.intrinsicName === "error") {
+  if (
+    isIntrinsicType(typeData.type) &&
+    typeData.type.intrinsicName === "error"
+  ) {
     return false;
   }
 
-  const typeName = typeToString(program, typeOrTypeNode);
+  const typeName = typeToString(program, typeData);
   if (typeof specifier === "string" || specifier instanceof RegExp) {
     return typeNameMatchesSpecifier(typeName, specifier);
   }
@@ -81,7 +155,7 @@ export function typeMatchesSpecifier(
     return false;
   }
   const declarationFiles =
-    type
+    typeData.type
       .getSymbol()
       ?.getDeclarations()
       ?.map((declaration) => declaration.getSourceFile()) ?? [];
@@ -166,12 +240,7 @@ function typeNameMatchesSpecifier(
   }
 
   const evaluated = typeName.getEvaluated();
-  if (patterns.some((pattern) => pattern.test(evaluated))) {
-    return true;
-  }
-
-  const written = typeName.getWritten();
-  return written !== null && patterns.some((pattern) => pattern.test(written));
+  return patterns.some((pattern) => pattern.test(evaluated));
 }
 
 /**

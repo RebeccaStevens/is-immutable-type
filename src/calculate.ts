@@ -9,16 +9,21 @@ import {
   isSymbolFlagSet,
   isIntersectionType,
   isTypeReference,
+  isIntrinsicType,
 } from "ts-api-utils";
 import ts from "typescript";
 
 import { max, min, clamp } from "./compare";
 import { Immutability } from "./immutability";
 import {
+  type TypeData,
   type TypeSpecifier,
-  typeMatchesSpecifier,
+  asTypeData,
+  cacheData,
+  getCachedData,
+  getTypeData,
   hasSymbol,
-  isTypeNode,
+  typeMatchesSpecifier,
 } from "./utils";
 
 /**
@@ -69,33 +74,6 @@ export type ImmutabilityCache = WeakMap<object, Immutability>;
 const globalCache: ImmutabilityCache = new WeakMap();
 
 /**
- * Cache a type's immutability.
- */
-function cacheTypeImmutability(
-  program: ts.Program,
-  cache: ImmutabilityCache,
-  type: ts.Type,
-  value: Immutability,
-) {
-  const checker = program.getTypeChecker();
-  const identity = checker.getRecursionIdentity(type);
-  cache.set(identity, value);
-}
-
-/**
- * Get a type's cashed immutability.
- */
-function getCachedTypeImmutability(
-  program: ts.Program,
-  cache: ImmutabilityCache,
-  type: ts.Type,
-) {
-  const checker = program.getTypeChecker();
-  const identity = checker.getRecursionIdentity(type);
-  return cache.get(identity);
-}
-
-/**
  * Get the immutability of the given type.
  *
  * If you only care about the immutability up to a certain point, a
@@ -117,7 +95,26 @@ export function getTypeImmutability(
   useCache: ImmutabilityCache | boolean = true,
   maxImmutability = Immutability.Immutable,
 ): Immutability {
-  const checker = program.getTypeChecker();
+  const typeData = getTypeData(program, typeOrTypeNode);
+  return getTypeImmutabilityHelper(
+    program,
+    typeData,
+    overrides,
+    useCache,
+    maxImmutability,
+  );
+}
+
+/**
+ * Get the immutability of the given type data.
+ */
+function getTypeImmutabilityHelper(
+  program: ts.Program,
+  typeData: Readonly<TypeData>,
+  overrides: ImmutabilityOverrides,
+  useCache: ImmutabilityCache | boolean,
+  maxImmutability: Immutability,
+): Immutability {
   const cache: ImmutabilityCache =
     useCache === true
       ? globalCache
@@ -125,29 +122,26 @@ export function getTypeImmutability(
       ? new WeakMap()
       : useCache;
 
-  const type = isTypeNode(typeOrTypeNode)
-    ? checker.getTypeFromTypeNode(typeOrTypeNode)
-    : typeOrTypeNode;
-  const cached = getCachedTypeImmutability(program, cache, type);
+  const cached = getCachedData(program, cache, typeData);
   if (cached !== undefined) {
     return cached;
   }
 
-  const override = getOverride(program, typeOrTypeNode, overrides);
+  const override = getOverride(program, typeData, overrides);
   const overrideTo = override?.to;
   const overrideFrom = override?.from;
 
   // Early escape if we don't need to check the override from.
   if (overrideTo !== undefined && overrideFrom === undefined) {
-    cacheTypeImmutability(program, cache, type, overrideTo);
+    cacheData(program, cache, typeData, overrideTo);
     return overrideTo;
   }
 
-  cacheTypeImmutability(program, cache, type, Immutability.Calculating);
+  cacheData(program, cache, typeData, Immutability.Calculating);
 
   const immutability = calculateTypeImmutability(
     program,
-    type,
+    typeData,
     overrides,
     cache,
     maxImmutability,
@@ -159,12 +153,12 @@ export function getTypeImmutability(
       (overrideFrom <= immutability && immutability <= overrideTo) ||
       (overrideFrom >= immutability && immutability >= overrideTo)
     ) {
-      cacheTypeImmutability(program, cache, type, overrideTo);
+      cacheData(program, cache, typeData, overrideTo);
       return overrideTo;
     }
   }
 
-  cacheTypeImmutability(program, cache, type, immutability);
+  cacheData(program, cache, typeData, immutability);
   return immutability;
 }
 
@@ -173,11 +167,11 @@ export function getTypeImmutability(
  */
 function getOverride(
   program: ts.Program,
-  typeOrTypeNode: ts.Type | ts.TypeNode,
+  typeData: Readonly<TypeData>,
   overrides: ImmutabilityOverrides,
 ) {
   return overrides.find((potentialOverride) =>
-    typeMatchesSpecifier(typeOrTypeNode, potentialOverride.type, program)
+    typeMatchesSpecifier(typeData, potentialOverride.type, program),
   );
 }
 
@@ -186,34 +180,47 @@ function getOverride(
  */
 function calculateTypeImmutability(
   program: ts.Program,
-  type: ts.Type,
+  typeData: Readonly<TypeData>,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability,
 ): Immutability {
   // Union?
-  if (isUnionType(type)) {
-    return type.types
+  if (isUnionType(typeData.type)) {
+    const typeLikes =
+      (typeData.typeNode as ts.UnionTypeNode | undefined)?.types ??
+      typeData.type.types;
+    return typeLikes
       .map((t) =>
-        getTypeImmutability(program, t, overrides, cache, maxImmutability),
+        getTypeImmutabilityHelper(
+          program,
+          getTypeData(program, t),
+          overrides,
+          cache,
+          maxImmutability,
+        ),
       )
       .reduce(min);
   }
 
   // Intersection?
-  if (isIntersectionType(type)) {
-    return objectImmutability(program, type, overrides, cache, maxImmutability);
+  if (isIntersectionType(typeData.type)) {
+    return objectImmutability(
+      program,
+      typeData,
+      overrides,
+      cache,
+      maxImmutability,
+    );
   }
 
   // Conditional?
-  if (isConditionalType(type)) {
-    const checker = program.getTypeChecker();
-    return [type.root.node.trueType, type.root.node.falseType]
-      .map((tn) => {
-        const t = checker.getTypeFromTypeNode(tn);
-        return getTypeImmutability(
+  if (isConditionalType(typeData.type)) {
+    return [typeData.type.root.node.trueType, typeData.type.root.node.falseType]
+      .map((t) => {
+        return getTypeImmutabilityHelper(
           program,
-          t,
+          getTypeData(program, t),
           overrides,
           cache,
           maxImmutability,
@@ -224,8 +231,8 @@ function calculateTypeImmutability(
 
   // (Non-namespace) Function?
   if (
-    type.getCallSignatures().length > 0 &&
-    type.getProperties().length === 0
+    typeData.type.getCallSignatures().length > 0 &&
+    typeData.type.getProperties().length === 0
   ) {
     return Immutability.Immutable;
   }
@@ -233,22 +240,48 @@ function calculateTypeImmutability(
   const checker = program.getTypeChecker();
 
   // Tuple?
-  if (checker.isTupleType(type)) {
-    if (!type.target.readonly) {
+  if (checker.isTupleType(typeData.type)) {
+    if (!typeData.type.target.readonly) {
       return Immutability.Mutable;
     }
 
-    return arrayImmutability(program, type, overrides, cache, maxImmutability);
+    return arrayImmutability(
+      program,
+      typeData as Readonly<
+        TypeData & {
+          type: ts.TypeReference;
+        }
+      >,
+      overrides,
+      cache,
+      maxImmutability,
+    );
   }
 
   // Array?
-  if (checker.isArrayType(type)) {
-    return arrayImmutability(program, type, overrides, cache, maxImmutability);
+  if (checker.isArrayType(typeData.type)) {
+    return arrayImmutability(
+      program,
+      typeData as Readonly<
+        TypeData & {
+          type: ts.TypeReference;
+        }
+      >,
+      overrides,
+      cache,
+      maxImmutability,
+    );
   }
 
   // Other type of object?
-  if (isObjectType(type)) {
-    return objectImmutability(program, type, overrides, cache, maxImmutability);
+  if (isObjectType(typeData.type)) {
+    return objectImmutability(
+      program,
+      typeData,
+      overrides,
+      cache,
+      maxImmutability,
+    );
   }
 
   // Must be a primitive.
@@ -260,20 +293,24 @@ function calculateTypeImmutability(
  */
 function arrayImmutability(
   program: ts.Program,
-  type: ts.TypeReference,
+  typeData: Readonly<
+    TypeData & {
+      type: ts.TypeReference;
+    }
+  >,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability,
 ): Immutability {
   const shallowImmutability = objectImmutability(
     program,
-    type,
+    typeData,
     overrides,
     cache,
     maxImmutability,
   );
   if (
-    shallowImmutability === Immutability.Mutable ||
+    shallowImmutability <= Immutability.ReadonlyShallow ||
     shallowImmutability >= maxImmutability
   ) {
     return shallowImmutability;
@@ -281,7 +318,7 @@ function arrayImmutability(
 
   const deepImmutability = typeArgumentsImmutability(
     program,
-    type,
+    typeData.type,
     overrides,
     cache,
     maxImmutability,
@@ -299,7 +336,7 @@ function arrayImmutability(
  */
 function objectImmutability(
   program: ts.Program,
-  type: ts.Type,
+  typeData: Readonly<TypeData>,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability,
@@ -309,17 +346,21 @@ function objectImmutability(
   let m_maxImmutability = maxImmutability;
   let m_minImmutability = Immutability.Mutable;
 
-  const properties = type.getProperties();
+  const properties = typeData.type.getProperties();
   // eslint-disable-next-line functional/no-conditional-statements
   if (properties.length > 0) {
     // eslint-disable-next-line functional/no-loop-statements
     for (const property of properties) {
       if (
-        isPropertyReadonlyInType(type, property.getEscapedName(), checker) ||
+        isPropertyReadonlyInType(
+          typeData.type,
+          property.getEscapedName(),
+          checker,
+        ) ||
         // Ignore "length" for tuples.
         // TODO: Report this issue to upstream.
-        ((property.escapedName as string) === "length" &&
-          checker.isTupleType(type))
+        (property.escapedName === "length" &&
+          checker.isTupleType(typeData.type))
       ) {
         continue;
       }
@@ -362,14 +403,22 @@ function objectImmutability(
 
     // eslint-disable-next-line functional/no-loop-statements
     for (const property of properties) {
-      const propertyType = getTypeOfPropertyOfType(checker, type, property);
-      if (propertyType === undefined) {
-        return Immutability.Unknown;
+      const propertyType = getTypeOfPropertyOfType(
+        checker,
+        typeData.type,
+        property,
+      );
+      if (
+        propertyType === undefined ||
+        (isIntrinsicType(propertyType) &&
+          propertyType.intrinsicName === "error")
+      ) {
+        continue;
       }
 
-      const result = getTypeImmutability(
+      const result = getTypeImmutabilityHelper(
         program,
-        propertyType,
+        asTypeData(propertyType),
         overrides,
         cache,
         maxImmutability,
@@ -381,10 +430,10 @@ function objectImmutability(
     }
   }
 
-  if (isTypeReference(type)) {
+  if (isTypeReference(typeData.type)) {
     const result = typeArgumentsImmutability(
       program,
-      type,
+      typeData.type,
       overrides,
       cache,
       maxImmutability,
@@ -395,13 +444,16 @@ function objectImmutability(
     }
   }
 
-  const types = isIntersectionType(type) ? type.types : [type];
+  const types = isIntersectionType(typeData.type)
+    ? (typeData.typeNode as ts.IntersectionTypeNode | undefined)?.types ??
+      typeData.type.types
+    : [typeData.typeNode ?? typeData.type];
 
   const stringIndexSigImmutability = types
     .map((t) =>
       indexSignatureImmutability(
         program,
-        t,
+        getTypeData(program, t),
         ts.IndexKind.String,
         overrides,
         cache,
@@ -419,7 +471,7 @@ function objectImmutability(
     .map((t) =>
       indexSignatureImmutability(
         program,
-        t,
+        getTypeData(program, t),
         ts.IndexKind.Number,
         overrides,
         cache,
@@ -446,12 +498,17 @@ function typeArgumentsImmutability(
   cache: ImmutabilityCache,
   maxImmutability: Immutability,
 ): Immutability {
-  const checker = program.getTypeChecker();
-  const typeArguments = checker.getTypeArguments(type);
-  if (typeArguments.length > 0) {
+  const { typeArguments } = type;
+  if (typeArguments !== undefined && typeArguments.length > 0) {
     return typeArguments
       .map((t) =>
-        getTypeImmutability(program, t, overrides, cache, maxImmutability),
+        getTypeImmutabilityHelper(
+          program,
+          getTypeData(program, t),
+          overrides,
+          cache,
+          maxImmutability,
+        ),
       )
       .reduce(min);
   }
@@ -464,14 +521,14 @@ function typeArgumentsImmutability(
  */
 function indexSignatureImmutability(
   program: ts.Program,
-  type: ts.Type,
+  typeData: Readonly<TypeData>,
   kind: ts.IndexKind,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability,
 ): Immutability {
   const checker = program.getTypeChecker();
-  const indexInfo = checker.getIndexInfoOfType(type, kind);
+  const indexInfo = checker.getIndexInfoOfType(typeData.type, kind);
   if (indexInfo === undefined) {
     return Immutability.Unknown;
   }
@@ -481,15 +538,15 @@ function indexSignatureImmutability(
   }
 
   if (indexInfo.isReadonly) {
-    if (indexInfo.type === type) {
+    if (indexInfo.type === typeData.type) {
       return maxImmutability;
     }
 
     return max(
       Immutability.ReadonlyShallow,
-      getTypeImmutability(
+      getTypeImmutabilityHelper(
         program,
-        indexInfo.type,
+        asTypeData(indexInfo.type),
         overrides,
         cache,
         maxImmutability,
