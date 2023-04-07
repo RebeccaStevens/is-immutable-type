@@ -5,7 +5,12 @@ import { Immutability } from "../src";
 import { runTestImmutability } from "./helpers";
 
 test("direct", (t) => {
-  for (const code of ["interface Test { readonly [key: string]: Test };"]) {
+  for (const code of [
+    `
+      interface I { readonly [key: string]: string | I };
+      const test: I = {};
+    `,
+  ]) {
     runTestImmutability(
       t,
       code,
@@ -14,7 +19,7 @@ test("direct", (t) => {
     );
   }
 
-  for (const code of ["type Test = ReadonlyArray<Test>;"]) {
+  for (const code of ["type Test = string | ReadonlyArray<Test>;"]) {
     runTestImmutability(
       t,
       code,
@@ -32,7 +37,7 @@ test("direct", (t) => {
     );
   }
 
-  for (const code of ["type Test = Test[];"]) {
+  for (const code of ["type Test = string | Test[];"]) {
     runTestImmutability(
       t,
       code,

@@ -1,7 +1,7 @@
 import path from "node:path";
 
 import { isIntrinsicType } from "ts-api-utils";
-import type ts from "typescript";
+import ts from "typescript";
 
 import { typeToString, type TypeName } from "./type-to-string";
 
@@ -58,6 +58,13 @@ export function isTypeNode(
 }
 
 /**
+ * Check if a type node is anonymous;
+ */
+export function isAnonymousTypeNode(typeNode: ts.TypeNode): boolean {
+  return typeNode.pos < 0;
+}
+
+/**
  * The type data to work with.
  */
 export type TypeData = {
@@ -67,36 +74,25 @@ export type TypeData = {
 
 /**
  * Get the type data from the given type or type node.
+ *
+ * @throws if the type is an error type.
  */
 export function getTypeData(
-  program: ts.Program,
-  typeLike: ts.Type | ts.TypeNode,
+  type: ts.Type,
+  typeNode: ts.TypeNode | null | undefined,
 ): TypeData {
-  if (isTypeNode(typeLike)) {
-    const checker = program.getTypeChecker();
-    const type = isTypeNode(typeLike)
-      ? checker.getTypeFromTypeNode(typeLike)
-      : typeLike;
-
-    return {
-      type,
-      typeNode: typeLike,
-    };
+  if (isIntrinsicType(type) && type.intrinsicName === "error") {
+    throw new Error("ErrorType encountered.");
   }
 
   return {
-    type: typeLike,
-    typeNode: null,
-  };
-}
-
-/**
- * Treat a type as a type data.
- */
-export function asTypeData(type: ts.Type): TypeData {
-  return {
     type,
-    typeNode: null,
+    typeNode:
+      typeNode === undefined ||
+      typeNode === null ||
+      isAnonymousTypeNode(typeNode)
+        ? null
+        : typeNode,
   };
 }
 
@@ -263,4 +259,40 @@ function isTypeDeclaredLocal(
   return declarationFiles.some(
     (declaration) => declaration.fileName.toLowerCase() === absolutePath,
   );
+}
+
+/**
+ * Get string representations of the given property name.
+ */
+export function propertyNameToString(propertyName: ts.PropertyName): string {
+  return ts.isIdentifier(propertyName) || ts.isPrivateIdentifier(propertyName)
+    ? identifierToString(propertyName)
+    : propertyName.getText();
+}
+
+/**
+ * Get string representations of the given entity name.
+ */
+export function entityNameToString(entityName: ts.EntityName): string {
+  return ts.isIdentifier(entityName)
+    ? identifierToString(entityName)
+    : qualifiedNameToString(entityName);
+}
+
+/**
+ * Get string representations of the given identifier.
+ */
+export function identifierToString(
+  identifier: ts.Identifier | ts.PrivateIdentifier,
+): string {
+  return identifier.escapedText as string;
+}
+
+/**
+ * Get string representations of the given qualified name.
+ */
+function qualifiedNameToString(qualifiedName: ts.QualifiedName): string {
+  return `${entityNameToString(qualifiedName.left)}.${identifierToString(
+    qualifiedName.right,
+  )}`;
 }

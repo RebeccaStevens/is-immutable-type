@@ -1,14 +1,20 @@
 /* eslint-disable functional/no-conditional-statements */
 
-import { isSymbolFlagSet, isTypeReference } from "ts-api-utils";
+import {
+  hasType,
+  isIntrinsicType,
+  isSymbolFlagSet,
+  isTypeReference,
+} from "ts-api-utils";
 import ts from "typescript";
 
 import {
-  getTypeData,
-  asTypeData,
   type TypeData,
   cacheData,
+  entityNameToString,
   getCachedData,
+  getTypeData,
+  isTypeNode,
 } from "./utils";
 
 /*
@@ -38,7 +44,9 @@ class TypeName {
 
   public getName(): string | null {
     if (this.m_data.name === undefined) {
-      if (this.typeData.type.intrinsicName === undefined) {
+      if (isIntrinsicType(this.typeData.type)) {
+        this.m_data.name = this.typeData.type.intrinsicName;
+      } else {
         const symbol = this.typeData.type.getSymbol();
         if (symbol === undefined) {
           const wrapperDeclarations =
@@ -62,8 +70,6 @@ class TypeName {
         } else {
           this.m_data.name = this.checker.symbolToString(symbol);
         }
-      } else {
-        this.m_data.name = this.typeData.type.intrinsicName;
       }
     }
     return this.m_data.name;
@@ -74,9 +80,9 @@ class TypeName {
       if (this.m_data.name === undefined) {
         this.m_data.name = this.getName();
       }
-      if (this.m_data.name === null) {
+      if (this.m_data.name === null || isIntrinsicType(this.typeData.type)) {
         this.m_data.nameWithArguments = null;
-      } else if (this.typeData.type.intrinsicName === undefined) {
+      } else {
         const symbol = this.typeData.type.getSymbol();
         if (symbol === undefined) {
           if (this.m_wrapperType?.typeArguments === undefined) {
@@ -84,7 +90,10 @@ class TypeName {
           } else {
             const wrapperArguments = typeArgumentsToString(
               this.program,
-              getTypeData(this.program, this.m_wrapperType),
+              getTypeData(
+                this.checker.getTypeFromTypeNode(this.m_wrapperType),
+                this.m_wrapperType
+              ),
               this.m_data.name,
               this.m_wrapperType.typeArguments.map((node) =>
                 this.checker.getTypeFromTypeNode(node)
@@ -110,8 +119,6 @@ class TypeName {
                 )}>`
               : null;
         }
-      } else {
-        this.m_data.nameWithArguments = null;
       }
     }
     return this.m_data.nameWithArguments;
@@ -141,9 +148,20 @@ class TypeName {
           if (aliasType.aliasTypeArguments === undefined) {
             this.m_data.aliasWithArguments = null;
           } else {
+            const aliasDeclarations =
+              this.typeData.type.aliasSymbol.getDeclarations();
+            const aliasDeclaration =
+              (aliasDeclarations?.length ?? 0) === 1
+                ? aliasDeclarations![0]
+                : undefined;
+            const aliasTypeNode =
+              aliasDeclaration !== undefined && hasType(aliasDeclaration)
+                ? aliasDeclaration.type
+                : undefined;
+
             const aliasArguments = typeArgumentsToString(
               this.program,
-              asTypeData(aliasType),
+              getTypeData(aliasType, aliasTypeNode),
               this.m_data.alias,
               aliasType.aliasTypeArguments
             );
@@ -196,8 +214,13 @@ function typeArgumentsToString(
   name: string | undefined,
   typeArguments: ReadonlyArray<ts.Type> | ts.NodeArray<ts.TypeNode>
 ) {
-  const typeArgumentStrings = typeArguments.map((t) => {
-    const typeArgument = getTypeData(program, t);
+  const typeArgumentStrings = typeArguments.map((typeLike) => {
+    const typeArgument = isTypeNode(typeLike)
+      ? getTypeData(
+          program.getTypeChecker().getTypeFromTypeNode(typeLike),
+          typeLike
+        )
+      : getTypeData(typeLike, undefined);
     if (typeData.type === typeArgument.type) {
       return name;
     }
@@ -217,31 +240,6 @@ function typeArgumentsToString(
   }
 
   return `${typeArgumentStrings.join(",")}`;
-}
-
-/**
- * Get string representations of the given entity name.
- */
-function entityNameToString(entityName: ts.EntityName): string {
-  return ts.isIdentifier(entityName)
-    ? identifierToString(entityName)
-    : qualifiedNameToString(entityName);
-}
-
-/**
- * Get string representations of the given identifier.
- */
-function identifierToString(identifier: ts.Identifier): string {
-  return identifier.escapedText as string;
-}
-
-/**
- * Get string representations of the given qualified name.
- */
-function qualifiedNameToString(qualifiedName: ts.QualifiedName): string {
-  return `${entityNameToString(qualifiedName.left)}.${identifierToString(
-    qualifiedName.right
-  )}`;
 }
 
 const cache = new WeakMap<ts.Type, TypeName>();

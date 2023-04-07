@@ -2,14 +2,15 @@ import assert from "node:assert/strict";
 
 import { getTypeOfPropertyOfType } from "@typescript-eslint/type-utils";
 import {
+  hasType,
   isConditionalType,
+  isIntersectionType,
+  isIntrinsicType,
   isObjectType,
-  isUnionType,
   isPropertyReadonlyInType,
   isSymbolFlagSet,
-  isIntersectionType,
   isTypeReference,
-  isIntrinsicType,
+  isUnionType,
 } from "ts-api-utils";
 import ts from "typescript";
 
@@ -18,11 +19,12 @@ import { Immutability } from "./immutability";
 import {
   type TypeData,
   type TypeSpecifier,
-  asTypeData,
   cacheData,
   getCachedData,
   getTypeData,
   hasSymbol,
+  isTypeNode,
+  propertyNameToString,
   typeMatchesSpecifier,
 } from "./utils";
 
@@ -34,6 +36,10 @@ export type ImmutabilityOverrides = ReadonlyArray<{
   to: Immutability;
   from?: Immutability;
 }>;
+
+type TypeReferenceData = TypeData & {
+  type: ts.TypeReference;
+};
 
 /**
  * Get the default overrides that are applied.
@@ -95,7 +101,14 @@ export function getTypeImmutability(
   useCache: ImmutabilityCache | boolean = true,
   maxImmutability = Immutability.Immutable,
 ): Immutability {
-  const typeData = getTypeData(program, typeOrTypeNode);
+  const givenTypeNode = isTypeNode(typeOrTypeNode);
+
+  const type = givenTypeNode
+    ? program.getTypeChecker().getTypeFromTypeNode(typeOrTypeNode)
+    : typeOrTypeNode;
+  const typeNode = givenTypeNode ? typeOrTypeNode : undefined;
+
+  const typeData = getTypeData(type, typeNode);
   return getTypeImmutabilityHelper(
     program,
     typeData,
@@ -187,19 +200,21 @@ function calculateTypeImmutability(
 ): Immutability {
   // Union?
   if (isUnionType(typeData.type)) {
-    const typeLikes =
-      (typeData.typeNode as ts.UnionTypeNode | undefined)?.types ??
-      typeData.type.types;
-    return typeLikes
-      .map((t) =>
-        getTypeImmutabilityHelper(
+    return typeData.type.types
+      .map((type, index) => {
+        const typeNode =
+          typeData.typeNode !== null && ts.isUnionTypeNode(typeData.typeNode)
+            ? typeData.typeNode.types[index]
+            : undefined; // TODO: can we safely get a union type node nested within a different type node?
+
+        return getTypeImmutabilityHelper(
           program,
-          getTypeData(program, t),
+          getTypeData(type, typeNode),
           overrides,
           cache,
           maxImmutability,
-        ),
-      )
+        );
+      })
       .reduce(min);
   }
 
@@ -217,10 +232,13 @@ function calculateTypeImmutability(
   // Conditional?
   if (isConditionalType(typeData.type)) {
     return [typeData.type.root.node.trueType, typeData.type.root.node.falseType]
-      .map((t) => {
+      .map((typeNode) => {
+        const checker = program.getTypeChecker();
+        const type = checker.getTypeFromTypeNode(typeNode);
+
         return getTypeImmutabilityHelper(
           program,
-          getTypeData(program, t),
+          getTypeData(type, typeNode),
           overrides,
           cache,
           maxImmutability,
@@ -318,7 +336,7 @@ function arrayImmutability(
 
   const deepImmutability = typeArgumentsImmutability(
     program,
-    typeData.type,
+    typeData as TypeReferenceData,
     overrides,
     cache,
     maxImmutability,
@@ -401,6 +419,23 @@ function objectImmutability(
 
     m_minImmutability = Immutability.ReadonlyShallow;
 
+    const propertyNodes = new Map<string, ts.TypeNode>(
+      typeData.typeNode !== null &&
+      hasType(typeData.typeNode) &&
+      typeData.typeNode.type !== undefined &&
+      ts.isTypeLiteralNode(typeData.typeNode.type)
+        ? typeData.typeNode.type.members
+            .map((member): [string, ts.TypeNode] | undefined =>
+              member.name === undefined ||
+              !hasType(member) ||
+              member.type === undefined
+                ? undefined
+                : [propertyNameToString(member.name), member.type],
+            )
+            .filter(<T>(v: T | undefined): v is T => v !== undefined)
+        : [],
+    );
+
     // eslint-disable-next-line functional/no-loop-statements
     for (const property of properties) {
       const propertyType = getTypeOfPropertyOfType(
@@ -416,9 +451,13 @@ function objectImmutability(
         continue;
       }
 
+      const propertyTypeNode = propertyNodes.get(
+        property.getEscapedName() as string,
+      );
+
       const result = getTypeImmutabilityHelper(
         program,
-        asTypeData(propertyType),
+        getTypeData(propertyType, propertyTypeNode),
         overrides,
         cache,
         maxImmutability,
@@ -433,7 +472,7 @@ function objectImmutability(
   if (isTypeReference(typeData.type)) {
     const result = typeArgumentsImmutability(
       program,
-      typeData.type,
+      typeData as TypeReferenceData,
       overrides,
       cache,
       maxImmutability,
@@ -445,15 +484,21 @@ function objectImmutability(
   }
 
   const types = isIntersectionType(typeData.type)
-    ? (typeData.typeNode as ts.IntersectionTypeNode | undefined)?.types ??
-      typeData.type.types
-    : [typeData.typeNode ?? typeData.type];
+    ? typeData.type.types
+    : [typeData.type];
+
+  const typeNodes =
+    typeData.typeNode === null
+      ? undefined
+      : ts.isIntersectionTypeNode(typeData.typeNode)
+      ? typeData.typeNode.types
+      : [typeData.typeNode];
 
   const stringIndexSigImmutability = types
-    .map((t) =>
+    .map((type, index) =>
       indexSignatureImmutability(
         program,
-        getTypeData(program, t),
+        getTypeData(type, typeNodes?.[index]),
         ts.IndexKind.String,
         overrides,
         cache,
@@ -468,10 +513,10 @@ function objectImmutability(
   }
 
   const numberIndexSigImmutability = types
-    .map((t) =>
+    .map((type, index) =>
       indexSignatureImmutability(
         program,
-        getTypeData(program, t),
+        getTypeData(type, typeNodes?.[index]),
         ts.IndexKind.Number,
         overrides,
         cache,
@@ -493,18 +538,20 @@ function objectImmutability(
  */
 function typeArgumentsImmutability(
   program: ts.Program,
-  type: ts.TypeReference,
+  typeData: Readonly<TypeReferenceData>,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
   maxImmutability: Immutability,
 ): Immutability {
-  const { typeArguments } = type;
-  if (typeArguments !== undefined && typeArguments.length > 0) {
-    return typeArguments
-      .map((t) =>
+  if (
+    typeData.type.typeArguments !== undefined &&
+    typeData.type.typeArguments.length > 0
+  ) {
+    return typeData.type.typeArguments
+      .map((type) =>
         getTypeImmutabilityHelper(
           program,
-          getTypeData(program, t),
+          getTypeData(type, undefined), // TODO: can we get a type node for this?
           overrides,
           cache,
           maxImmutability,
@@ -546,7 +593,7 @@ function indexSignatureImmutability(
       Immutability.ReadonlyShallow,
       getTypeImmutabilityHelper(
         program,
-        asTypeData(indexInfo.type),
+        getTypeData(indexInfo.type, undefined), // TODO: can we get a type node for this?
         overrides,
         cache,
         maxImmutability,
