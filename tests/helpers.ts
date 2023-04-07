@@ -1,6 +1,7 @@
 import * as tsvfs from "@typescript/vfs";
 // eslint-disable-next-line ava/use-test -- see https://github.com/avajs/eslint-plugin-ava/issues/351
 import { type ExecutionContext } from "ava";
+import { hasType } from "ts-api-utils";
 import ts from "typescript";
 
 import {
@@ -13,15 +14,6 @@ import {
   type ImmutabilityCache,
   type ImmutabilityOverrides,
 } from "../src";
-
-/**
- * Type guard to check if a Statement has a type.
- */
-export function hasTypeNode(
-  node: ts.Statement,
-): node is ts.Statement & { type: ts.TypeNode } {
-  return Object.hasOwn(node, "type");
-}
 
 /**
  * Create a TS environment to run the tests in.
@@ -80,7 +72,7 @@ function getType(code: string, line?: number) {
 
   return {
     type,
-    typeNode: hasTypeNode(statement) ? statement.type : undefined,
+    typeNode: hasType(statement) ? statement.type : undefined,
     program,
   };
 }
