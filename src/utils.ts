@@ -17,7 +17,18 @@ type PatternSpecifier =
 
 type FileSpecifier = PatternSpecifier & {
   from: "file";
+
+  /**
+   * The path to look in for the type, relative to project directory.
+   */
   path?: string;
+
+  /**
+   * Any paths to exclude, relative to `path`.
+   *
+   * @default ["node_modules"]
+   */
+  excludePaths?: string | string[];
 };
 
 type LibSpecifier = PatternSpecifier & {
@@ -26,6 +37,10 @@ type LibSpecifier = PatternSpecifier & {
 
 type PackageSpecifier = PatternSpecifier & {
   from: "package";
+
+  /**
+   * The package to look in.
+   */
   package: string;
 };
 
@@ -157,7 +172,12 @@ export function typeMatchesSpecifier(
       ?.map((declaration) => declaration.getSourceFile()) ?? [];
   switch (specifier.from) {
     case "file": {
-      return isTypeDeclaredLocal(specifier.path, declarationFiles, program);
+      return isTypeDeclaredLocal(
+        specifier.path,
+        specifier.excludePaths,
+        declarationFiles,
+        program,
+      );
     }
     case "lib": {
       // Built in type (i.e string, number, boolean, etc)
@@ -244,14 +264,25 @@ function typeNameMatchesSpecifier(
  */
 function isTypeDeclaredLocal(
   relativePath: string | undefined,
-  declarationFiles: ts.SourceFile[],
+  excludePaths: string | ReadonlyArray<string> | undefined,
+  declarationFiles: ReadonlyArray<ts.SourceFile>,
   program: ts.Program,
 ): boolean {
   if (relativePath === undefined) {
     const cwd = program.getCurrentDirectory().toLowerCase();
-    return declarationFiles.some((declaration) =>
-      declaration.fileName.toLowerCase().startsWith(cwd),
-    );
+    return declarationFiles.some((declaration) => {
+      const file = declaration.fileName.toLowerCase();
+      const excludePathsArray =
+        excludePaths === undefined
+          ? ["node_modules"]
+          : Array.isArray(excludePaths)
+          ? (excludePaths as string[])
+          : [excludePaths as string];
+      return (
+        file.startsWith(cwd) &&
+        excludePathsArray.every((p) => !file.startsWith(path.join(cwd, p)))
+      );
+    });
   }
   const absolutePath = path
     .join(program.getCurrentDirectory(), relativePath)
