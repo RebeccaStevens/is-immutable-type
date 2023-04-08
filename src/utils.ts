@@ -22,13 +22,6 @@ type FileSpecifier = PatternSpecifier & {
    * The path to look in for the type, relative to project directory.
    */
   path?: string;
-
-  /**
-   * Any paths to exclude, relative to `path`.
-   *
-   * @default ["node_modules"]
-   */
-  excludePaths?: string | string[];
 };
 
 type LibSpecifier = PatternSpecifier & {
@@ -170,14 +163,10 @@ export function typeMatchesSpecifier(
       .getSymbol()
       ?.getDeclarations()
       ?.map((declaration) => declaration.getSourceFile()) ?? [];
+
   switch (specifier.from) {
     case "file": {
-      return isTypeDeclaredLocal(
-        specifier.path,
-        specifier.excludePaths,
-        declarationFiles,
-        program,
-      );
+      return isTypeDeclaredLocal(specifier.path, declarationFiles, program);
     }
     case "lib": {
       // Built in type (i.e string, number, boolean, etc)
@@ -189,12 +178,24 @@ export function typeMatchesSpecifier(
       );
     }
     case "package": {
-      return declarationFiles.some(
-        (declaration) =>
-          declaration.fileName.includes(`node_modules/${specifier.package}/`) ||
-          declaration.fileName.includes(
-            `node_modules/@types/${specifier.package}/`,
-          ),
+      const typeRoots = ts.getEffectiveTypeRoots(
+        program.getCompilerOptions(),
+        program,
+      );
+      const possibleLocations = [
+        `${path.join(
+          program.getCurrentDirectory(),
+          "node_modules",
+          specifier.package,
+        )}/`,
+        ...(typeRoots?.map(
+          (root) => `${path.join(root, specifier.package)}/`,
+        ) ?? []),
+      ];
+      return declarationFiles.some((declaration) =>
+        possibleLocations.some((location) =>
+          declaration.fileName.toLowerCase().startsWith(location),
+        ),
       );
     }
   }
@@ -264,23 +265,23 @@ function typeNameMatchesSpecifier(
  */
 function isTypeDeclaredLocal(
   relativePath: string | undefined,
-  excludePaths: string | ReadonlyArray<string> | undefined,
   declarationFiles: ReadonlyArray<ts.SourceFile>,
   program: ts.Program,
 ): boolean {
   if (relativePath === undefined) {
     const cwd = program.getCurrentDirectory().toLowerCase();
+    const typeRoots = ts.getEffectiveTypeRoots(
+      program.getCompilerOptions(),
+      program,
+    );
+
     return declarationFiles.some((declaration) => {
-      const file = declaration.fileName.toLowerCase();
-      const excludePathsArray =
-        excludePaths === undefined
-          ? ["node_modules"]
-          : Array.isArray(excludePaths)
-          ? (excludePaths as string[])
-          : [excludePaths as string];
+      const fileName = declaration.fileName.toLowerCase();
       return (
-        file.startsWith(cwd) &&
-        excludePathsArray.every((p) => !file.startsWith(path.join(cwd, p)))
+        !(
+          program.isSourceFileFromExternalLibrary(declaration) ||
+          typeRoots?.some((typeRoot) => fileName.startsWith(typeRoot)) === true
+        ) && fileName.startsWith(cwd)
       );
     });
   }
