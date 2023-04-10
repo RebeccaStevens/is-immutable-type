@@ -42,7 +42,7 @@ specifiers:
   eslint-plugin-unicorn: 46.0.0
   husky: 8.0.3
   knip: 2.1.2
-  lint-staged: 13.2.0
+  lint-staged: 13.2.1
   markdownlint-cli: 0.33.0
   prettier: 2.8.7
   prettier-plugin-packagejson: 2.4.3
@@ -100,7 +100,7 @@ devDependencies:
   eslint-plugin-unicorn: 46.0.0_eslint@8.36.0
   husky: 8.0.3
   knip: 2.1.2
-  lint-staged: 13.2.0
+  lint-staged: 13.2.1
   markdownlint-cli: 0.33.0
   prettier: 2.8.7
   prettier-plugin-packagejson: 2.4.3_prettier@2.8.7
@@ -4363,8 +4363,8 @@ packages:
       uc.micro: 1.0.6
     dev: true
 
-  /lint-staged/13.2.0:
-    resolution: {integrity: sha512-GbyK5iWinax5Dfw5obm2g2ccUiZXNGtAS4mCbJ0Lv4rq6iEtfBSjOYdcbOtAIFtM114t0vdpViDDetjVTSd8Vw==}
+  /lint-staged/13.2.1:
+    resolution: {integrity: sha512-8gfzinVXoPfga5Dz/ZOn8I2GOhf81Wvs+KwbEXQn/oWZAvCVS2PivrXfVbFJc93zD16uC0neS47RXHIjXKYZQw==}
     engines: {node: ^14.13.1 || >=16.0.0}
     hasBin: true
     dependencies:
