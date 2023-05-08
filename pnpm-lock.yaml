@@ -17,7 +17,7 @@ devDependencies:
     version: 3.0.1
   '@rebeccastevens/eslint-config':
     specifier: 1.6.1
-    version: 1.6.1(@typescript-eslint/eslint-plugin@5.57.1)(@typescript-eslint/parser@5.57.1)(eslint-import-resolver-typescript@3.5.5)(eslint-plugin-eslint-comments@3.2.0)(eslint-plugin-functional@5.0.7)(eslint-plugin-import@2.27.5)(eslint-plugin-jsdoc@40.1.2)(eslint-plugin-markdown@3.0.0)(eslint-plugin-node@11.1.0)(eslint-plugin-optimize-regex@1.2.1)(eslint-plugin-promise@6.1.1)(eslint-plugin-sonarjs@0.19.0)(eslint-plugin-unicorn@46.0.0)(eslint@8.38.0)
+    version: 1.6.1(@typescript-eslint/eslint-plugin@5.57.1)(@typescript-eslint/parser@5.57.1)(eslint-import-resolver-typescript@3.5.5)(eslint-plugin-eslint-comments@3.2.0)(eslint-plugin-functional@5.0.7)(eslint-plugin-import@2.27.5)(eslint-plugin-jsdoc@40.1.2)(eslint-plugin-markdown@3.0.0)(eslint-plugin-node@11.1.0)(eslint-plugin-optimize-regex@1.2.1)(eslint-plugin-promise@6.1.1)(eslint-plugin-sonarjs@0.19.0)(eslint-plugin-unicorn@47.0.0)(eslint@8.38.0)
   '@rollup/plugin-json':
     specifier: 6.0.0
     version: 6.0.0(rollup@3.20.2)
@@ -118,8 +118,8 @@ devDependencies:
     specifier: 0.19.0
     version: 0.19.0(eslint@8.38.0)
   eslint-plugin-unicorn:
-    specifier: 46.0.0
-    version: 46.0.0(eslint@8.38.0)
+    specifier: 47.0.0
+    version: 47.0.0(eslint@8.38.0)
   husky:
     specifier: 8.0.3
     version: 8.0.3
@@ -647,8 +647,8 @@ packages:
       jsdoc-type-pratt-parser: 4.0.0
     dev: true
 
-  /@eslint-community/eslint-utils@4.2.0(eslint@8.38.0):
-    resolution: {integrity: sha512-gB8T4H4DEfX2IV9zGDJPOBgP1e/DbfCPDTtEqUMckpvzS1OYtva8JdFYBqMwYk7xAQ429WGF/UPqn8uQ//h2vQ==}
+  /@eslint-community/eslint-utils@4.4.0(eslint@8.38.0):
+    resolution: {integrity: sha512-1/sA4dwrzBAyeUoQ6oxahHKmrZvsnLCg4RfxW3ZFGGmQkSNQPFNLV9CUEFQP1x9EYXHTo5p6xdhZM1Ne9p/AfA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
@@ -924,7 +924,7 @@ packages:
       config-chain: 1.1.13
     dev: true
 
-  /@rebeccastevens/eslint-config@1.6.1(@typescript-eslint/eslint-plugin@5.57.1)(@typescript-eslint/parser@5.57.1)(eslint-import-resolver-typescript@3.5.5)(eslint-plugin-eslint-comments@3.2.0)(eslint-plugin-functional@5.0.7)(eslint-plugin-import@2.27.5)(eslint-plugin-jsdoc@40.1.2)(eslint-plugin-markdown@3.0.0)(eslint-plugin-node@11.1.0)(eslint-plugin-optimize-regex@1.2.1)(eslint-plugin-promise@6.1.1)(eslint-plugin-sonarjs@0.19.0)(eslint-plugin-unicorn@46.0.0)(eslint@8.38.0):
+  /@rebeccastevens/eslint-config@1.6.1(@typescript-eslint/eslint-plugin@5.57.1)(@typescript-eslint/parser@5.57.1)(eslint-import-resolver-typescript@3.5.5)(eslint-plugin-eslint-comments@3.2.0)(eslint-plugin-functional@5.0.7)(eslint-plugin-import@2.27.5)(eslint-plugin-jsdoc@40.1.2)(eslint-plugin-markdown@3.0.0)(eslint-plugin-node@11.1.0)(eslint-plugin-optimize-regex@1.2.1)(eslint-plugin-promise@6.1.1)(eslint-plugin-sonarjs@0.19.0)(eslint-plugin-unicorn@47.0.0)(eslint@8.38.0):
     resolution: {integrity: sha512-2uoKuVGePpVLv/f2GH4YDhVBTS98sXVk1Q1D/HFfggfZQB+ahcJUOiM5cWPvpA40IO2Ctbfm4qDSeCoMCIo25Q==}
     engines: {node: '>=18.12.1'}
     peerDependencies:
@@ -957,7 +957,7 @@ packages:
       eslint-plugin-optimize-regex: 1.2.1
       eslint-plugin-promise: 6.1.1(eslint@8.38.0)
       eslint-plugin-sonarjs: 0.19.0(eslint@8.38.0)
-      eslint-plugin-unicorn: 46.0.0(eslint@8.38.0)
+      eslint-plugin-unicorn: 47.0.0(eslint@8.38.0)
     dev: true
 
   /@rollup/plugin-json@6.0.0(rollup@3.20.2):
@@ -1349,7 +1349,7 @@ packages:
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
     dependencies:
-      '@eslint-community/eslint-utils': 4.2.0(eslint@8.38.0)
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.38.0)
       '@types/json-schema': 7.0.11
       '@types/semver': 7.3.13
       '@typescript-eslint/scope-manager': 5.57.1
@@ -2978,14 +2978,14 @@ packages:
       eslint: 8.38.0
     dev: true
 
-  /eslint-plugin-unicorn@46.0.0(eslint@8.38.0):
-    resolution: {integrity: sha512-j07WkC+PFZwk8J33LYp6JMoHa1lXc1u6R45pbSAipjpfpb7KIGr17VE2D685zCxR5VL4cjrl65kTJflziQWMDA==}
-    engines: {node: '>=14.18'}
+  /eslint-plugin-unicorn@47.0.0(eslint@8.38.0):
+    resolution: {integrity: sha512-ivB3bKk7fDIeWOUmmMm9o3Ax9zbMz1Bsza/R2qm46ufw4T6VBFBaJIR1uN3pCKSmSXm8/9Nri8V+iUut1NhQGA==}
+    engines: {node: '>=16'}
     peerDependencies:
-      eslint: '>=8.28.0'
+      eslint: '>=8.38.0'
     dependencies:
       '@babel/helper-validator-identifier': 7.19.1
-      '@eslint-community/eslint-utils': 4.2.0(eslint@8.38.0)
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.38.0)
       ci-info: 3.8.0
       clean-regexp: 1.0.0
       eslint: 8.38.0
@@ -2997,7 +2997,7 @@ packages:
       pluralize: 8.0.0
       read-pkg-up: 7.0.1
       regexp-tree: 0.1.24
-      regjsparser: 0.9.1
+      regjsparser: 0.10.0
       safe-regex: 2.1.1
       semver: 7.3.8
       strip-indent: 3.0.0
@@ -3053,7 +3053,7 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     hasBin: true
     dependencies:
-      '@eslint-community/eslint-utils': 4.2.0(eslint@8.38.0)
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.38.0)
       '@eslint-community/regexpp': 4.4.0
       '@eslint/eslintrc': 2.0.2
       '@eslint/js': 8.38.0
@@ -5647,8 +5647,8 @@ packages:
       '@pnpm/npm-conf': 2.1.0
     dev: true
 
-  /regjsparser@0.9.1:
-    resolution: {integrity: sha512-dQUtn90WanSNl+7mQKcXAgZxvUe7Z0SqXlgzv0za4LwiUhyzBC58yQO3liFoUgu8GiJVInAhJjkj1N0EtQ5nkQ==}
+  /regjsparser@0.10.0:
+    resolution: {integrity: sha512-qx+xQGZVsy55CH0a1hiVwHmqjLryfh7wQyF5HO07XJ9f7dQMY/gPQHhlyDkIzJKC+x2fUCpCcUODUUUFrm7SHA==}
     hasBin: true
     dependencies:
       jsesc: 0.5.0
