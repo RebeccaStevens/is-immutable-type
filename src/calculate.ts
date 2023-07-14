@@ -377,7 +377,7 @@ function objectImmutability(
         ) ||
         // Ignore "length" for tuples.
         // TODO: Report this issue to upstream.
-        (property.escapedName === "length" &&
+        ((property.escapedName as string) === "length" &&
           checker.isTupleType(typeData.type))
       ) {
         continue;

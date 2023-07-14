@@ -36,7 +36,7 @@ class TypeName {
 
   public constructor(
     private readonly program: ts.Program,
-    private readonly typeData: Readonly<TypeData>
+    private readonly typeData: Readonly<TypeData>,
   ) {
     this.m_data = {};
     this.checker = program.getTypeChecker();
@@ -92,12 +92,12 @@ class TypeName {
               this.program,
               getTypeData(
                 this.checker.getTypeFromTypeNode(this.m_wrapperType),
-                this.m_wrapperType
+                this.m_wrapperType,
               ),
               this.m_data.name,
               this.m_wrapperType.typeArguments.map((node) =>
-                this.checker.getTypeFromTypeNode(node)
-              )
+                this.checker.getTypeFromTypeNode(node),
+              ),
             );
             this.m_data.nameWithArguments =
               wrapperArguments === undefined
@@ -115,7 +115,7 @@ class TypeName {
                   this.program,
                   this.typeData,
                   this.m_data.name,
-                  typeArguments
+                  typeArguments,
                 )}>`
               : null;
         }
@@ -143,7 +143,7 @@ class TypeName {
           this.m_data.aliasWithArguments = null;
         } else {
           const aliasType = this.checker.getDeclaredTypeOfSymbol(
-            this.typeData.type.aliasSymbol
+            this.typeData.type.aliasSymbol,
           );
           if (aliasType.aliasTypeArguments === undefined) {
             this.m_data.aliasWithArguments = null;
@@ -163,7 +163,7 @@ class TypeName {
               this.program,
               getTypeData(aliasType, aliasTypeNode),
               this.m_data.alias,
-              aliasType.aliasTypeArguments
+              aliasType.aliasTypeArguments,
             );
             this.m_data.aliasWithArguments =
               aliasArguments === undefined
@@ -191,7 +191,7 @@ class TypeName {
             this.program,
             this.typeData,
             undefined,
-            this.typeData.typeNode.typeArguments
+            this.typeData.typeNode.typeArguments,
           );
 
           this.m_data.evaluated =
@@ -212,13 +212,13 @@ function typeArgumentsToString(
   program: ts.Program,
   typeData: TypeData,
   name: string | undefined,
-  typeArguments: ReadonlyArray<ts.Type> | ts.NodeArray<ts.TypeNode>
+  typeArguments: ReadonlyArray<ts.Type> | ts.NodeArray<ts.TypeNode>,
 ) {
   const typeArgumentStrings = typeArguments.map((typeLike) => {
     const typeArgument = isTypeNode(typeLike)
       ? getTypeData(
           program.getTypeChecker().getTypeFromTypeNode(typeLike),
-          typeLike
+          typeLike,
         )
       : getTypeData(typeLike, undefined);
     if (typeData.type === typeArgument.type) {
@@ -234,7 +234,7 @@ function typeArgumentsToString(
 
   if (typeArgumentStrings.includes(undefined)) {
     console.warn(
-      "`typeArgumentStrings` contains `undefined`, this is likely a bug in `is-immutable-type`"
+      "`typeArgumentStrings` contains `undefined`, this is likely a bug in `is-immutable-type`",
     );
     return undefined;
   }
@@ -249,7 +249,7 @@ const cache = new WeakMap<ts.Type, TypeName>();
  */
 export function typeToString(
   program: ts.Program,
-  typeData: Readonly<TypeData>
+  typeData: Readonly<TypeData>,
 ): TypeName {
   const cached = getCachedData(program, cache, typeData);
   if (cached !== undefined) {
