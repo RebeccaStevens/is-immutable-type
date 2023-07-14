@@ -1,6 +1,7 @@
 import * as tsvfs from "@typescript/vfs";
 // eslint-disable-next-line ava/use-test -- see https://github.com/avajs/eslint-plugin-ava/issues/351
 import { type ExecutionContext } from "ava";
+import { hasType } from "ts-api-utils";
 import ts from "typescript";
 
 import {
@@ -13,15 +14,6 @@ import {
   type ImmutabilityCache,
   type ImmutabilityOverrides,
 } from "../src";
-
-/**
- * Type guard to check if a Statement has a type.
- */
-export function hasTypeNode(
-  node: ts.Statement,
-): node is ts.Statement & { type: ts.TypeNode } {
-  return Object.hasOwn(node, "type");
-}
 
 /**
  * Create a TS environment to run the tests in.
@@ -72,11 +64,15 @@ function getType(code: string, line?: number) {
 
   const statement = ast.statements[(line ?? ast.statements.length) - 1]!;
   const checker = program.getTypeChecker();
-  const type = checker.getTypeAtLocation(statement);
+
+  const node = ts.isVariableStatement(statement)
+    ? statement.declarationList.declarations[0]!
+    : statement;
+  const type = checker.getTypeAtLocation(node);
 
   return {
     type,
-    typeNode: hasTypeNode(statement) ? statement.type : undefined,
+    typeNode: hasType(statement) ? statement.type : undefined,
     program,
   };
 }
@@ -103,29 +99,25 @@ export function runTestImmutability(
       : test;
 
   const { program, type, typeNode } = getType(code, line);
+  const typeLike = typeNode ?? type;
 
-  const actual = getTypeImmutability(
-    program,
-    typeNode ?? type,
-    overrides,
-    cache,
-  );
+  const actual = getTypeImmutability(program, typeLike, overrides, cache);
   t.is(Immutability[actual], Immutability[expected], message);
 
-  const immutable = isImmutableType(program, type, overrides, cache);
+  const immutable = isImmutableType(program, typeLike, overrides, cache);
   t.is(expected >= Immutability.Immutable, immutable);
 
-  const readonlyDeep = isReadonlyDeepType(program, type, overrides, cache);
+  const readonlyDeep = isReadonlyDeepType(program, typeLike, overrides, cache);
   t.is(expected >= Immutability.ReadonlyDeep, readonlyDeep);
 
   const readonlyShallow = isReadonlyShallowType(
     program,
-    type,
+    typeLike,
     overrides,
     cache,
   );
   t.is(expected >= Immutability.ReadonlyShallow, readonlyShallow);
 
-  const mutable = isMutableType(program, type, overrides, cache);
+  const mutable = isMutableType(program, typeLike, overrides, cache);
   t.is(expected === Immutability.Mutable, mutable);
 }
