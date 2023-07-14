@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { isIntrinsicType } from "ts-api-utils";
+import { isIntrinsicErrorType } from "ts-api-utils";
 import ts from "typescript";
 
 import { typeToString, type TypeName } from "./type-to-string";
@@ -89,7 +89,7 @@ export function getTypeData(
   type: ts.Type,
   typeNode: ts.TypeNode | null | undefined,
 ): TypeData {
-  if (isIntrinsicType(type) && type.intrinsicName === "error") {
+  if (isIntrinsicErrorType(type)) {
     throw new Error("ErrorType encountered.");
   }
 
@@ -144,10 +144,7 @@ export function typeMatchesSpecifier(
   specifier: TypeSpecifier,
   program: ts.Program,
 ): boolean {
-  if (
-    isIntrinsicType(typeData.type) &&
-    typeData.type.intrinsicName === "error"
-  ) {
+  if (isIntrinsicErrorType(typeData.type)) {
     return false;
   }
 
@@ -166,36 +163,16 @@ export function typeMatchesSpecifier(
 
   switch (specifier.from) {
     case "file": {
-      return isTypeDeclaredLocal(specifier.path, declarationFiles, program);
+      return isTypeDeclaredFromLocal(specifier.path, declarationFiles, program);
     }
     case "lib": {
-      // Built in type (i.e string, number, boolean, etc)
-      if (declarationFiles.length === 0) {
-        return true;
-      }
-      return declarationFiles.some((declaration) =>
-        program.isSourceFileDefaultLibrary(declaration),
-      );
+      return isTypeDeclaredFromLib(declarationFiles, program);
     }
     case "package": {
-      const typeRoots = ts.getEffectiveTypeRoots(
-        program.getCompilerOptions(),
+      return isTypeDeclaredInPackage(
+        specifier.package,
+        declarationFiles,
         program,
-      );
-      const possibleLocations = [
-        `${path.join(
-          program.getCurrentDirectory(),
-          "node_modules",
-          specifier.package,
-        )}/`,
-        ...(typeRoots?.map(
-          (root) => `${path.join(root, specifier.package)}/`,
-        ) ?? []),
-      ];
-      return declarationFiles.some((declaration) =>
-        possibleLocations.some((location) =>
-          declaration.fileName.toLowerCase().startsWith(location),
-        ),
       );
     }
   }
@@ -261,9 +238,47 @@ function typeNameMatchesSpecifier(
 }
 
 /**
- * Test if the type is declared locally.
+ * Test if the type is declared in a TypeScript lib.
  */
-function isTypeDeclaredLocal(
+function isTypeDeclaredFromLib(
+  declarationFiles: ReadonlyArray<ts.SourceFile>,
+  program: ts.Program,
+): boolean {
+  // Intrinsic type (i.e. string, number, boolean, etc).
+  if (declarationFiles.length === 0) {
+    return true;
+  }
+  return declarationFiles.some((declaration) =>
+    program.isSourceFileDefaultLibrary(declaration),
+  );
+}
+
+/**
+ * Test if the type is declared in a TypeScript package.
+ */
+function isTypeDeclaredInPackage(
+  packageName: string,
+  declarationFiles: ReadonlyArray<ts.SourceFile>,
+  program: ts.Program,
+): boolean {
+  // Handle scoped packages - if the name starts with @, remove it and replace / with __
+  const typesPackageName = packageName.replace(/^@([^/]+)\//u, "$1__");
+
+  const matcher = new RegExp(`${packageName}|${typesPackageName}`, "u");
+  return declarationFiles.some((declaration) => {
+    const packageIdName = program.sourceFileToPackageName.get(declaration.path);
+    return (
+      packageIdName !== undefined &&
+      matcher.test(packageIdName) &&
+      program.isSourceFileFromExternalLibrary(declaration)
+    );
+  });
+}
+
+/**
+ * Test if the type is declared in a local file.
+ */
+function isTypeDeclaredFromLocal(
   relativePath: string | undefined,
   declarationFiles: ReadonlyArray<ts.SourceFile>,
   program: ts.Program,
@@ -276,12 +291,15 @@ function isTypeDeclaredLocal(
     );
 
     return declarationFiles.some((declaration) => {
+      if (program.isSourceFileFromExternalLibrary(declaration)) {
+        return false;
+      }
       const fileName = declaration.fileName.toLowerCase();
+      if (!fileName.startsWith(cwd)) {
+        return false;
+      }
       return (
-        !(
-          program.isSourceFileFromExternalLibrary(declaration) ||
-          typeRoots?.some((typeRoot) => fileName.startsWith(typeRoot)) === true
-        ) && fileName.startsWith(cwd)
+        typeRoots?.some((typeRoot) => fileName.startsWith(typeRoot)) !== true
       );
     });
   }
