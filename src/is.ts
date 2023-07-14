@@ -27,14 +27,14 @@ export function isImmutableType(
   program: ts.Program,
   typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
-  useCache: ImmutabilityCache | boolean = true
+  useCache: ImmutabilityCache | boolean = true,
 ) {
   const immutability = getTypeImmutability(
     program,
     typeOrTypeNode,
     overrides,
     useCache,
-    Immutability.Immutable
+    Immutability.Immutable,
   );
   return isImmutable(immutability);
 }
@@ -52,14 +52,14 @@ export function isReadonlyDeepType(
   program: ts.Program,
   typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
-  useCache: ImmutabilityCache | boolean = true
+  useCache: ImmutabilityCache | boolean = true,
 ) {
   const immutability = getTypeImmutability(
     program,
     typeOrTypeNode,
     overrides,
     useCache,
-    Immutability.ReadonlyDeep
+    Immutability.ReadonlyDeep,
   );
   return isReadonlyDeep(immutability);
 }
@@ -77,14 +77,14 @@ export function isReadonlyShallowType(
   program: ts.Program,
   typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
-  useCache: ImmutabilityCache | boolean = true
+  useCache: ImmutabilityCache | boolean = true,
 ) {
   const immutability = getTypeImmutability(
     program,
     typeOrTypeNode,
     overrides,
     useCache,
-    Immutability.ReadonlyShallow
+    Immutability.ReadonlyShallow,
   );
   return isReadonlyShallow(immutability);
 }
@@ -102,14 +102,14 @@ export function isMutableType(
   program: ts.Program,
   typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
-  useCache: ImmutabilityCache | boolean = true
+  useCache: ImmutabilityCache | boolean = true,
 ) {
   const immutability = getTypeImmutability(
     program,
     typeOrTypeNode,
     overrides,
     useCache,
-    Immutability.Mutable
+    Immutability.Mutable,
   );
   return isMutable(immutability);
 }

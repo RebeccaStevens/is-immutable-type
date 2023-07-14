@@ -5,7 +5,7 @@ import ts from "typescript";
  * Type guard to check if a Node has a Symbol.
  */
 export function hasSymbol(
-  node: ts.Node
+  node: ts.Node,
 ): node is ts.Node & { symbol: ts.Symbol } {
   return Object.hasOwn(node, "symbol");
 }
@@ -14,7 +14,7 @@ export function hasSymbol(
  * Type guard to check if a Type is TypeNode.
  */
 export function isTypeNode(
-  typeLike: ts.Type | ts.TypeNode
+  typeLike: ts.Type | ts.TypeNode,
 ): typeLike is ts.TypeNode {
   return Object.hasOwn(typeLike, "kind");
 }
@@ -24,7 +24,7 @@ export function isTypeNode(
  */
 export function typeToString(
   program: ts.Program,
-  typeOrTypeNode: ts.Type | ts.TypeNode
+  typeOrTypeNode: ts.Type | ts.TypeNode,
 ): {
   name: string | undefined;
   nameWithArguments: string | undefined;
@@ -56,7 +56,7 @@ export function typeToString(
           program,
           aliasType,
           alias,
-          aliasType.aliasTypeArguments
+          aliasType.aliasTypeArguments,
         );
   const aliasWithArguments =
     aliasArguments === undefined ? undefined : `${alias}<${aliasArguments}>`;
@@ -92,8 +92,8 @@ export function typeToString(
             checker.getTypeFromTypeNode(wrapperType),
             wrapperName,
             wrapperType.typeArguments.map((node) =>
-              checker.getTypeFromTypeNode(node)
-            )
+              checker.getTypeFromTypeNode(node),
+            ),
           );
 
     const wrapperWithArguments =
@@ -139,7 +139,7 @@ function typeArgumentsToString(
   program: ts.Program,
   type: ts.Type,
   typeName: string | undefined,
-  typeArguments: ReadonlyArray<ts.Type>
+  typeArguments: ReadonlyArray<ts.Type>,
 ) {
   const typeArgumentStrings = typeArguments.map((t) => {
     if (type === t) {
@@ -151,7 +151,7 @@ function typeArgumentsToString(
 
   if (typeArgumentStrings.includes(undefined)) {
     console.warn(
-      "type argument strings contains `undefined`, this is likely a bug in `is-immutable-type`"
+      "type argument strings contains `undefined`, this is likely a bug in `is-immutable-type`",
     );
     return undefined;
   }

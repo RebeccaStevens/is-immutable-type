@@ -13,7 +13,7 @@ test("simple", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "handles simple unions of immutable types"
+      "handles simple unions of immutable types",
     );
   }
 

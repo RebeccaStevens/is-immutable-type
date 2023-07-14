@@ -18,7 +18,7 @@ test("primitives", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "treat primitives as immutable"
+      "treat primitives as immutable",
     );
   }
 });
@@ -32,7 +32,7 @@ test("records", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "handles immutable records"
+      "handles immutable records",
     );
   }
 
@@ -62,7 +62,7 @@ test("arrays", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "handles immutable arrays"
+      "handles immutable arrays",
     );
   }
 
@@ -74,7 +74,7 @@ test("arrays", (t) => {
       t,
       code,
       Immutability.ReadonlyDeep,
-      "handles deeply readonly arrays"
+      "handles deeply readonly arrays",
     );
   }
 
@@ -86,7 +86,7 @@ test("arrays", (t) => {
       t,
       code,
       Immutability.ReadonlyShallow,
-      "handles shallowly readonly arrays"
+      "handles shallowly readonly arrays",
     );
   }
 
@@ -113,7 +113,7 @@ test("tuples", (t) => {
       t,
       code,
       Immutability.ReadonlyDeep,
-      "handles deeply readonly tuples"
+      "handles deeply readonly tuples",
     );
   }
 
@@ -125,7 +125,7 @@ test("tuples", (t) => {
       t,
       code,
       Immutability.ReadonlyShallow,
-      "handles shallowly readonly tuples"
+      "handles shallowly readonly tuples",
     );
   }
 
@@ -151,7 +151,7 @@ test("sets and maps", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "handles immutable sets and maps"
+      "handles immutable sets and maps",
     );
   }
 
@@ -163,7 +163,7 @@ test("sets and maps", (t) => {
       t,
       code,
       Immutability.ReadonlyDeep,
-      "handles deeply readonly sets and maps"
+      "handles deeply readonly sets and maps",
     );
   }
 
@@ -175,7 +175,7 @@ test("sets and maps", (t) => {
       t,
       code,
       Immutability.ReadonlyShallow,
-      "handles shallowly readonly sets and maps"
+      "handles shallowly readonly sets and maps",
     );
   }
 
@@ -213,7 +213,7 @@ test("methods", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "handles immutable records with methods"
+      "handles immutable records with methods",
     );
   }
 
@@ -225,7 +225,7 @@ test("methods", (t) => {
       t,
       code,
       Immutability.ReadonlyDeep,
-      "handles mutable records with methods"
+      "handles mutable records with methods",
     );
   }
 });
@@ -240,7 +240,7 @@ test("private identifiers", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "treat private identifier as immutable"
+      "treat private identifier as immutable",
     );
   }
 });

@@ -19,7 +19,7 @@ test("destructuring arrays", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "immutable elements in mutable destructed array are detected as immutable"
+      "immutable elements in mutable destructed array are detected as immutable",
     );
   }
 
@@ -33,7 +33,7 @@ test("destructuring arrays", (t) => {
       t,
       code,
       Immutability.Mutable,
-      "rest property is detected as a mutable array"
+      "rest property is detected as a mutable array",
     );
   }
 });
@@ -53,7 +53,7 @@ test("destructuring objects", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "immutable elements in mutable destructed object are detected as immutable"
+      "immutable elements in mutable destructed object are detected as immutable",
     );
   }
 
@@ -67,7 +67,7 @@ test("destructuring objects", (t) => {
       t,
       code,
       Immutability.Mutable,
-      "rest property is detected as a mutable object"
+      "rest property is detected as a mutable object",
     );
   }
 });

@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import assert from "node:assert/strict";
 
 import { getTypeOfPropertyOfType } from "@typescript-eslint/type-utils";
 import {
@@ -65,7 +65,7 @@ function cacheTypeImmutability(
   program: ts.Program,
   cache: ImmutabilityCache,
   type: ts.Type,
-  value: Immutability
+  value: Immutability,
 ) {
   const checker = program.getTypeChecker();
   const identity = checker.getRecursionIdentity(type);
@@ -78,7 +78,7 @@ function cacheTypeImmutability(
 function getCachedTypeImmutability(
   program: ts.Program,
   cache: ImmutabilityCache,
-  type: ts.Type
+  type: ts.Type,
 ) {
   const checker = program.getTypeChecker();
   const identity = checker.getRecursionIdentity(type);
@@ -105,7 +105,7 @@ export function getTypeImmutability(
   typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
-  maxImmutability = Immutability.Immutable
+  maxImmutability = Immutability.Immutable,
 ): Immutability {
   const checker = program.getTypeChecker();
   const cache: ImmutabilityCache =
@@ -140,7 +140,7 @@ export function getTypeImmutability(
     type,
     overrides,
     cache,
-    maxImmutability
+    maxImmutability,
   );
 
   if (overrideTo !== undefined) {
@@ -164,7 +164,7 @@ export function getTypeImmutability(
 function getOverride(
   program: ts.Program,
   typeOrTypeNode: ts.Type | ts.TypeNode,
-  overrides: ImmutabilityOverrides
+  overrides: ImmutabilityOverrides,
 ) {
   const {
     name,
@@ -201,13 +201,13 @@ function calculateTypeImmutability(
   type: ts.Type,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
-  maxImmutability: Immutability
+  maxImmutability: Immutability,
 ): Immutability {
   // Union?
   if (isUnionType(type)) {
     return type.types
       .map((t) =>
-        getTypeImmutability(program, t, overrides, cache, maxImmutability)
+        getTypeImmutability(program, t, overrides, cache, maxImmutability),
       )
       .reduce(min);
   }
@@ -228,7 +228,7 @@ function calculateTypeImmutability(
           t,
           overrides,
           cache,
-          maxImmutability
+          maxImmutability,
         );
       })
       .reduce(min);
@@ -275,14 +275,14 @@ function arrayImmutability(
   type: ts.TypeReference,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
-  maxImmutability: Immutability
+  maxImmutability: Immutability,
 ): Immutability {
   const shallowImmutability = objectImmutability(
     program,
     type,
     overrides,
     cache,
-    maxImmutability
+    maxImmutability,
   );
   if (
     shallowImmutability === Immutability.Mutable ||
@@ -296,13 +296,13 @@ function arrayImmutability(
     type,
     overrides,
     cache,
-    maxImmutability
+    maxImmutability,
   );
 
   return clamp(
     Immutability.ReadonlyShallow,
     deepImmutability,
-    shallowImmutability
+    shallowImmutability,
   );
 }
 
@@ -314,7 +314,7 @@ function objectImmutability(
   type: ts.Type,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
-  maxImmutability: Immutability
+  maxImmutability: Immutability,
 ): Immutability {
   const checker = program.getTypeChecker();
 
@@ -330,7 +330,8 @@ function objectImmutability(
         isPropertyReadonlyInType(type, property.getEscapedName(), checker) ||
         // Ignore "length" for tuples.
         // TODO: Report this issue to upstream.
-        (property.escapedName === "length" && checker.isTupleType(type))
+        ((property.escapedName as string) === "length" &&
+          checker.isTupleType(type))
       ) {
         continue;
       }
@@ -346,7 +347,7 @@ function objectImmutability(
           declarations.some(
             (declaration) =>
               hasSymbol(declaration) &&
-              isSymbolFlagSet(declaration.symbol, ts.SymbolFlags.Method)
+              isSymbolFlagSet(declaration.symbol, ts.SymbolFlags.Method),
           )
         ) {
           m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);
@@ -358,7 +359,7 @@ function objectImmutability(
             (declaration) =>
               ts.isPropertySignature(declaration) &&
               declaration.type !== undefined &&
-              ts.isFunctionTypeNode(declaration.type)
+              ts.isFunctionTypeNode(declaration.type),
           )
         ) {
           m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);
@@ -383,7 +384,7 @@ function objectImmutability(
         propertyType,
         overrides,
         cache,
-        maxImmutability
+        maxImmutability,
       );
       m_maxImmutability = min(m_maxImmutability, result);
       if (m_minImmutability >= m_maxImmutability) {
@@ -398,7 +399,7 @@ function objectImmutability(
       type,
       overrides,
       cache,
-      maxImmutability
+      maxImmutability,
     );
     m_maxImmutability = min(m_maxImmutability, result);
     if (m_minImmutability >= m_maxImmutability) {
@@ -416,8 +417,8 @@ function objectImmutability(
         ts.IndexKind.String,
         overrides,
         cache,
-        maxImmutability
-      )
+        maxImmutability,
+      ),
     )
     .reduce(max);
 
@@ -434,8 +435,8 @@ function objectImmutability(
         ts.IndexKind.Number,
         overrides,
         cache,
-        maxImmutability
-      )
+        maxImmutability,
+      ),
     )
     .reduce(max);
 
@@ -455,14 +456,14 @@ function typeArgumentsImmutability(
   type: ts.TypeReference,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
-  maxImmutability: Immutability
+  maxImmutability: Immutability,
 ): Immutability {
   const checker = program.getTypeChecker();
   const typeArguments = checker.getTypeArguments(type);
   if (typeArguments.length > 0) {
     return typeArguments
       .map((t) =>
-        getTypeImmutability(program, t, overrides, cache, maxImmutability)
+        getTypeImmutability(program, t, overrides, cache, maxImmutability),
       )
       .reduce(min);
   }
@@ -479,7 +480,7 @@ function indexSignatureImmutability(
   kind: ts.IndexKind,
   overrides: ImmutabilityOverrides,
   cache: ImmutabilityCache,
-  maxImmutability: Immutability
+  maxImmutability: Immutability,
 ): Immutability {
   const checker = program.getTypeChecker();
   const indexInfo = checker.getIndexInfoOfType(type, kind);
@@ -503,8 +504,8 @@ function indexSignatureImmutability(
         indexInfo.type,
         overrides,
         cache,
-        maxImmutability
-      )
+        maxImmutability,
+      ),
     );
   }
 

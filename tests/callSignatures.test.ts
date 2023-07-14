@@ -17,7 +17,7 @@ test("simple", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "handles immutable namespaces"
+      "handles immutable namespaces",
     );
   }
 
@@ -55,7 +55,7 @@ test("simple", (t) => {
       t,
       code,
       Immutability.Mutable,
-      "handles mutable namespaces"
+      "handles mutable namespaces",
     );
   }
 });

@@ -18,7 +18,7 @@ import {
  * Type guard to check if a Statement has a type.
  */
 export function hasTypeNode(
-  node: ts.Statement
+  node: ts.Statement,
 ): node is ts.Statement & { type: ts.TypeNode } {
   return Object.hasOwn(node, "type");
 }
@@ -42,7 +42,7 @@ function createTSTestEnvironment(code: string) {
     system,
     ["index.ts"],
     ts,
-    compilerOptions
+    compilerOptions,
   );
 
   const program = env.languageService.getProgram();
@@ -85,7 +85,7 @@ function getType(code: string, line?: number) {
  * Run tests against "getTypeImmutability".
  */
 export function runTestImmutability(
-  t: Readonly<ExecutionContext<unknown>>,
+  t: Readonly<ExecutionContext>,
   test:
     | string
     | Readonly<{
@@ -95,7 +95,7 @@ export function runTestImmutability(
         cache?: ImmutabilityCache;
       }>,
   expected: Immutability,
-  message?: string
+  message?: string,
 ): void {
   const { code, line, overrides, cache } =
     typeof test === "string"
@@ -108,7 +108,7 @@ export function runTestImmutability(
     program,
     typeNode ?? type,
     overrides,
-    cache
+    cache,
   );
   t.is(Immutability[actual], Immutability[expected], message);
 
@@ -122,7 +122,7 @@ export function runTestImmutability(
     program,
     type,
     overrides,
-    cache
+    cache,
   );
   t.is(expected >= Immutability.ReadonlyShallow, readonlyShallow);
 

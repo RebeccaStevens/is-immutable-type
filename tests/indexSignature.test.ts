@@ -13,7 +13,7 @@ test("Property Signatures", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "handles immutable IndexSignatures"
+      "handles immutable IndexSignatures",
     );
   }
 
