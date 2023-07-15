@@ -1,7 +1,6 @@
 {
   "all": true,
   "include": ["src/**/*"],
-  "exclude": ["src/tsutils.ts"],
   "reporter": ["lcov", "text"],
   "check-coverage": false,
   "watermarks": {

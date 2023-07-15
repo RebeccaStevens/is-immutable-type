@@ -38,7 +38,7 @@ export function max(a: Immutability, b: Immutability): Immutability {
 export function clamp(
   minValue: Immutability,
   value: Immutability,
-  maxValue: Immutability
+  maxValue: Immutability,
 ) {
   return Math.max(minValue, Math.min(maxValue, value));
 }

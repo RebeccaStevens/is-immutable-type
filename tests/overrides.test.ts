@@ -1,13 +1,13 @@
 import test from "ava";
 
-import { Immutability, type ImmutabilityOverrides } from "../src";
+import { Immutability, type ImmutabilityOverrides } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
 test("root by name", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      name: "Test",
+      type: "Test",
       to: Immutability.Immutable,
     },
   ];
@@ -29,7 +29,11 @@ test("root by name", (t) => {
 test("root by pattern", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      pattern: /^T.*/u,
+      type: /^T.*/u,
+      to: Immutability.Immutable,
+    },
+    {
+      type: { from: "file", pattern: /^T.*/u },
       to: Immutability.Immutable,
     },
   ];
@@ -51,7 +55,11 @@ test("root by pattern", (t) => {
 test("use type parameters in pattern of root override", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      pattern: /^Test<.+>/u,
+      type: /^Test<.+>/u,
+      to: Immutability.Immutable,
+    },
+    {
+      type: { from: "file", pattern: /^Test<.+>/u },
       to: Immutability.Immutable,
     },
   ];
@@ -73,11 +81,19 @@ test("use type parameters in pattern of root override", (t) => {
 test("expression by name", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      name: "string",
+      type: "string",
       to: Immutability.Mutable,
     },
     {
-      name: "ReadonlyArray",
+      type: { from: "lib", name: "string" },
+      to: Immutability.Mutable,
+    },
+    {
+      type: "ReadonlyArray",
+      to: Immutability.Mutable,
+    },
+    {
+      type: { from: "lib", name: "ReadonlyArray" },
       to: Immutability.Mutable,
     },
   ];
@@ -87,8 +103,7 @@ test("expression by name", (t) => {
     "type Test = string;",
     "type Test = ReadonlyArray<string>",
   ]) {
-
-    runTestImmutability(
+  runTestImmutability(
       t,
       { code, overrides },
       Immutability.Mutable,
@@ -100,11 +115,19 @@ test("expression by name", (t) => {
 test("expression by a pattern", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      pattern: /^s.*g$/u,
+      type: /^s.*g$/u,
       to: Immutability.Mutable,
     },
     {
-      pattern: /Readonly/u,
+      type: { from: "lib", pattern: /^s.*g$/u },
+      to: Immutability.Mutable,
+    },
+    {
+      type: /Readonly/u,
+      to: Immutability.Mutable,
+    },
+    {
+      type: { from: "lib", pattern: /Readonly/u },
       to: Immutability.Mutable,
     },
   ];
@@ -114,7 +137,6 @@ test("expression by a pattern", (t) => {
     "type Test = string;",
     "type Test = ReadonlyArray<string>",
   ]) {
-
     runTestImmutability(
       t,
       { code, overrides },
@@ -127,7 +149,12 @@ test("expression by a pattern", (t) => {
 test("expression from lower by name", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      name: "ReadonlyArray",
+      type: "ReadonlyArray",
+      to: Immutability.Immutable,
+      from: Immutability.ReadonlyDeep,
+    },
+    {
+      type: { from: "lib", name: "ReadonlyArray" },
       to: Immutability.Immutable,
       from: Immutability.ReadonlyDeep,
     },
@@ -163,7 +190,12 @@ test("expression from lower by name", (t) => {
 test("expression from lower by a pattern", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      pattern: /^Readonly.+<.+>$/u,
+      type: /^Readonly.+<.+>$/u,
+      to: Immutability.Immutable,
+      from: Immutability.ReadonlyDeep,
+    },
+    {
+      type: { from: "lib", pattern: /^Readonly.+<.+>$/u },
       to: Immutability.Immutable,
       from: Immutability.ReadonlyDeep,
     },
@@ -197,7 +229,12 @@ test("expression from lower by a pattern", (t) => {
 test("expression from higher by name", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      name: "ReadonlyArray",
+      type: "ReadonlyArray",
+      to: Immutability.Mutable,
+      from: Immutability.ReadonlyShallow,
+    },
+    {
+      type: { from: "lib", name: "ReadonlyArray" },
       to: Immutability.Mutable,
       from: Immutability.ReadonlyShallow,
     },
@@ -228,10 +265,15 @@ test("expression from higher by name", (t) => {
   }
 });
 
-test("expression from hgiher by a pattern", (t) => {
+test("expression from higher by a pattern", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      pattern: /^Readonly.+<.+>$/u,
+      type: /^Readonly.+<.+>$/u,
+      to: Immutability.Mutable,
+      from: Immutability.ReadonlyShallow,
+    },
+    {
+      type: { from: "lib", pattern: /^Readonly.+<.+>$/u },
       to: Immutability.Mutable,
       from: Immutability.ReadonlyShallow,
     },
@@ -265,7 +307,11 @@ test("expression from hgiher by a pattern", (t) => {
 test("wrapper by name", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      name: "ReadonlyDeep",
+      type: "ReadonlyDeep",
+      to: Immutability.ReadonlyDeep,
+    },
+    {
+      type: { from: "lib", name: "ReadonlyDeep" },
       to: Immutability.ReadonlyDeep,
     },
   ];
@@ -289,7 +335,11 @@ test("wrapper by name", (t) => {
 test("wrapper by pattern", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      pattern: /^ReadonlyDeep<.+>$/u,
+      type: /^ReadonlyDeep<.+>$/u,
+      to: Immutability.ReadonlyDeep,
+    },
+    {
+      type: { from: "file", pattern: /^ReadonlyDeep<.+>$/u },
       to: Immutability.ReadonlyDeep,
     },
   ];
@@ -314,7 +364,11 @@ test("wrapper by pattern", (t) => {
 test("rename alias with type parameter", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      name: "ImmutableArray",
+      type: "ImmutableArray",
+      to: Immutability.Immutable,
+    },
+    {
+      type: { from: "lib", name: "ImmutableArray" },
       to: Immutability.Immutable,
     },
   ];
@@ -350,7 +404,11 @@ test("rename alias with type parameter", (t) => {
 test("rename alias of type with type parameter", (t) => {
   const overrides: ImmutabilityOverrides = [
     {
-      name: "A",
+      type: "A",
+      to: Immutability.Mutable,
+    },
+    {
+      type: { from: "lib", name: "A" },
       to: Immutability.Mutable,
     },
   ];

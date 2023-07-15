@@ -14,11 +14,18 @@
   "parserOptions": {
     "project": ["./tsconfig.json"]
   },
-  "ignorePatterns": ["/coverage/", "/dist/", "/**/*.md", "/src/tsutils.ts"],
+  "ignorePatterns": ["/coverage/", "/dist/", "/**/*.md"],
   "rules": {
+    "functional/no-expression-statements": "off",
+    "functional/functional-parameters": [
+      "error",
+      {
+        "enforceParameterCount": false
+      }
+    ],
     "functional/no-loop-statement": "off",
-    "functional/prefer-readonly-type": "off",
-    "import/no-relative-parent-imports": "off"
+    "functional/no-throw-statements": "off",
+    "functional/prefer-immutable-types": "off"
   },
   "overrides": [
     {

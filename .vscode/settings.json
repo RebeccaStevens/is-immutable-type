@@ -1,7 +1,6 @@
 {
   "files.exclude": {
-    "coverage/": true,
-    "dist/": true
+    "coverage/": true
   },
   "files.trimTrailingWhitespace": true,
   "search.exclude": {

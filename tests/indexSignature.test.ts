@@ -1,6 +1,6 @@
 import test from "ava";
 
-import { Immutability } from "../src";
+import { Immutability } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
@@ -13,7 +13,7 @@ test("Property Signatures", (t) => {
       t,
       code,
       Immutability.Immutable,
-      "handles immutable IndexSignatures"
+      "handles immutable IndexSignatures",
     );
   }
 

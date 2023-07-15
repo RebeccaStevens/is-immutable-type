@@ -21,3 +21,4 @@ export {
   isReadonlyDeepType,
   isReadonlyShallowType,
 } from "./is";
+export { type TypeSpecifier } from "./utils";

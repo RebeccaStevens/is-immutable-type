@@ -36,12 +36,17 @@ pnpm add is-immutable-type
 
 ```ts
 import { getTypeImmutability, Immutability, isReadonlyDeep, isUnknown } from "is-immutable-type";
+import { hasType } from "ts-api-utils";
 import type ts from "typescript";
 
-function foo(checker: ts.TypeChecker, node: ts.Node) {
-  const nodeType = checker.getTypeAtLocation(node);
-  const constrainedNodeType = checker.getBaseConstraintOfType(nodeType);
-  const immutability = getTypeImmutability(checker, constrainedNodeType);
+function example(program: ts.Program, node: ts.Node) {
+  const typeNodeOrType = hasType(node)
+    // Use the TypeNode if it's avaliable.
+    ? node.type
+    // Otherwise, get the Type.
+    : program.getTypeChecker().getTypeAtLocation(node);
+
+  const immutability = getTypeImmutability(program, typeNodeOrType);
 
   if (isUnknown(immutability)) {
     console.log("`immutability` is `Unknown`").
@@ -79,35 +84,46 @@ just by analyzing its type makeup. One common reason for this is because methods
 may modify internal state and we cannot tell this just by the method's type. For
 this reason, we allow types to be overridden.
 
-To override a type, pass an `overrides` array of all the `override` objects you
-want to use to your function call.\
-You can either override a type by `name` or by a regex `pattern`.\
-You must specify a `to` property with the new immutability value that should be
-used.\
-Additionally you may specify a `from` property which will make it so the
-override will only be applied if the calculated immutability is between the
-`to` and `from` values (inclusively).
+To override a type, pass an overrides array of all the override objects you want
+to use to your function call.\
+An override object consists of a `type`, a `to` and optionally a `from`
+property. The `type` property specifies the type that will be overridden.\
+The `to` property specifies the new immutability value that will be used.\
+The `from` property, if given, will limit when the override is applied to when
+the calculated immutability is between the `to` value and this value
+(inclusively).
+
+The `type` is specified with a `TypeSpecifier`.\
+This can either be a `string` that will match against the type's name or a regex
+pattern that will match against the the type's name and any type arguments.\
+Additionally, you can specify where the type needs to come from for it to be
+overridden.\
+To do this, use an object, with either a `name` or `pattern` value; and a `from`
+property. This `from` property specifies where the type needs to come from,
+either `lib` (TypeScript's lib), `package` (a node_modules package), or `file`
+(a local file).
 
 ### Example 1
 
-Always treat `ReadonlyArray`s as `Immutable`.
+Always treat TypeScript's `ReadonlyArray`s as `Immutable`.
 
 ```ts
-[{ name: "ReadonlyArray", to: Immutability.Immutable }]
+[{ type: { from: "lib", name: "ReadonlyArray" }, to: Immutability.Immutable, }]
 ```
 
 ### Example 2
 
-Treat `ReadonlyArray`s as `Immutable` instead of `ReadonlyDeep`. But if the
-instance type was calculated as `ReadonlyShallow`, it will stay as such.
+Treat TypeScript's `ReadonlyArray`s as `Immutable` instead of `ReadonlyDeep`.
+But if the instance type was calculated as `ReadonlyShallow`, it will stay as
+such.
 
 ```ts
-[{ name: "ReadonlyArray", to: Immutability.Immutable, from: Immutability.ReadonlyDeep }]
+[{ type: { from: "lib", name: "ReadonlyArray" }, to: Immutability.Immutable, from: Immutability.ReadonlyDeep }]
 ```
 
 ### Default Overrides
 
-By default the following types are overridden to be `Mutable`:
+By default the following TypeScript lib types are overridden to be `Mutable`:
 
 - `Map`
 - `Set`
@@ -115,8 +131,8 @@ By default the following types are overridden to be `Mutable`:
 - `URL`
 - `URLSearchParams`
 
-If you know of any other TypeScript types that need to be
-overridden, please open an issue.
+If you know of any other TypeScript lib types that need to be overridden,
+please open an issue.
 
 Note: When providing custom overrides, the default ones will not be used. Be
 sure to include the default overrides in your custom overrides if you don't want
@@ -135,11 +151,8 @@ type. If you want this library to treat types wrapped in `ReadonlyDeep` as
 immutable regardless, you can provide an override stating as such.
 
 ```ts
-[{ pattern: /^ReadonlyDeep<.+>$/u, to: Immutability.Immutable }]
+[{ type: { from: "package", package: "type-fest" pattern: /^ReadonlyDeep<.+>$/u }, to: Immutability.Immutable }]
 ```
-
-Note here the inclusion of `ReadonlyObjectDeep`, this comes from the internal
-workings of `ReadonlyDeep`.
 
 ### Limitations (when it comes to overrides)
 

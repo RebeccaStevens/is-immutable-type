@@ -8,6 +8,7 @@ declare module "rollup-plugin-unassert" {
     importPatterns?: string[];
   }): {
     name: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transform(code: string, id: string): any;
   };
 }

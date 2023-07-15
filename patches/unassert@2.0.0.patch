@@ -1,0 +1,1100 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index cc45827c2b71bad16a74e04a96517578ad6ab26e..040fb11a488118db2bed8b608237ee11ad87ce89 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -1,44 +1,52 @@
+-'use strict';
+-
+-const estraverse = require('estraverse');
+-
+ /**
+  * unassert
+  *   Encourages programming with assertions by providing tools to compile them away.
+  *
+  * https://github.com/unassert-js/unassert
+  *
+- * Copyright (c) 2015-2022 Takuto Wada
++ * Copyright (c) 2015-2023 Takuto Wada
+  * Licensed under the MIT license.
+  *   https://github.com/unassert-js/unassert/blob/master/LICENSE
+  */
++'use strict';
++
++const estraverse = require('estraverse');
++const MagicString = require('magic-string');
+ 
+-function isLiteral (node) {
+-  return node && node.type === 'Literal';
++function isAcornNode(node) {
++  return typeof node === 'object' && node !== null && typeof node.start === 'number' && typeof node.end === 'number';
+ }
+-function isIdentifier (node) {
+-  return node && node.type === 'Identifier';
++function isLiteral(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'Literal';
+ }
+-function isObjectPattern (node) {
+-  return node && node.type === 'ObjectPattern';
++function isIdentifier(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'Identifier';
+ }
+-function isMemberExpression (node) {
+-  return node && node.type === 'MemberExpression';
++function isObjectPattern(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'ObjectPattern';
+ }
+-function isCallExpression (node) {
+-  return node && node.type === 'CallExpression';
++function isMemberExpression(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'MemberExpression';
+ }
+-function isExpressionStatement (node) {
+-  return node && node.type === 'ExpressionStatement';
++function isCallExpression(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'CallExpression';
+ }
+-function isIfStatement (node) {
+-  return node && node.type === 'IfStatement';
++function isExpressionStatement(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'ExpressionStatement';
+ }
+-function isImportDeclaration (node) {
+-  return node && node.type === 'ImportDeclaration';
++function isIfStatement(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'IfStatement';
+ }
+-
+-function isBodyOfNodeHavingNonBlockStatementAsBody (node, key) {
++function isImportDeclaration(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'ImportDeclaration';
++}
++function isProperty(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'Property';
++}
++function isVariableDeclarator(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'VariableDeclarator';
++}
++function isBodyOfNodeHavingNonBlockStatementAsBody(node, key) {
+   if (!node) {
+     return false;
+   }
+@@ -57,30 +65,27 @@ function isBodyOfNodeHavingNonBlockStatementAsBody (node, key) {
+   }
+   return false;
+ }
+-
+-function isBodyOfIfStatement (node, key) {
++function isBodyOfIfStatement(node, key) {
+   return isIfStatement(node) && (key === 'consequent' || key === 'alternate');
+ }
+-
+-function isNonBlockChildOfParentNode (currentNode, parentNode, key) {
+-  return isExpressionStatement(currentNode) && isCallExpression(currentNode.expression) &&
+-        (isBodyOfIfStatement(parentNode, key) || isBodyOfNodeHavingNonBlockStatementAsBody(parentNode, key));
++function isNonBlockChildOfParentNode(currentNode, parentNode, key) {
++  return isExpressionStatement(currentNode) && isCallExpression(currentNode.expression) && (isBodyOfIfStatement(parentNode, key) || isBodyOfNodeHavingNonBlockStatementAsBody(parentNode, key));
+ }
+-
+-function createVisitor (options) {
++function createVisitor(options) {
+   const config = Object.assign(defaultOptions(), options);
+   const targetModules = new Set(config.modules);
+   const targetVariables = new Set(config.variables);
+-
+-  function isAssertionModuleName (lit) {
+-    return isLiteral(lit) && targetModules.has(lit.value);
++  const {
++    code
++  } = config;
++  const nodeUpdates = new WeakMap();
++  function isAssertionModuleName(lit) {
++    return isLiteral(lit) && targetModules.has( lit.value);
+   }
+-
+-  function isAssertionVariableName (id) {
++  function isAssertionVariableName(id) {
+     return isIdentifier(id) && targetVariables.has(id.name);
+   }
+-
+-  function isAssertionMethod (callee) {
++  function isAssertionMethod(callee) {
+     if (!isMemberExpression(callee)) {
+       return false;
+     }
+@@ -91,39 +96,39 @@ function createVisitor (options) {
+       return isAssertionVariableName(obj);
+     }
+   }
+-
+-  function isAssertionFunction (callee) {
++  function isAssertionFunction(callee) {
+     return isAssertionVariableName(callee);
+   }
+-
+-  function isConsoleAssert (callee) {
++  function isConsoleAssert(callee) {
+     if (!isMemberExpression(callee)) {
+       return false;
+     }
+-    const { object: obj, property: prop } = callee;
+-    return isIdentifier(obj) && obj.name === 'console' &&
+-      isIdentifier(prop) && prop.name === 'assert';
++    const {
++      object: obj,
++      property: prop
++    } = callee;
++    return isIdentifier(obj) && obj.name === 'console' && isIdentifier(prop) && prop.name === 'assert';
+   }
+-
+-  function registerIdentifierAsAssertionVariable (id) {
++  function registerIdentifierAsAssertionVariable(id) {
+     if (isIdentifier(id)) {
+       targetVariables.add(id.name);
+     }
+   }
+-
+-  function handleDestructuredAssertionAssignment (objectPattern) {
+-    for (const { value } of objectPattern.properties) {
+-      registerIdentifierAsAssertionVariable(value);
++  function handleDestructuredAssertionAssignment(objectPattern) {
++    for (const property of objectPattern.properties) {
++      if (isProperty(property)) {
++        registerIdentifierAsAssertionVariable(property.value);
++      }
+     }
+   }
+-
+-  function handleImportSpecifiers (importDeclaration) {
+-    for (const { local } of importDeclaration.specifiers) {
++  function handleImportSpecifiers(importDeclaration) {
++    for (const {
++      local
++    } of importDeclaration.specifiers) {
+       registerIdentifierAsAssertionVariable(local);
+     }
+   }
+-
+-  function registerAssertionVariables (node) {
++  function registerAssertionVariables(node) {
+     if (isIdentifier(node)) {
+       registerIdentifierAsAssertionVariable(node);
+     } else if (isObjectPattern(node)) {
+@@ -132,8 +137,7 @@ function createVisitor (options) {
+       handleImportSpecifiers(node);
+     }
+   }
+-
+-  function isRequireAssert (id, init) {
++  function isRequireAssert(id, init) {
+     if (!isCallExpression(init)) {
+       return false;
+     }
+@@ -147,8 +151,7 @@ function createVisitor (options) {
+     }
+     return isIdentifier(id) || isObjectPattern(id);
+   }
+-
+-  function isRequireAssertDotStrict (id, init) {
++  function isRequireAssertDotStrict(id, init) {
+     if (!isMemberExpression(init)) {
+       return false;
+     }
+@@ -161,133 +164,235 @@ function createVisitor (options) {
+     }
+     return prop.name === 'strict';
+   }
+-
+-  function isRemovalTargetRequire (id, init) {
++  function isRemovalTargetRequire(id, init) {
+     return isRequireAssert(id, init) || isRequireAssertDotStrict(id, init);
+   }
+-
+-  function isRemovalTargetAssertion (callee) {
++  function isRemovalTargetAssertion(callee) {
+     return isAssertionFunction(callee) || isAssertionMethod(callee) || isConsoleAssert(callee);
+   }
+-
+-  const nodeToRemove = new WeakSet();
+-
+-  return {
+-    enter: function (currentNode, parentNode) {
+-      switch (currentNode.type) {
+-        case 'ImportDeclaration': {
+-          const source = currentNode.source;
+-          if (!(isAssertionModuleName(source))) {
+-            return;
+-          }
+-          // remove current ImportDeclaration
+-          nodeToRemove.add(currentNode);
++  function removeNode(node) {
++    nodeUpdates.set(node, null);
++  }
++  function replaceNode(node, replacement) {
++    nodeUpdates.set(node, replacement);
++  }
++  function getStartAndEnd(node, code) {
++    let {
++      start,
++      end
++    } = node;
++    while (/\s/.test(code[start - 1])) {
++      start -= 1;
++    }
++    if (isVariableDeclarator(node)) {
++      let newEnd = end;
++      while (/\s/.test(code[newEnd])) {
++        newEnd += 1;
++      }
++      if (/,/.test(code[newEnd])) {
++        end = newEnd + 1;
++      }
++    }
++    return {
++      start,
++      end
++    };
++  }
++  function createNoopExpression() {
++    return {
++      code: '(void 0)',
++      node: {
++        type: 'UnaryExpression',
++        operator: 'void',
++        prefix: true,
++        argument: {
++          type: 'Literal',
++          value: 0,
++          raw: '0'
++        }
++      }
++    };
++  }
++  function createNoopStatement() {
++    return {
++      code: '{}',
++      node: {
++        type: 'BlockStatement',
++        body: []
++      }
++    };
++  }
++  function unassertImportDeclaration(currentNode) {
++    const source = currentNode.source;
++    if (!isAssertionModuleName(source)) {
++      return;
++    }
++    removeNode(currentNode);
++    this.skip();
++    registerAssertionVariables(currentNode);
++  }
++  function unassertVariableDeclarator(currentNode, parentNode) {
++    if (isRemovalTargetRequire(currentNode.id, currentNode.init)) {
++      if (parentNode.declarations.length === 1) {
++        removeNode(parentNode);
++      } else {
++        removeNode(currentNode);
++      }
++      this.skip();
++      registerAssertionVariables(currentNode.id);
++    }
++  }
++  function unassertAssignmentExpression(currentNode, parentNode) {
++    if (currentNode.operator !== '=') {
++      return;
++    }
++    if (!isExpressionStatement(parentNode)) {
++      return;
++    }
++    if (isRemovalTargetRequire(currentNode.left, currentNode.right)) {
++      removeNode(parentNode);
++      this.skip();
++      registerAssertionVariables(currentNode.left);
++    }
++  }
++  function unassertCallExpression(currentNode, parentNode) {
++    const callee = currentNode.callee;
++    if (!isRemovalTargetAssertion(callee)) {
++      return;
++    }
++    switch (parentNode.type) {
++      case 'ExpressionStatement':
++        {
++          removeNode(parentNode);
+           this.skip();
+-          // register local identifier(s) as assertion variable
+-          registerAssertionVariables(currentNode);
+           break;
+         }
+-        case 'VariableDeclarator': {
+-          if (isRemovalTargetRequire(currentNode.id, currentNode.init)) {
+-            if (parentNode.declarations.length === 1) {
+-              // remove parent VariableDeclaration
+-              nodeToRemove.add(parentNode);
+-            } else {
+-              // single var pattern
+-              // remove current VariableDeclarator
+-              nodeToRemove.add(currentNode);
+-            }
+-            this.skip();
+-            // register local identifier(s) as assertion variable
+-            registerAssertionVariables(currentNode.id);
+-          }
++      case 'SequenceExpression':
++        {
++          replaceNode(currentNode, createNoopExpression());
+           break;
+         }
+-        case 'AssignmentExpression': {
+-          if (currentNode.operator !== '=') {
+-            return;
+-          }
+-          if (!isExpressionStatement(parentNode)) {
+-            return;
++    }
++  }
++  function unassertAwaitExpression(currentNode, parentNode) {
++    const childNode = currentNode.argument;
++    if (isExpressionStatement(parentNode) && isCallExpression(childNode)) {
++      const callee = childNode.callee;
++      if (isRemovalTargetAssertion(callee)) {
++        removeNode(parentNode);
++        this.skip();
++      }
++    }
++  }
++  return {
++    enter: function (currentNode, parentNode) {
++      if (code && isAcornNode(currentNode)) {
++        code.addSourcemapLocation(currentNode.start);
++        code.addSourcemapLocation(currentNode.end);
++      }
++      switch (currentNode.type) {
++        case 'ImportDeclaration':
++          {
++            unassertImportDeclaration.bind(this)(currentNode, parentNode);
++            break;
+           }
+-          if (isRemovalTargetRequire(currentNode.left, currentNode.right)) {
+-            // remove parent ExpressionStatement
+-            nodeToRemove.add(parentNode);
+-            this.skip();
+-            // register local identifier(s) as assertion variable
+-            registerAssertionVariables(currentNode.left);
++        case 'VariableDeclarator':
++          {
++            unassertVariableDeclarator.bind(this)(currentNode, parentNode);
++            break;
+           }
+-          break;
+-        }
+-        case 'CallExpression': {
+-          if (!isExpressionStatement(parentNode)) {
+-            return;
++        case 'AssignmentExpression':
++          {
++            unassertAssignmentExpression.bind(this)(currentNode, parentNode);
++            break;
+           }
+-          const callee = currentNode.callee;
+-          if (isRemovalTargetAssertion(callee)) {
+-            // remove parent ExpressionStatement
+-            nodeToRemove.add(parentNode);
+-            this.skip();
++        case 'CallExpression':
++          {
++            unassertCallExpression.bind(this)(currentNode, parentNode);
++            break;
+           }
+-          break;
+-        }
+-        case 'AwaitExpression': {
+-          const childNode = currentNode.argument;
+-          if (isExpressionStatement(parentNode) && isCallExpression(childNode)) {
+-            const callee = childNode.callee;
+-            if (isRemovalTargetAssertion(callee)) {
+-              // remove parent ExpressionStatement
+-              nodeToRemove.add(parentNode);
+-              this.skip();
+-            }
++        case 'AwaitExpression':
++          {
++            unassertAwaitExpression.bind(this)(currentNode, parentNode);
++            break;
+           }
+-          break;
+-        }
+       }
+     },
+     leave: function (currentNode, parentNode) {
+-      switch (currentNode.type) {
+-        case 'ImportDeclaration':
+-        case 'VariableDeclarator':
+-        case 'VariableDeclaration':
+-        case 'ExpressionStatement':
+-          break;
+-        default:
+-          return undefined;
++      const update = nodeUpdates.get(currentNode);
++      if (update === undefined) {
++        return undefined;
+       }
+-      if (nodeToRemove.has(currentNode)) {
++      if (update === null) {
+         if (isExpressionStatement(currentNode)) {
+           const path = this.path();
+-          const key = path[path.length - 1];
+-          if (isNonBlockChildOfParentNode(currentNode, parentNode, key)) {
+-            return {
+-              type: 'BlockStatement',
+-              body: []
+-            };
++          if (path) {
++            const key = path[path.length - 1];
++            if (parentNode && isNonBlockChildOfParentNode(currentNode, parentNode, key)) {
++              const replacement = createNoopStatement();
++              if (code && isAcornNode(currentNode)) {
++                const {
++                  start,
++                  end
++                } = getStartAndEnd(currentNode, code.toString());
++                code.overwrite(start, end, replacement.code);
++              }
++              return replacement.node;
++            }
+           }
+         }
++        if (code && isAcornNode(currentNode)) {
++          const {
++            start,
++            end
++          } = getStartAndEnd(currentNode, code.toString());
++          code.remove(start, end);
++        }
+         this.remove();
++        return undefined;
++      }
++      if (code && isAcornNode(currentNode)) {
++        const {
++          start,
++          end
++        } = getStartAndEnd(currentNode, code.toString());
++        code.overwrite(start, end, update.code);
+       }
+-      return undefined;
++      return update.node;
+     }
+   };
+ }
+-
+-function unassertAst (ast, options) {
++function unassertAst(ast, options) {
+   return estraverse.replace(ast, createVisitor(options));
+ }
+-
+-function defaultOptions () {
++function unassertCode(code, ast, options) {
++  const {
++    sourceMap,
++    ...traverseOptions
++  } = options ?? {};
++  const usingMagic = code instanceof MagicString;
++  const magicCode = usingMagic ? code : new MagicString(code);
++  estraverse.traverse(ast, createVisitor({
++    ...traverseOptions,
++    code: magicCode
++  }));
++  if (usingMagic) {
++    return magicCode;
++  }
++  const unassertedCode = magicCode.toString();
++  const map = sourceMap ? magicCode.generateMap(sourceMap === true ? undefined : sourceMap) : null;
++  return {
++    code: unassertedCode,
++    map
++  };
++}
++function defaultOptions() {
+   return {
+-    modules: [
+-      'assert',
+-      'assert/strict',
+-      'node:assert',
+-      'node:assert/strict'
+-    ]
++    modules: ['assert', 'assert/strict', 'node:assert', 'node:assert/strict']
+   };
+ }
+ 
+ exports.createVisitor = createVisitor;
+ exports.defaultOptions = defaultOptions;
+ exports.unassertAst = unassertAst;
++exports.unassertCode = unassertCode;
+diff --git a/dist/index.d.cts b/dist/index.d.cts
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2841483943ed1ba6c9be128564d4ae1448dabac
+--- /dev/null
++++ b/dist/index.d.cts
+@@ -0,0 +1,46 @@
++import type MagicString from "magic-string";
++import type { SourceMap, SourceMapOptions } from "magic-string";
++import type { Node } from "acorn";
++import type { Visitor } from "estraverse";
++
++export type UnassertAstOptions = Partial<{
++  modules: string[];
++  variables: string[];
++}>;
++
++export type UnassertCodeOptions = UnassertAstOptions &
++  Partial<{
++    sourceMap: boolean | SourceMapOptions;
++  }>;
++
++export type CreateVisitorOptions = UnassertAstOptions &
++  Partial<{
++    code: MagicString;
++  }>;
++
++export type UnassertCodeResult = {
++  code: string;
++  map: SourceMap | null;
++};
++
++export function unassertAst(ast: Node, options?: UnassertAstOptions): Node;
++
++export function unassertCode(
++  code: string,
++  ast: Node,
++  options?: UnassertCodeOptions
++): UnassertCodeResult;
++export function unassertCode(
++  code: MagicString,
++  ast: Node,
++  options?: UnassertCodeOptions
++): MagicString;
++export function unassertCode(
++  code: string | MagicString,
++  ast: Node,
++  options?: UnassertCodeOptions
++): UnassertCodeResult | MagicString;
++
++export function defaultOptions(): UnassertAstOptions;
++
++export function createVisitor(options?: CreateVisitorOptions): Visitor;
+diff --git a/dist/index.d.mts b/dist/index.d.mts
+new file mode 100644
+index 0000000000000000000000000000000000000000..b2841483943ed1ba6c9be128564d4ae1448dabac
+--- /dev/null
++++ b/dist/index.d.mts
+@@ -0,0 +1,46 @@
++import type MagicString from "magic-string";
++import type { SourceMap, SourceMapOptions } from "magic-string";
++import type { Node } from "acorn";
++import type { Visitor } from "estraverse";
++
++export type UnassertAstOptions = Partial<{
++  modules: string[];
++  variables: string[];
++}>;
++
++export type UnassertCodeOptions = UnassertAstOptions &
++  Partial<{
++    sourceMap: boolean | SourceMapOptions;
++  }>;
++
++export type CreateVisitorOptions = UnassertAstOptions &
++  Partial<{
++    code: MagicString;
++  }>;
++
++export type UnassertCodeResult = {
++  code: string;
++  map: SourceMap | null;
++};
++
++export function unassertAst(ast: Node, options?: UnassertAstOptions): Node;
++
++export function unassertCode(
++  code: string,
++  ast: Node,
++  options?: UnassertCodeOptions
++): UnassertCodeResult;
++export function unassertCode(
++  code: MagicString,
++  ast: Node,
++  options?: UnassertCodeOptions
++): MagicString;
++export function unassertCode(
++  code: string | MagicString,
++  ast: Node,
++  options?: UnassertCodeOptions
++): UnassertCodeResult | MagicString;
++
++export function defaultOptions(): UnassertAstOptions;
++
++export function createVisitor(options?: CreateVisitorOptions): Visitor;
+diff --git a/dist/index.mjs b/dist/index.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..5be3a7ff6e23e9d5cc9429ff163b70bf6f38656e
+--- /dev/null
++++ b/dist/index.mjs
+@@ -0,0 +1,393 @@
++/**
++ * unassert
++ *   Encourages programming with assertions by providing tools to compile them away.
++ *
++ * https://github.com/unassert-js/unassert
++ *
++ * Copyright (c) 2015-2023 Takuto Wada
++ * Licensed under the MIT license.
++ *   https://github.com/unassert-js/unassert/blob/master/LICENSE
++ */
++import { replace, traverse } from 'estraverse';
++import MagicString from 'magic-string';
++
++function isAcornNode(node) {
++  return typeof node === 'object' && node !== null && typeof node.start === 'number' && typeof node.end === 'number';
++}
++function isLiteral(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'Literal';
++}
++function isIdentifier(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'Identifier';
++}
++function isObjectPattern(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'ObjectPattern';
++}
++function isMemberExpression(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'MemberExpression';
++}
++function isCallExpression(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'CallExpression';
++}
++function isExpressionStatement(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'ExpressionStatement';
++}
++function isIfStatement(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'IfStatement';
++}
++function isImportDeclaration(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'ImportDeclaration';
++}
++function isProperty(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'Property';
++}
++function isVariableDeclarator(node) {
++  return (node === null || node === void 0 ? void 0 : node.type) === 'VariableDeclarator';
++}
++function isBodyOfNodeHavingNonBlockStatementAsBody(node, key) {
++  if (!node) {
++    return false;
++  }
++  if (key !== 'body') {
++    return false;
++  }
++  switch (node.type) {
++    case 'DoWhileStatement':
++    case 'ForInStatement':
++    case 'ForOfStatement':
++    case 'ForStatement':
++    case 'LabeledStatement':
++    case 'WithStatement':
++    case 'WhileStatement':
++      return true;
++  }
++  return false;
++}
++function isBodyOfIfStatement(node, key) {
++  return isIfStatement(node) && (key === 'consequent' || key === 'alternate');
++}
++function isNonBlockChildOfParentNode(currentNode, parentNode, key) {
++  return isExpressionStatement(currentNode) && isCallExpression(currentNode.expression) && (isBodyOfIfStatement(parentNode, key) || isBodyOfNodeHavingNonBlockStatementAsBody(parentNode, key));
++}
++function createVisitor(options) {
++  const config = Object.assign(defaultOptions(), options);
++  const targetModules = new Set(config.modules);
++  const targetVariables = new Set(config.variables);
++  const {
++    code
++  } = config;
++  const nodeUpdates = new WeakMap();
++  function isAssertionModuleName(lit) {
++    return isLiteral(lit) && targetModules.has( lit.value);
++  }
++  function isAssertionVariableName(id) {
++    return isIdentifier(id) && targetVariables.has(id.name);
++  }
++  function isAssertionMethod(callee) {
++    if (!isMemberExpression(callee)) {
++      return false;
++    }
++    const obj = callee.object;
++    if (isMemberExpression(obj)) {
++      return isAssertionMethod(obj);
++    } else {
++      return isAssertionVariableName(obj);
++    }
++  }
++  function isAssertionFunction(callee) {
++    return isAssertionVariableName(callee);
++  }
++  function isConsoleAssert(callee) {
++    if (!isMemberExpression(callee)) {
++      return false;
++    }
++    const {
++      object: obj,
++      property: prop
++    } = callee;
++    return isIdentifier(obj) && obj.name === 'console' && isIdentifier(prop) && prop.name === 'assert';
++  }
++  function registerIdentifierAsAssertionVariable(id) {
++    if (isIdentifier(id)) {
++      targetVariables.add(id.name);
++    }
++  }
++  function handleDestructuredAssertionAssignment(objectPattern) {
++    for (const property of objectPattern.properties) {
++      if (isProperty(property)) {
++        registerIdentifierAsAssertionVariable(property.value);
++      }
++    }
++  }
++  function handleImportSpecifiers(importDeclaration) {
++    for (const {
++      local
++    } of importDeclaration.specifiers) {
++      registerIdentifierAsAssertionVariable(local);
++    }
++  }
++  function registerAssertionVariables(node) {
++    if (isIdentifier(node)) {
++      registerIdentifierAsAssertionVariable(node);
++    } else if (isObjectPattern(node)) {
++      handleDestructuredAssertionAssignment(node);
++    } else if (isImportDeclaration(node)) {
++      handleImportSpecifiers(node);
++    }
++  }
++  function isRequireAssert(id, init) {
++    if (!isCallExpression(init)) {
++      return false;
++    }
++    const callee = init.callee;
++    if (!isIdentifier(callee) || callee.name !== 'require') {
++      return false;
++    }
++    const arg = init.arguments[0];
++    if (!isLiteral(arg) || !isAssertionModuleName(arg)) {
++      return false;
++    }
++    return isIdentifier(id) || isObjectPattern(id);
++  }
++  function isRequireAssertDotStrict(id, init) {
++    if (!isMemberExpression(init)) {
++      return false;
++    }
++    if (!isRequireAssert(id, init.object)) {
++      return false;
++    }
++    const prop = init.property;
++    if (!isIdentifier(prop)) {
++      return false;
++    }
++    return prop.name === 'strict';
++  }
++  function isRemovalTargetRequire(id, init) {
++    return isRequireAssert(id, init) || isRequireAssertDotStrict(id, init);
++  }
++  function isRemovalTargetAssertion(callee) {
++    return isAssertionFunction(callee) || isAssertionMethod(callee) || isConsoleAssert(callee);
++  }
++  function removeNode(node) {
++    nodeUpdates.set(node, null);
++  }
++  function replaceNode(node, replacement) {
++    nodeUpdates.set(node, replacement);
++  }
++  function getStartAndEnd(node, code) {
++    let {
++      start,
++      end
++    } = node;
++    while (/\s/.test(code[start - 1])) {
++      start -= 1;
++    }
++    if (isVariableDeclarator(node)) {
++      let newEnd = end;
++      while (/\s/.test(code[newEnd])) {
++        newEnd += 1;
++      }
++      if (/,/.test(code[newEnd])) {
++        end = newEnd + 1;
++      }
++    }
++    return {
++      start,
++      end
++    };
++  }
++  function createNoopExpression() {
++    return {
++      code: '(void 0)',
++      node: {
++        type: 'UnaryExpression',
++        operator: 'void',
++        prefix: true,
++        argument: {
++          type: 'Literal',
++          value: 0,
++          raw: '0'
++        }
++      }
++    };
++  }
++  function createNoopStatement() {
++    return {
++      code: '{}',
++      node: {
++        type: 'BlockStatement',
++        body: []
++      }
++    };
++  }
++  function unassertImportDeclaration(currentNode) {
++    const source = currentNode.source;
++    if (!isAssertionModuleName(source)) {
++      return;
++    }
++    removeNode(currentNode);
++    this.skip();
++    registerAssertionVariables(currentNode);
++  }
++  function unassertVariableDeclarator(currentNode, parentNode) {
++    if (isRemovalTargetRequire(currentNode.id, currentNode.init)) {
++      if (parentNode.declarations.length === 1) {
++        removeNode(parentNode);
++      } else {
++        removeNode(currentNode);
++      }
++      this.skip();
++      registerAssertionVariables(currentNode.id);
++    }
++  }
++  function unassertAssignmentExpression(currentNode, parentNode) {
++    if (currentNode.operator !== '=') {
++      return;
++    }
++    if (!isExpressionStatement(parentNode)) {
++      return;
++    }
++    if (isRemovalTargetRequire(currentNode.left, currentNode.right)) {
++      removeNode(parentNode);
++      this.skip();
++      registerAssertionVariables(currentNode.left);
++    }
++  }
++  function unassertCallExpression(currentNode, parentNode) {
++    const callee = currentNode.callee;
++    if (!isRemovalTargetAssertion(callee)) {
++      return;
++    }
++    switch (parentNode.type) {
++      case 'ExpressionStatement':
++        {
++          removeNode(parentNode);
++          this.skip();
++          break;
++        }
++      case 'SequenceExpression':
++        {
++          replaceNode(currentNode, createNoopExpression());
++          break;
++        }
++    }
++  }
++  function unassertAwaitExpression(currentNode, parentNode) {
++    const childNode = currentNode.argument;
++    if (isExpressionStatement(parentNode) && isCallExpression(childNode)) {
++      const callee = childNode.callee;
++      if (isRemovalTargetAssertion(callee)) {
++        removeNode(parentNode);
++        this.skip();
++      }
++    }
++  }
++  return {
++    enter: function (currentNode, parentNode) {
++      if (code && isAcornNode(currentNode)) {
++        code.addSourcemapLocation(currentNode.start);
++        code.addSourcemapLocation(currentNode.end);
++      }
++      switch (currentNode.type) {
++        case 'ImportDeclaration':
++          {
++            unassertImportDeclaration.bind(this)(currentNode, parentNode);
++            break;
++          }
++        case 'VariableDeclarator':
++          {
++            unassertVariableDeclarator.bind(this)(currentNode, parentNode);
++            break;
++          }
++        case 'AssignmentExpression':
++          {
++            unassertAssignmentExpression.bind(this)(currentNode, parentNode);
++            break;
++          }
++        case 'CallExpression':
++          {
++            unassertCallExpression.bind(this)(currentNode, parentNode);
++            break;
++          }
++        case 'AwaitExpression':
++          {
++            unassertAwaitExpression.bind(this)(currentNode, parentNode);
++            break;
++          }
++      }
++    },
++    leave: function (currentNode, parentNode) {
++      const update = nodeUpdates.get(currentNode);
++      if (update === undefined) {
++        return undefined;
++      }
++      if (update === null) {
++        if (isExpressionStatement(currentNode)) {
++          const path = this.path();
++          if (path) {
++            const key = path[path.length - 1];
++            if (parentNode && isNonBlockChildOfParentNode(currentNode, parentNode, key)) {
++              const replacement = createNoopStatement();
++              if (code && isAcornNode(currentNode)) {
++                const {
++                  start,
++                  end
++                } = getStartAndEnd(currentNode, code.toString());
++                code.overwrite(start, end, replacement.code);
++              }
++              return replacement.node;
++            }
++          }
++        }
++        if (code && isAcornNode(currentNode)) {
++          const {
++            start,
++            end
++          } = getStartAndEnd(currentNode, code.toString());
++          code.remove(start, end);
++        }
++        this.remove();
++        return undefined;
++      }
++      if (code && isAcornNode(currentNode)) {
++        const {
++          start,
++          end
++        } = getStartAndEnd(currentNode, code.toString());
++        code.overwrite(start, end, update.code);
++      }
++      return update.node;
++    }
++  };
++}
++function unassertAst(ast, options) {
++  return replace(ast, createVisitor(options));
++}
++function unassertCode(code, ast, options) {
++  const {
++    sourceMap,
++    ...traverseOptions
++  } = options ?? {};
++  const usingMagic = code instanceof MagicString;
++  const magicCode = usingMagic ? code : new MagicString(code);
++  traverse(ast, createVisitor({
++    ...traverseOptions,
++    code: magicCode
++  }));
++  if (usingMagic) {
++    return magicCode;
++  }
++  const unassertedCode = magicCode.toString();
++  const map = sourceMap ? magicCode.generateMap(sourceMap === true ? undefined : sourceMap) : null;
++  return {
++    code: unassertedCode,
++    map
++  };
++}
++function defaultOptions() {
++  return {
++    modules: ['assert', 'assert/strict', 'node:assert', 'node:assert/strict']
++  };
++}
++
++export { createVisitor, defaultOptions, unassertAst, unassertCode };
+diff --git a/package.json b/package.json
+index d010bf6686ff9e7916841452d76325c2ae99bf4e..daab376191885dfa1c4669df4982ca8ebddbfaf8 100644
+--- a/package.json
++++ b/package.json
+@@ -15,15 +15,20 @@
+     }
+   ],
+   "dependencies": {
+-    "estraverse": "^5.0.0"
++    "estraverse": "^5.0.0",
++    "magic-string": "^0.30.0"
+   },
+   "devDependencies": {
++    "@babel/preset-env": "^7.20.2",
++    "@rollup/plugin-babel": "^6.0.3",
+     "@twada/benchmark-commits": "^0.1.0",
+     "acorn": "^8.0.0",
+     "escodegen": "^2.0.0",
+     "mocha": "^10.0.0",
+     "rimraf": "^3.0.2",
+     "rollup": "^2.77.0",
++    "rollup-plugin-cleanup": "^3.2.1",
++    "rollup-plugin-copy": "^3.4.0",
+     "semistandard": "^16.0.0",
+     "snazzy": "^9.0.0"
+   },
+@@ -31,12 +36,15 @@
+     "README.md",
+     "CHANGELOG.md",
+     "LICENSE",
+-    "src",
+     "dist"
+   ],
+   "main": "./dist/index.cjs",
+   "exports": {
+-    "import": "./src/index.mjs",
++    "types": {
++      "import": "./dist/index.d.mts",
++      "require": "./dist/index.d.cts"
++    },
++    "import": "./dist/index.mjs",
+     "require": "./dist/index.cjs"
+   },
+   "homepage": "https://github.com/unassert-js/unassert",
+@@ -56,7 +64,8 @@
+     "build": "rimraf dist && rollup -c",
+     "lint": "semistandard --verbose src/*.mjs test/*.mjs | snazzy",
+     "fmt": "semistandard --fix src/*.mjs test/*.mjs",
+-    "test": "npm run lint && mocha test"
++    "test": "npm run lint && npm run test:js",
++    "test:js": "mocha test"
+   },
+   "semistandard": {
+     "globals": [
+@@ -64,5 +73,8 @@
+       "beforeEach",
+       "it"
+     ]
++  },
++  "engines": {
++    "node": ">=14.15.0"
+   }
+ }
+diff --git a/src/index.mjs b/src/index.mjs
+deleted file mode 100644
+index f614bd2a0b3e4ef16ea35e2db47cfe9b1e021d1f..0000000000000000000000000000000000000000

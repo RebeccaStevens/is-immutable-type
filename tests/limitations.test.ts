@@ -6,14 +6,14 @@
 
 import test from "ava";
 
-import { Immutability } from "../src";
+import { Immutability } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
 test("override primitive", (t) => {
   const overrides = [
     {
-      name: "string",
+      type: "string",
       to: Immutability.Mutable,
     },
   ];
@@ -40,8 +40,8 @@ test("alias of type primitive", (t) => {
 
   // prettier-ignore
   for (const overrides of [
-    [{ name: "A", to: Immutability.Mutable }],
-    [{ name: "B", to: Immutability.Mutable }]
+    [{ type: "A", to: Immutability.Mutable }],
+    [{ type: "B", to: Immutability.Mutable }]
   ]) {
     runTestImmutability(
       t,

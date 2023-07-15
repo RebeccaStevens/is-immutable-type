@@ -1,5 +1,4 @@
 import rollupPluginJSON from "@rollup/plugin-json";
-import rollupPluginNodeResolve from "@rollup/plugin-node-resolve";
 import rollupPluginTypescript from "@rollup/plugin-typescript";
 import { defineConfig, type Plugin } from "rollup";
 import rollupPluginAutoExternal from "rollup-plugin-auto-external";
@@ -43,16 +42,11 @@ const runtimes = defineConfig({
 
   plugins: [
     rollupPluginAutoExternal(),
-    rollupPluginNodeResolve(),
     rollupPluginTypescript({
-      tsconfig: "tsconfig.build.json",
+      tsconfig: "tsconfig.json",
     }),
     rollupPluginUassert({
       include: ["**/*.ts"],
-      importPatterns: [
-        'import assert from "node:assert"',
-        'import * as assert from "node:assert"',
-      ],
     }),
     rollupPluginJSON({
       preferConst: true,
@@ -77,10 +71,9 @@ const types = defineConfig({
   ],
 
   plugins: [
-    rollupPluginTypescript({
-      tsconfig: "tsconfig.build.json",
+    rollupPluginDts({
+      tsconfig: "tsconfig.json",
     }),
-    rollupPluginDts(),
   ] as Plugin[],
 });
 
