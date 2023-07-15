@@ -13,7 +13,7 @@ import {
   isReadonlyShallowType,
   type ImmutabilityCache,
   type ImmutabilityOverrides,
-} from "../src";
+} from "#is-immutable-type";
 
 /**
  * Create a TS environment to run the tests in.

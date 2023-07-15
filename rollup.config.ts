@@ -43,7 +43,7 @@ const runtimes = defineConfig({
   plugins: [
     rollupPluginAutoExternal(),
     rollupPluginTypescript({
-      tsconfig: "tsconfig.build.json",
+      tsconfig: "tsconfig.json",
     }),
     rollupPluginUassert({
       include: ["**/*.ts"],
@@ -71,10 +71,9 @@ const types = defineConfig({
   ],
 
   plugins: [
-    rollupPluginTypescript({
-      tsconfig: "tsconfig.build.json",
+    rollupPluginDts({
+      tsconfig: "tsconfig.json",
     }),
-    rollupPluginDts(),
   ] as Plugin[],
 });
 

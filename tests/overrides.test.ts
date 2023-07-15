@@ -1,6 +1,6 @@
 import test from "ava";
 
-import { Immutability, type ImmutabilityOverrides } from "../src";
+import { Immutability, type ImmutabilityOverrides } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
