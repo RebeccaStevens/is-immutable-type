@@ -234,7 +234,10 @@ function typeNameMatchesSpecifier(
   }
 
   const evaluated = typeName.getEvaluated();
-  return patterns.some((pattern) => pattern.test(evaluated));
+  return (
+    names.includes(evaluated) ||
+    patterns.some((pattern) => pattern.test(evaluated))
+  );
 }
 
 /**
