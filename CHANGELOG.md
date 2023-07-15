@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+# [2.0.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.9...v2.0.0) (2023-07-15)
+
+
+* Next Major (#128) ([b76b2b7](https://github.com/RebeccaStevens/is-immutable-type/commit/b76b2b7e5b48e37e77b55608b4e3fa1bea168e9d)), closes [#128](https://github.com/RebeccaStevens/is-immutable-type/issues/128) [#47](https://github.com/RebeccaStevens/is-immutable-type/issues/47)
+
+
+### BREAKING CHANGES
+
+* compatibility with typescript-eslint v6 is now required
+
 ## [1.2.9](https://github.com/RebeccaStevens/is-immutable-type/compare/v1.2.8...v1.2.9) (2023-03-20)
 
 
