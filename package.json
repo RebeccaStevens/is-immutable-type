@@ -87,7 +87,7 @@
     "ava": "5.3.1",
     "c8": "8.0.0",
     "commitizen": "4.3.0",
-    "cspell": "6.31.1",
+    "cspell": "6.31.2",
     "cz-conventional-changelog": "3.3.0",
     "eslint": "8.45.0",
     "eslint-config-prettier": "8.8.0",
