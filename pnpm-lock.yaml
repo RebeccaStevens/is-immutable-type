@@ -70,8 +70,8 @@ devDependencies:
     specifier: 6.1.0
     version: 6.1.0(eslint@8.45.0)(typescript@5.1.6)
   '@typescript/vfs':
-    specifier: 1.4.0
-    version: 1.4.0
+    specifier: 1.5.0
+    version: 1.5.0
   ava:
     specifier: 5.3.1
     version: 5.3.1
@@ -1564,8 +1564,8 @@ packages:
       eslint-visitor-keys: 3.4.1
     dev: true
 
-  /@typescript/vfs@1.4.0:
-    resolution: {integrity: sha512-Pood7yv5YWMIX+yCHo176OnF8WUlKGImFG7XlsuH14Zb1YN5+dYD3uUtS7lqZtsH7tAveNUi2NzdpQCN0yRbaw==}
+  /@typescript/vfs@1.5.0:
+    resolution: {integrity: sha512-AJS307bPgbsZZ9ggCT3wwpg3VbTKMFNHfaY/uF0ahSkYYrPF2dSSKDNIDIQAHm9qJqbLvCsSJH7yN4Vs/CsMMg==}
     dependencies:
       debug: 4.3.4
     transitivePeerDependencies:
