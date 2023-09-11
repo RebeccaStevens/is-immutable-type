@@ -125,7 +125,7 @@
     "eslint": "*",
     "typescript": ">=4.7.4"
   },
-  "packageManager": "pnpm@8.7.1",
+  "packageManager": "pnpm@8.7.4",
   "pnpm": {
     "patchedDependencies": {
       "unassert@2.0.0": "patches/unassert@2.0.0.patch",
