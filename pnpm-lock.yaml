@@ -61,8 +61,8 @@ devDependencies:
     specifier: 16.18.59
     version: 16.18.59
   '@types/rollup-plugin-auto-external':
-    specifier: 2.0.3
-    version: 2.0.3
+    specifier: 2.0.4
+    version: 2.0.4
   '@typescript-eslint/eslint-plugin':
     specifier: 6.7.5
     version: 6.7.5(@typescript-eslint/parser@6.7.5)(eslint@8.51.0)(typescript@5.2.2)
@@ -1525,8 +1525,8 @@ packages:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
     dev: true
 
-  /@types/rollup-plugin-auto-external@2.0.3:
-    resolution: {integrity: sha512-53aSj+4CdKav2uGO4++IHlA7kOF1XxLRMaznAXcWx2zj87YDBZ5ZhWPAJ2vvri2WqjPdrOznf1qSvnm9hlPyww==}
+  /@types/rollup-plugin-auto-external@2.0.4:
+    resolution: {integrity: sha512-CTEK2LSD4Cs1ZNuDkJ877KNVOQOyV6Olsgl2OR7jX82CVvlLT/yE0OibO1JRWf7ioDo839tjdJCkBQITOtOS+A==}
     dependencies:
       rollup: 4.1.4
     dev: true
