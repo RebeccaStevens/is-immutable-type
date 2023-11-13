@@ -58,8 +58,8 @@ devDependencies:
     specifier: 12.1.0
     version: 12.1.0(semantic-release@22.0.7)
   '@types/node':
-    specifier: 16.18.60
-    version: 16.18.60
+    specifier: 16.18.61
+    version: 16.18.61
   '@types/rollup-plugin-auto-external':
     specifier: 2.0.4
     version: 2.0.4
@@ -170,7 +170,7 @@ devDependencies:
     version: 22.0.7
   ts-node:
     specifier: 10.9.1
-    version: 10.9.1(@types/node@16.18.60)(typescript@5.2.2)
+    version: 10.9.1(@types/node@16.18.61)(typescript@5.2.2)
   ts-paths-esm-loader:
     specifier: 1.4.3
     version: 1.4.3(ts-node@10.9.1)(tsconfig-paths@3.14.2)
@@ -1513,8 +1513,8 @@ packages:
     resolution: {integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==}
     dev: true
 
-  /@types/node@16.18.60:
-    resolution: {integrity: sha512-ZUGPWx5vKfN+G2/yN7pcSNLkIkXEvlwNaJEd4e0ppX7W2S8XAkdc/37hM4OUNJB9sa0p12AOvGvxL4JCPiz9DA==}
+  /@types/node@16.18.61:
+    resolution: {integrity: sha512-k0N7BqGhJoJzdh6MuQg1V1ragJiXTh8VUBAZTWjJ9cUq23SG0F0xavOwZbhiP4J3y20xd6jxKx+xNUhkMAi76Q==}
     dev: true
 
   /@types/node@18.18.6:
@@ -6981,7 +6981,7 @@ packages:
     dependencies:
       typescript: 5.2.2
 
-  /ts-node@10.9.1(@types/node@16.18.60)(typescript@5.2.2):
+  /ts-node@10.9.1(@types/node@16.18.61)(typescript@5.2.2):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -7000,7 +7000,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
-      '@types/node': 16.18.60
+      '@types/node': 16.18.61
       acorn: 8.10.0
       acorn-walk: 8.2.0
       arg: 4.1.3
@@ -7018,7 +7018,7 @@ packages:
       ts-node: ^10.4.0
       tsconfig-paths: ^4.0.0 || ^3.12.0
     dependencies:
-      ts-node: 10.9.1(@types/node@16.18.60)(typescript@5.2.2)
+      ts-node: 10.9.1(@types/node@16.18.61)(typescript@5.2.2)
       tsconfig-paths: 3.14.2
     dev: true
 
