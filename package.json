@@ -79,7 +79,7 @@
     "@semantic-release/github": "9.2.3",
     "@semantic-release/npm": "11.0.1",
     "@semantic-release/release-notes-generator": "12.1.0",
-    "@types/node": "16.18.61",
+    "@types/node": "16.18.62",
     "@types/rollup-plugin-auto-external": "2.0.5",
     "@typescript-eslint/eslint-plugin": "6.11.0",
     "@typescript-eslint/parser": "6.11.0",
