@@ -116,7 +116,7 @@
     "rollup-plugin-dts": "6.1.0",
     "rollup-plugin-unassert": "0.6.0",
     "semantic-release": "22.0.8",
-    "ts-node": "10.9.1",
+    "ts-node": "10.9.2",
     "ts-paths-esm-loader": "1.4.3",
     "tslib": "2.6.2",
     "typescript": "5.2.2"
