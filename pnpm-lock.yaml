@@ -32,7 +32,7 @@ devDependencies:
     version: 4.0.0
   '@rebeccastevens/eslint-config':
     specifier: 2.0.0
-    version: 2.0.0(@typescript-eslint/eslint-plugin@6.11.0)(@typescript-eslint/parser@6.11.0)(eslint-import-resolver-typescript@3.6.1)(eslint-plugin-eslint-comments@3.2.0)(eslint-plugin-functional@5.0.8)(eslint-plugin-import@2.29.0)(eslint-plugin-jsdoc@46.9.0)(eslint-plugin-markdown@3.0.1)(eslint-plugin-n@16.3.1)(eslint-plugin-optimize-regex@1.2.1)(eslint-plugin-promise@6.1.1)(eslint-plugin-sonarjs@0.19.0)(eslint-plugin-unicorn@49.0.0)(eslint@8.54.0)
+    version: 2.0.0(@typescript-eslint/eslint-plugin@6.11.0)(@typescript-eslint/parser@6.11.0)(eslint-import-resolver-typescript@3.6.1)(eslint-plugin-eslint-comments@3.2.0)(eslint-plugin-functional@5.0.8)(eslint-plugin-import@2.29.0)(eslint-plugin-jsdoc@47.0.2)(eslint-plugin-markdown@3.0.1)(eslint-plugin-n@16.3.1)(eslint-plugin-optimize-regex@1.2.1)(eslint-plugin-promise@6.1.1)(eslint-plugin-sonarjs@0.19.0)(eslint-plugin-unicorn@49.0.0)(eslint@8.54.0)
   '@rollup/plugin-json':
     specifier: 6.0.1
     version: 6.0.1(rollup@4.6.0)
@@ -109,8 +109,8 @@ devDependencies:
     specifier: 2.29.0
     version: 2.29.0(@typescript-eslint/parser@6.11.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.54.0)
   eslint-plugin-jsdoc:
-    specifier: 46.9.0
-    version: 46.9.0(eslint@8.54.0)
+    specifier: 47.0.2
+    version: 47.0.2(eslint@8.54.0)
   eslint-plugin-markdown:
     specifier: 3.0.1
     version: 3.0.1(eslint@8.54.0)
@@ -1139,7 +1139,7 @@ packages:
       - domexception
     dev: true
 
-  /@rebeccastevens/eslint-config@2.0.0(@typescript-eslint/eslint-plugin@6.11.0)(@typescript-eslint/parser@6.11.0)(eslint-import-resolver-typescript@3.6.1)(eslint-plugin-eslint-comments@3.2.0)(eslint-plugin-functional@5.0.8)(eslint-plugin-import@2.29.0)(eslint-plugin-jsdoc@46.9.0)(eslint-plugin-markdown@3.0.1)(eslint-plugin-n@16.3.1)(eslint-plugin-optimize-regex@1.2.1)(eslint-plugin-promise@6.1.1)(eslint-plugin-sonarjs@0.19.0)(eslint-plugin-unicorn@49.0.0)(eslint@8.54.0):
+  /@rebeccastevens/eslint-config@2.0.0(@typescript-eslint/eslint-plugin@6.11.0)(@typescript-eslint/parser@6.11.0)(eslint-import-resolver-typescript@3.6.1)(eslint-plugin-eslint-comments@3.2.0)(eslint-plugin-functional@5.0.8)(eslint-plugin-import@2.29.0)(eslint-plugin-jsdoc@47.0.2)(eslint-plugin-markdown@3.0.1)(eslint-plugin-n@16.3.1)(eslint-plugin-optimize-regex@1.2.1)(eslint-plugin-promise@6.1.1)(eslint-plugin-sonarjs@0.19.0)(eslint-plugin-unicorn@49.0.0)(eslint@8.54.0):
     resolution: {integrity: sha512-NUp1vROpMvLl76q9UQeqkE6v7eD4nhIIjG2RI95TvI+i3cNg4tV9dGunrf0jEyxooR6T2C9KTFb02wQY/B283A==}
     engines: {node: '>=18.12.1'}
     peerDependencies:
@@ -1166,7 +1166,7 @@ packages:
       eslint-plugin-eslint-comments: 3.2.0(eslint@8.54.0)
       eslint-plugin-functional: 5.0.8(eslint@8.54.0)(typescript@5.2.2)
       eslint-plugin-import: 2.29.0(@typescript-eslint/parser@6.11.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.54.0)
-      eslint-plugin-jsdoc: 46.9.0(eslint@8.54.0)
+      eslint-plugin-jsdoc: 47.0.2(eslint@8.54.0)
       eslint-plugin-markdown: 3.0.1(eslint@8.54.0)
       eslint-plugin-n: 16.3.1(eslint@8.54.0)
       eslint-plugin-optimize-regex: 1.2.1
@@ -3321,11 +3321,11 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-plugin-jsdoc@46.9.0(eslint@8.54.0):
-    resolution: {integrity: sha512-UQuEtbqLNkPf5Nr/6PPRCtr9xypXY+g8y/Q7gPa0YK7eDhh0y2lWprXRnaYbW7ACgIUvpDKy9X2bZqxtGzBG9Q==}
+  /eslint-plugin-jsdoc@47.0.2(eslint@8.54.0):
+    resolution: {integrity: sha512-sIq81Pv+yrhhwY0m1JH79rdZRgDNunehv3S0Yv0UfewpoeJyPkODFn2o4o20nofVoI2tjku9/QBcCYUmmeWFXA==}
     engines: {node: '>=16'}
     peerDependencies:
-      eslint: ^7.0.0 || ^8.0.0
+      eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
     dependencies:
       '@es-joy/jsdoccomment': 0.41.0
       are-docs-informative: 0.0.2
@@ -3336,7 +3336,7 @@ packages:
       esquery: 1.5.0
       is-builtin-module: 3.2.1
       semver: 7.5.4
-      spdx-expression-parse: 3.0.1
+      spdx-expression-parse: 4.0.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6633,6 +6633,13 @@ packages:
 
   /spdx-expression-parse@3.0.1:
     resolution: {integrity: sha512-cbqHunsQWnJNE6KhVSMsMeH5H/L9EpymbzqTQ3uLwNCLZ1Q481oWaofqH7nO6V07xlXwY6PhQdQ2IedWx/ZK4Q==}
+    dependencies:
+      spdx-exceptions: 2.3.0
+      spdx-license-ids: 3.0.12
+    dev: true
+
+  /spdx-expression-parse@4.0.0:
+    resolution: {integrity: sha512-Clya5JIij/7C6bRR22+tnGXbc4VKlibKSVj2iHvVeX5iMW7s1SIQlqu699JkODJJIhh/pUu8L0/VLh8xflD+LQ==}
     dependencies:
       spdx-exceptions: 2.3.0
       spdx-license-ids: 3.0.12
