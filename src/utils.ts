@@ -189,20 +189,20 @@ function typeNameMatchesSpecifier(
     typeof specifier === "string"
       ? [specifier]
       : specifier instanceof RegExp || specifier.name === undefined
-      ? []
-      : Array.isArray(specifier.name)
-      ? specifier.name
-      : [specifier.name];
+        ? []
+        : Array.isArray(specifier.name)
+          ? specifier.name
+          : [specifier.name];
   const patterns =
     typeof specifier === "string"
       ? []
       : specifier instanceof RegExp
-      ? [specifier]
-      : specifier.pattern === undefined
-      ? []
-      : Array.isArray(specifier.pattern)
-      ? specifier.pattern
-      : [specifier.pattern];
+        ? [specifier]
+        : specifier.pattern === undefined
+          ? []
+          : Array.isArray(specifier.pattern)
+            ? specifier.pattern
+            : [specifier.pattern];
 
   const name = typeName.getName();
   if (name !== null) {

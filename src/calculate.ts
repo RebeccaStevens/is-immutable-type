@@ -132,8 +132,8 @@ function getTypeImmutabilityHelper(
     useCache === true
       ? globalCache
       : useCache === false
-      ? new WeakMap()
-      : useCache;
+        ? new WeakMap()
+        : useCache;
 
   const cached = getCachedData(program, cache, typeData);
   if (cached !== undefined) {
@@ -491,8 +491,8 @@ function objectImmutability(
     typeData.typeNode === null
       ? undefined
       : ts.isIntersectionTypeNode(typeData.typeNode)
-      ? typeData.typeNode.types
-      : [typeData.typeNode];
+        ? typeData.typeNode.types
+        : [typeData.typeNode];
 
   const stringIndexSigImmutability = types
     .map((type, index) =>
