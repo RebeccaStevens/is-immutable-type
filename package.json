@@ -63,7 +63,7 @@
     "type-check": "tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
-    "@typescript-eslint/type-utils": "^6.0.0",
+    "@typescript-eslint/type-utils": "^7.0.0",
     "ts-api-utils": "^1.0.1"
   },
   "devDependencies": {
@@ -81,8 +81,8 @@
     "@semantic-release/release-notes-generator": "12.1.0",
     "@types/node": "16.18.65",
     "@types/rollup-plugin-auto-external": "2.0.5",
-    "@typescript-eslint/eslint-plugin": "6.11.0",
-    "@typescript-eslint/parser": "6.11.0",
+    "@typescript-eslint/eslint-plugin": "7.2.0",
+    "@typescript-eslint/parser": "7.2.0",
     "@typescript/vfs": "1.5.0",
     "ava": "5.3.1",
     "c8": "8.0.1",
