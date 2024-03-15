@@ -349,3 +349,10 @@ function qualifiedNameToString(qualifiedName: ts.QualifiedName): string {
     qualifiedName.right,
   )}`;
 }
+
+/**
+ * Cast the type.
+ */
+export function cast<T extends U, U = unknown>(value: U): value is T {
+  return true;
+}
