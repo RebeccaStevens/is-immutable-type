@@ -57,12 +57,6 @@
       }
     },
     {
-      "files": ["./tests/limitations.test.ts"],
-      "rules": {
-        "ava/no-ignored-test-files": "off"
-      }
-    },
-    {
       "files": ["./tests/fixtures/**"],
       "rules": {
         "unicorn/no-empty-file": "off"
