@@ -1,80 +1,52 @@
-import rollupPluginJSON from "@rollup/plugin-json";
-import rollupPluginTypescript from "@rollup/plugin-typescript";
-import { defineConfig, type Plugin } from "rollup";
+import rollupPluginReplace from "@rollup/plugin-replace";
+import { rollupPlugin as rollupPluginDeassert } from "deassert";
+import { type RollupOptions } from "rollup";
 import rollupPluginAutoExternal from "rollup-plugin-auto-external";
-import rollupPluginDts from "rollup-plugin-dts";
-import rollupPluginUassert from "rollup-plugin-unassert";
+import rollupPluginTs from "rollup-plugin-ts";
 
 import pkg from "./package.json" assert { type: "json" };
 
-const common = defineConfig({
+const treeshake = {
+  annotations: true,
+  moduleSideEffects: [],
+  propertyReadSideEffects: false,
+  unknownGlobalSideEffects: false,
+} satisfies RollupOptions["treeshake"];
+
+const library = {
   input: "src/index.ts",
-
-  output: {
-    sourcemap: false,
-  },
-
-  external: [],
-
-  treeshake: {
-    annotations: true,
-    moduleSideEffects: [],
-    propertyReadSideEffects: false,
-    unknownGlobalSideEffects: false,
-  },
-});
-
-const runtimes = defineConfig({
-  ...common,
 
   output: [
     {
-      ...common.output,
       file: pkg.exports.import,
       format: "esm",
+      sourcemap: false,
     },
     {
-      ...common.output,
       file: pkg.exports.require,
       format: "cjs",
+      sourcemap: false,
     },
   ],
 
   plugins: [
     rollupPluginAutoExternal(),
-    rollupPluginTypescript({
-      tsconfig: "tsconfig.json",
+    rollupPluginTs({
+      transpileOnly: true,
+      tsconfig: "tsconfig.build.json",
     }),
-    rollupPluginUassert({
-      include: ["**/*.ts"],
+    rollupPluginReplace({
+      values: {
+        "import.meta.vitest": "undefined",
+      },
+      preventAssignment: true,
     }),
-    rollupPluginJSON({
-      preferConst: true,
+    rollupPluginDeassert({
+      include: ["**/*.{js,ts}"],
     }),
   ],
-});
 
-const types = defineConfig({
-  ...common,
+  treeshake,
+} satisfies RollupOptions;
 
-  output: [
-    {
-      ...common.output,
-      file: pkg.exports.types.import,
-      format: "esm",
-    },
-    {
-      ...common.output,
-      file: pkg.exports.types.require,
-      format: "cjs",
-    },
-  ],
-
-  plugins: [
-    rollupPluginDts({
-      tsconfig: "tsconfig.json",
-    }),
-  ] as Plugin[],
-});
-
-export default [runtimes, types];
+export default [library];

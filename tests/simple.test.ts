@@ -1,11 +1,11 @@
-import test from "ava";
+import { describe, it } from "vitest";
 
 import { Immutability } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
-test("primitives", (t) => {
-  for (const code of [
+describe("primitives", () => {
+  it.each([
     "type Test = null;",
     "type Test = undefined;",
     "type Test = string;",
@@ -13,234 +13,147 @@ test("primitives", (t) => {
     "type Test = boolean;",
     "type Test = symbol;",
     "type Test = bigint;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "treat primitives as immutable",
-    );
-  }
+  ])("treat primitives as immutable", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 });
 
-test("records", (t) => {
-  for (const code of [
+describe("records", () => {
+  it.each([
     "type Test = { readonly foo: string; };",
     "type Test = Readonly<{ foo: string; }>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles immutable records",
-    );
-  }
+  ])("handles immutable records", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 
-  // prettier-ignore
-  for (const code of [
-    "type Test = { foo: string; };",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "handles mutable records"
-    );
-  }
+  it.each(["type Test = { foo: string; };"])(
+    "handles mutable records",
+    (code) => {
+      runTestImmutability(code, Immutability.Mutable);
+    },
+  );
 });
 
-test("arrays", (t) => {
+describe("arrays", () => {
   const ImmutableShallow = `type ImmutableShallow<T extends {}> = {
     readonly [P in keyof T & {}]: T[P];
   };`;
 
-  for (const code of [
+  it.each([
     `type Test = ImmutableShallow<readonly string[]>; ${ImmutableShallow}`,
     `type Test = ImmutableShallow<ReadonlyArray<string>>; ${ImmutableShallow}`,
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles immutable arrays",
-    );
-  }
+  ])("handles immutable arrays", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 
-  for (const code of [
+  it.each([
     "type Test = readonly string[];",
     "type Test = ReadonlyArray<string>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyDeep,
-      "handles deeply readonly arrays",
-    );
-  }
+  ])("handles deeply readonly arrays", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyDeep);
+  });
 
-  for (const code of [
+  it.each([
     "type Test = readonly { foo: string }[];",
     "type Test = ReadonlyArray<{ foo: string }>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyShallow,
-      "handles shallowly readonly arrays",
-    );
-  }
+  ])("handles shallowly readonly arrays", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyShallow);
+  });
 
-  // prettier-ignore
-  for (const code of [
-    "type Test = string[];",
-    "type Test = Array<string>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "handles mutable arrays"
-    );
-  }
+  it.each(["type Test = string[];", "type Test = Array<string>;"])(
+    "handles mutable arrays",
+    (code) => {
+      runTestImmutability(code, Immutability.Mutable);
+    },
+  );
 });
 
-test("tuples", (t) => {
-  for (const code of [
+describe("tuples", () => {
+  it.each([
     "type Test = readonly [string, number, boolean];",
     "type Test = Readonly<[string, number, boolean]>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyDeep,
-      "handles deeply readonly tuples",
-    );
-  }
+  ])("handles deeply readonly tuples", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyDeep);
+  });
 
-  for (const code of [
+  it.each([
     "type Test = readonly [{ foo: string }, { bar: number }];",
     "type Test = Readonly<[{ foo: string }, { bar: number }]>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyShallow,
-      "handles shallowly readonly tuples",
-    );
-  }
+  ])("handles shallowly readonly tuples", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyShallow);
+  });
 
-  // prettier-ignore
-  for (const code of [
-    "type Test = [string, number, boolean];",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "handles mutable tuples"
-    );
-  }
+  it.each(["type Test = [string, number, boolean];"])(
+    "handles mutable tuples",
+    (code) => {
+      runTestImmutability(code, Immutability.Mutable);
+    },
+  );
 });
 
-test("sets and maps", (t) => {
-  for (const code of [
+describe("sets and maps", () => {
+  it.each([
     "type Test = Readonly<ReadonlySet<string>>;",
     "type Test = Readonly<ReadonlyMap<string, string>>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles immutable sets and maps",
-    );
-  }
+  ])("handles immutable sets and maps", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 
-  for (const code of [
+  it.each([
     "type Test = ReadonlySet<string>;",
     "type Test = ReadonlyMap<string, string>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyDeep,
-      "handles deeply readonly sets and maps",
-    );
-  }
+  ])("handles deeply readonly sets and maps", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyDeep);
+  });
 
-  for (const code of [
+  it.each([
     "type Test = ReadonlySet<{ foo: string }>;",
     "type Test = ReadonlyMap<{ foo: string }, { bar: string }>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyShallow,
-      "handles shallowly readonly sets and maps",
-    );
-  }
+  ])("handles shallowly readonly sets and maps", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyShallow);
+  });
 
-  // prettier-ignore
-  for (const code of [
-    "type Test = Set<string>;",
-    "type Test = Map<string, string>;"
-  ]) {
-      runTestImmutability(
-        t,
-        code,
-        Immutability.Mutable,
-        "handles mutable sets and maps"
-      );
-    }
+  it.each(["type Test = Set<string>;", "type Test = Map<string, string>;"])(
+    "handles mutable sets and maps",
+    (code) => {
+      runTestImmutability(code, Immutability.Mutable);
+    },
+  );
 });
 
-test("functions", (t) => {
-  for (const code of [
+describe("functions", () => {
+  it.each([
     "type Test = () => number;",
     "type Test = (foo: { bar: string; }) => { baz: number; };",
     "type Test = { (): number; };",
     "type Test = { (foo: { bar: string; }): { baz: number; } };",
-  ]) {
-    runTestImmutability(t, code, Immutability.Immutable, "handles function");
-  }
+  ])("handles functions", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 });
 
-test("methods", (t) => {
-  for (const code of [
+describe("methods", () => {
+  it.each([
     "type Test = { readonly foo: () => string; };",
     "type Test = Readonly<{ foo(): string; }>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles immutable records with methods",
-    );
-  }
+  ])("handles immutable records with methods", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 
-  for (const code of [
+  it.each([
     "type Test = { foo: () => string; };",
     "type Test = { foo(): string; };",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyDeep,
-      "handles mutable records with methods",
-    );
-  }
+  ])("handles mutable records with methods", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyDeep);
+  });
 });
 
-test("private identifiers", (t) => {
-  for (const code of [
+describe("private identifiers", () => {
+  it.each([
     'class Foo { readonly #readonlyPrivateField = "foo"; }',
     'class Foo { #privateField = "foo"; }',
     "class Foo { #privateMember() {}; }",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "treat private identifier as immutable",
-    );
-  }
+  ])("treats private identifier as immutable", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 });

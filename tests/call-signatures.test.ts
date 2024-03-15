@@ -1,61 +1,40 @@
-import test from "ava";
+import { describe, it } from "vitest";
 
 import { Immutability } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
-test("simple", (t) => {
-  for (const code of [
+describe("Call Signatures", () => {
+  it.each([
     "type Test = { (): void; readonly bar: number };",
     "type Test = Readonly<{ (): void; bar: number }>;",
     "type Test = { (foo: number): string; readonly bar: number };",
     "type Test = Readonly<{ (foo: number): string; bar: number }>;",
     "type Test = { (foo: { baz: number }): string; readonly bar: number };",
     "type Test = Readonly<{ (foo: { baz: number }): string; bar: number }>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles immutable namespaces",
-    );
-  }
+  ])("works for Immutable namespaces", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 
-  // prettier-ignore
-  for (const code of [
-    "type Test = { (): void; readonly bar: readonly number[] };",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyDeep,
-      "handles mutable namespaces"
-    );
-  }
+  it.each(["type Test = { (): void; readonly bar: readonly number[] };"])(
+    "works for ReadonlyDeep namespaces",
+    (code) => {
+      runTestImmutability(code, Immutability.ReadonlyDeep);
+    },
+  );
 
-  // prettier-ignore
-  for (const code of [
+  it.each([
     "type Test = { (): void; readonly bar: readonly ({ foo: number })[] };",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyShallow,
-      "handles mutable namespaces"
-    );
-  }
+  ])("works for ReadonlyShallow namespaces", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyShallow);
+  });
 
-  for (const code of [
+  it.each([
     "type Test = { (): void; bar: number };",
     "type Test = { (): string; bar: number };",
     "type Test = { (foo: string): void; bar: number };",
     "type Test = { (foo: { baz: number }): string; bar: number };",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "handles mutable namespaces",
-    );
-  }
+  ])("works for Mutable namespaces", (code) => {
+    runTestImmutability(code, Immutability.Mutable);
+  });
 });

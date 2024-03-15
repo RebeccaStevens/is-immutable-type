@@ -1,5 +1,3 @@
-/* eslint-disable functional/no-conditional-statements */
-
 import {
   hasType,
   isIntrinsicType,
@@ -9,12 +7,12 @@ import {
 import ts from "typescript";
 
 import {
-  type TypeData,
   cacheData,
   entityNameToString,
   getCachedData,
   getTypeData,
   isTypeNode,
+  type TypeData,
 } from "./utils";
 
 /*
@@ -239,7 +237,7 @@ function typeArgumentsToString(
     return undefined;
   }
 
-  return `${typeArgumentStrings.join(",")}`;
+  return typeArgumentStrings.join(",");
 }
 
 const cache = new WeakMap<ts.Type, TypeName>();

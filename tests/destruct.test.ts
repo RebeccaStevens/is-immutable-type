@@ -1,11 +1,11 @@
-import test from "ava";
+import { describe, it } from "vitest";
 
 import { Immutability } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
-test("destructuring arrays", (t) => {
-  for (const code of [
+describe("destructuring arrays", () => {
+  it.each([
     `
       const [a, b, ...c] = [1, 2, 3, 4];"
       type Test = typeof a;
@@ -14,32 +14,22 @@ test("destructuring arrays", (t) => {
       const [a, b, ...c] = [1, 2, 3, 4];"
       type Test = typeof b;
     `,
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "immutable elements in mutable destructed array are detected as immutable",
-    );
-  }
+  ])("Immutable", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 
-  for (const code of [
+  it.each([
     `
       const [a, b, ...c] = [1, 2, 3, 4];
       type Test = typeof c;
     `,
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "rest property is detected as a mutable array",
-    );
-  }
+  ])("Mutable", (code) => {
+    runTestImmutability(code, Immutability.Mutable);
+  });
 });
 
-test("destructuring objects", (t) => {
-  for (const code of [
+describe("destructuring objects", () => {
+  it.each([
     `
       const { a, b, ...c } = { a: 1, b: 2, d: 4, e: 5 };"
       type Test = typeof a;
@@ -48,26 +38,16 @@ test("destructuring objects", (t) => {
       const { a, b, ...c } = { a: 1, b: 2, d: 4, e: 5 };"
       type Test = typeof b;
     `,
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "immutable elements in mutable destructed object are detected as immutable",
-    );
-  }
+  ])("Immutable", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 
-  for (const code of [
+  it.each([
     `
       const { a, b, ...c } = { a: 1, b: 2, d: 4, e: 5 };
       type Test = typeof c;
     `,
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "rest property is detected as a mutable object",
-    );
-  }
+  ])("Mutable", (code) => {
+    runTestImmutability(code, Immutability.Mutable);
+  });
 });

@@ -4,49 +4,20 @@
  * Ideally we would like to get these tests to pass but so far that has proven to be very challenging.
  */
 
-import test from "ava";
+import { describe, it } from "vitest";
 
 import { Immutability } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
-test("override primitive", (t) => {
-  const overrides = [
-    {
-      type: "string",
-      to: Immutability.Mutable,
-    },
-  ];
-
-  // prettier-ignore
-  for (const code of [
-    "type Test = string;"
-  ]) {
+describe("Limitations", () => {
+  it("overrids an unused alias of a primitive", () => {
     runTestImmutability(
-      t,
-      { code, overrides },
-      Immutability.Immutable,
-      "can override a primitive"
+      {
+        code: `type A = string;`,
+        overrides: [{ type: "A", to: Immutability.Mutable }],
+      },
+      Immutability.Mutable,
     );
-  }
-});
-
-// Both `A` and `B` get discarded - TypeScript directly use `string`.
-test("alias of type primitive", (t) => {
-  const code = `
-    type A = string;
-    type B = A;
-  `;
-
-  // prettier-ignore
-  for (const overrides of [
-    [{ type: "A", to: Immutability.Mutable }],
-    [{ type: "B", to: Immutability.Mutable }]
-  ]) {
-    runTestImmutability(
-      t,
-      { code, overrides },
-      Immutability.Mutable
-    );
-  }
+  });
 });

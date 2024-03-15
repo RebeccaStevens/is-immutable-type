@@ -1,55 +1,35 @@
-import test from "ava";
+import { describe, it } from "vitest";
 
 import { Immutability } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
-test("simple", (t) => {
-  for (const code of [
+describe("Unions", () => {
+  it.each([
     "type Test = string | number",
     "type Test = Readonly<{ foo: string; }> | number;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles simple unions of immutable types",
-    );
-  }
+  ])("Immutable", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 
-  // prettier-ignore
-  for (const code of [
-    "type Test = readonly string[] | readonly number[];",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyDeep,
-      "handles simple unions of deeply readonly types"
-    );
-  }
+  it.each(["type Test = readonly string[] | readonly number[];"])(
+    "ReadonlyDeep",
+    (code) => {
+      runTestImmutability(code, Immutability.ReadonlyDeep);
+    },
+  );
 
-  // prettier-ignore
-  for (const code of [
-    "type Test = { foo: string; } | { bar: string; };",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "handles simple unions of mutable types"
-    );
-  }
+  it.each(["type Test = { foo: string; } | { bar: string; };"])(
+    "Mutable",
+    (code) => {
+      runTestImmutability(code, Immutability.Mutable);
+    },
+  );
 
-  // prettier-ignore
-  for (const code of [
-    "type Test = Readonly<{ foo: string; } | { bar: string; }>;",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles immutable unions of mutable types"
-    );
-  }
+  it.each(["type Test = Readonly<{ foo: string; } | { bar: string; }>;"])(
+    "Immutable",
+    (code) => {
+      runTestImmutability(code, Immutability.Immutable);
+    },
+  );
 });

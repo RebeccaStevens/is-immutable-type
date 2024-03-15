@@ -1,18 +1,35 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.fixAll.eslint": "explicit",
+    "source.formatDocument": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortImports": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.rulers": [80],
+  "files.associations": {
+    ".markdownlint.json": "jsonc",
+    ".markdownlintignore": "ignore"
+  },
   "files.exclude": {
     "coverage/": true
   },
   "files.trimTrailingWhitespace": true,
   "search.exclude": {
     "**/.git/": true,
+    ".nyc_output/": true,
     ".vscode/": true,
     "dist/": true,
-    "yarn.lock": true
+    "pnpm-lock.yaml": true
   },
-  "eslint.packageManager": "yarn",
   "typescript.tsdk": "./node_modules/typescript/lib",
-  "files.associations": {
-    ".markdownlint.json": "jsonc",
-    ".markdownlintignore": "ignore"
+  "[markdown]": {
+    "editor.rulers": [160]
+  },
+  "[properties]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
   }
 }

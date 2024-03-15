@@ -1,8 +1,7 @@
 import * as tsvfs from "@typescript/vfs";
-// eslint-disable-next-line ava/use-test -- see https://github.com/avajs/eslint-plugin-ava/issues/351
-import { type ExecutionContext } from "ava";
 import { hasType } from "ts-api-utils";
 import ts from "typescript";
+import { expect } from "vitest";
 
 import {
   getTypeImmutability,
@@ -81,7 +80,6 @@ function getType(code: string, line?: number) {
  * Run tests against "getTypeImmutability".
  */
 export function runTestImmutability(
-  t: Readonly<ExecutionContext>,
   test:
     | string
     | Readonly<{
@@ -102,13 +100,17 @@ export function runTestImmutability(
   const typeLike = typeNode ?? type;
 
   const actual = getTypeImmutability(program, typeLike, overrides, cache);
-  t.is(Immutability[actual], Immutability[expected], message);
+  expect(Immutability[actual]).to.be.equal(Immutability[expected], message);
 
   const immutable = isImmutableType(program, typeLike, overrides, cache);
-  t.is(expected >= Immutability.Immutable, immutable);
+  expect(expected).to.be[immutable ? "greaterThanOrEqual" : "lessThan"](
+    Immutability.Immutable,
+  );
 
   const readonlyDeep = isReadonlyDeepType(program, typeLike, overrides, cache);
-  t.is(expected >= Immutability.ReadonlyDeep, readonlyDeep);
+  expect(expected).to.be[readonlyDeep ? "greaterThanOrEqual" : "lessThan"](
+    Immutability.ReadonlyDeep,
+  );
 
   const readonlyShallow = isReadonlyShallowType(
     program,
@@ -116,8 +118,14 @@ export function runTestImmutability(
     overrides,
     cache,
   );
-  t.is(expected >= Immutability.ReadonlyShallow, readonlyShallow);
+  expect(expected).to.be[readonlyShallow ? "greaterThanOrEqual" : "lessThan"](
+    Immutability.ReadonlyShallow,
+  );
 
   const mutable = isMutableType(program, typeLike, overrides, cache);
-  t.is(expected === Immutability.Mutable, mutable);
+  if (mutable) {
+    expect(expected).to.be.equal(Immutability.Mutable);
+  } else {
+    expect(expected).to.be.not.equal(Immutability.Mutable);
+  }
 }

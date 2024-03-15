@@ -154,24 +154,6 @@ immutable regardless, you can provide an override stating as such.
 [{ type: { from: "package", package: "type-fest" pattern: /^ReadonlyDeep<.+>$/u }, to: Immutability.Immutable }]
 ```
 
-### Limitations (when it comes to overrides)
-
-#### Primitives
-
-Currently we cannot override primitives or aliases of primitives.
-
-For example, if we have the following code:
-
-```ts
-type A = string;
-type B = A;
-```
-
-We cannot override `A`, `B` or `string` here.
-
-The reason we cannot override the aliases is because, internally, TypeScript
-discards both `A` and `B` and just uses `string` in their place.
-
 ## Caching
 
 By default we use a global cache to speed up the calculation of multiple types'

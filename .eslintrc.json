@@ -12,10 +12,18 @@
     "prettier"
   ],
   "parserOptions": {
-    "project": ["./tsconfig.json"]
+    "project": "./tsconfig.eslint.json"
   },
-  "ignorePatterns": ["/coverage/", "/dist/", "/**/*.md"],
+  "ignorePatterns": [
+    "!.*",
+    "/coverage/",
+    "/dist/",
+    "node_modules",
+    "pnpm-lock.yaml",
+    "**/*.md"
+  ],
   "rules": {
+    "functional/no-conditional-statements": "off",
     "functional/no-expression-statements": "off",
     "functional/functional-parameters": [
       "error",
@@ -24,16 +32,28 @@
       }
     ],
     "functional/no-loop-statement": "off",
+    "functional/no-return-void": "off",
     "functional/no-throw-statements": "off",
     "functional/prefer-immutable-types": "off"
   },
   "overrides": [
     {
-      "files": ["./tests/**"],
-      "plugins": ["ava"],
-      "extends": ["plugin:ava/recommended", "plugin:functional/off"],
+      "files": ["**/*.test.ts"],
+      "plugins": ["vitest"],
+      "extends": ["plugin:vitest/recommended", "plugin:functional/off"],
       "rules": {
-        "unicorn/filename-case": "off"
+        "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/no-unsafe-argument": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "vitest/expect-expect": [
+          "error",
+          {
+            "assertFunctionNames": ["expect", "runTestImmutability"]
+          }
+        ]
       }
     },
     {
@@ -54,6 +74,13 @@
       "rules": {
         "import/no-unassigned-import": "off",
         "jsdoc/require-jsdoc": "off"
+      }
+    },
+    {
+      "files": ["./**/*.cjs"],
+      "extends": ["plugin:@typescript-eslint/disable-type-checked"],
+      "parserOptions": {
+        "project": false
       }
     }
   ]

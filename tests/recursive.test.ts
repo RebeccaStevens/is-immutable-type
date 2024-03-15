@@ -1,109 +1,75 @@
-import test from "ava";
+import { describe, it } from "vitest";
 
 import { Immutability } from "#is-immutable-type";
 
 import { runTestImmutability } from "./helpers";
 
-test("direct", (t) => {
-  for (const code of [
-    `
+describe("Recursive Types", () => {
+  describe("direct", () => {
+    it.each([
+      `
       interface I { readonly [key: string]: string | I };
       const test: I = {};
     `,
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles direct recursive immutable types",
-    );
-  }
+    ])("Immutable", (code) => {
+      runTestImmutability(code, Immutability.Immutable);
+    });
 
-  for (const code of ["type Test = string | ReadonlyArray<Test>;"]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyDeep,
-      "handles direct recursive deeply readonly types",
+    it.each(["type Test = string | ReadonlyArray<Test>;"])(
+      "ReadonlyDeep",
+      (code) => {
+        runTestImmutability(code, Immutability.ReadonlyDeep);
+      },
     );
-  }
 
-  for (const code of ["type Test = ReadonlyArray<Test | { foo: 1 }>;"]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyShallow,
-      "handles direct recursive shallowly readonly types",
+    it.each(["type Test = ReadonlyArray<Test | { foo: 1 }>;"])(
+      "ReadonlyShallow",
+      (code) => {
+        runTestImmutability(code, Immutability.ReadonlyShallow);
+      },
     );
-  }
 
-  for (const code of ["type Test = string | Test[];"]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "handles direct recursive mutable types",
-    );
-  }
-});
+    it.each(["type Test = string | Test[];"])("Mutable", (code) => {
+      runTestImmutability(code, Immutability.Mutable);
+    });
+  });
 
-test("generics", (t) => {
-  for (const code of [
-    "type Test<G> = Readonly<{ foo: Test<string> | string; }>;",
-    "type Test<G> = G extends string ? Readonly<{ foo: string }> : Test<string>",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles generic recursive immutable types",
-    );
-  }
+  describe("generics", () => {
+    it.each([
+      "type Test<G> = Readonly<{ foo: Test<string> | string; }>;",
+      "type Test<G> = G extends string ? Readonly<{ foo: string }> : Test<string>",
+    ])("Immutable", (code) => {
+      runTestImmutability(code, Immutability.Immutable);
+    });
 
-  for (const code of [
-    "type Test<G> = Readonly<{ foo: ReadonlyArray<Test<string>> | G; }>;",
-    "type Test<G> = G extends string ? ReadonlyArray<string> : Test<string>",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyDeep,
-      "handles generic recursive deeply readonly types",
-    );
-  }
+    it.each([
+      "type Test<G> = Readonly<{ foo: ReadonlyArray<Test<string>> | G; }>;",
+      "type Test<G> = G extends string ? ReadonlyArray<string> : Test<string>",
+    ])("ReadonlyDeep", (code) => {
+      runTestImmutability(code, Immutability.ReadonlyDeep);
+    });
 
-  for (const code of [
-    "type Test<G> = Readonly<{ foo: Array<Test<string>> | string; }>;",
-    "type Test<G> = G extends string ? Readonly<{ foo: Array<string>; }> : Test<string>",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.ReadonlyShallow,
-      "handles generic recursive shallowly readonly types",
-    );
-  }
+    it.each([
+      "type Test<G> = Readonly<{ foo: Array<Test<string>> | string; }>;",
+      "type Test<G> = G extends string ? Readonly<{ foo: Array<string>; }> : Test<string>",
+    ])("ReadonlyShallow", (code) => {
+      runTestImmutability(code, Immutability.ReadonlyShallow);
+    });
 
-  for (const code of [
-    "type Test<G> = { foo: Test<string> | string; };",
-    "type Test<G> = G extends string ? { foo: string } : Test<string>",
-  ]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Mutable,
-      "handles generic recursive mutable types",
-    );
-  }
-});
+    it.each([
+      "type Test<G> = { foo: Test<string> | string; };",
+      "type Test<G> = G extends string ? { foo: string } : Test<string>",
+    ])("Mutable", (code) => {
+      runTestImmutability(code, Immutability.Mutable);
+    });
+  });
 
-test("nested", (t) => {
-  for (const code of ["type Foo<U> = { readonly foo: Foo<Foo<U>>; };"]) {
-    runTestImmutability(
-      t,
-      code,
-      Immutability.Immutable,
-      "handles nested recursive immutable types",
+  describe("nested", () => {
+    it.each(["type Foo<U> = { readonly foo: Foo<Foo<U>>; };"])(
+      "Immutable",
+      (code) => {
+        runTestImmutability(code, Immutability.Immutable);
+      },
     );
-  }
+  });
 });
