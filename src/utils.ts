@@ -115,7 +115,7 @@ export function cacheData<V>(
 ) {
   const checker = program.getTypeChecker();
   const identity = checker.getRecursionIdentity(typeData.type);
-  // eslint-disable-next-line functional/no-conditional-statements
+
   if (typeData.typeNode !== null) {
     cache.set(typeData.typeNode, value);
   }
