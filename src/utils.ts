@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { isIntrinsicErrorType } from "ts-api-utils";
+import { isIntrinsicErrorType, isTypeReference } from "ts-api-utils";
 import ts from "typescript";
 
 import { typeToString, type TypeName } from "./type-to-string";
@@ -351,8 +351,25 @@ function qualifiedNameToString(qualifiedName: ts.QualifiedName): string {
 }
 
 /**
- * Cast the type.
+ * Is type a (non-namespace) function?
  */
-export function cast<T extends U, U = unknown>(value: U): value is T {
-  return true;
+export function isFunction(type: ts.Type) {
+  return (
+    type.getCallSignatures().length > 0 && type.getProperties().length === 0
+  );
+}
+
+/**
+ * Is type a type reference with type arguments?
+ */
+export function isTypeReferenceWithTypeArguments(
+  type: ts.Type,
+): type is ts.TypeReference & {
+  typeArguments: NonNullable<ts.TypeReference["typeArguments"]>;
+} {
+  return (
+    isTypeReference(type) &&
+    type.typeArguments !== undefined &&
+    type.typeArguments.length > 0
+  );
 }
