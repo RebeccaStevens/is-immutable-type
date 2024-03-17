@@ -6,15 +6,15 @@ import { runTestImmutability } from "./helpers";
 
 describe("primitives", () => {
   it.each([
-    "type Test = null;",
-    "type Test = undefined;",
-    "type Test = string;",
-    "type Test = number;",
-    "type Test = boolean;",
-    "type Test = symbol;",
-    "type Test = bigint;",
-  ])("treat primitives as immutable", (code) => {
-    runTestImmutability(code, Immutability.Immutable);
+    "null",
+    "undefined",
+    "string",
+    "number",
+    "boolean",
+    "symbol",
+    "bigint",
+  ])("treat %s as immutable", (test) => {
+    runTestImmutability(`type Test = ${test};`, Immutability.Immutable);
   });
 });
 
