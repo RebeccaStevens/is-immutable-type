@@ -31,10 +31,11 @@
         "enforceParameterCount": false
       }
     ],
-    "functional/no-loop-statement": "off",
+    "functional/no-loop-statements": "off",
     "functional/no-return-void": "off",
     "functional/no-throw-statements": "off",
-    "functional/prefer-immutable-types": "off"
+    "functional/prefer-immutable-types": "off",
+    "sonarjs/no-duplicate-string": "off"
   },
   "overrides": [
     {

@@ -26,6 +26,7 @@
     "pnpm-lock.yaml": true
   },
   "typescript.tsdk": "./node_modules/typescript/lib",
+  "vitest.commandLine": "pnpm run test:js:watch",
   "[markdown]": {
     "editor.rulers": [160]
   },
