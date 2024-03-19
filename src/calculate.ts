@@ -9,23 +9,24 @@ import {
   isObjectType,
   isPropertyReadonlyInType,
   isSymbolFlagSet,
-  isTypeReference,
   isUnionType,
 } from "ts-api-utils";
 import ts from "typescript";
 
-import { max, min, clamp } from "./compare";
+import { max, min } from "./compare";
 import { Immutability } from "./immutability";
 import {
-  type TypeData,
-  type TypeSpecifier,
   cacheData,
   getCachedData,
   getTypeData,
   hasSymbol,
+  isFunction,
   isTypeNode,
+  isTypeReferenceWithTypeArguments,
   propertyNameToString,
   typeMatchesSpecifier,
+  type TypeData,
+  type TypeSpecifier,
 } from "./utils";
 
 /**
@@ -36,10 +37,6 @@ export type ImmutabilityOverrides = ReadonlyArray<{
   to: Immutability;
   from?: Immutability;
 }>;
-
-type TypeReferenceData = TypeData & {
-  type: ts.TypeReference;
-};
 
 /**
  * Get the default overrides that are applied.
@@ -73,6 +70,14 @@ export function getDefaultOverrides(): ImmutabilityOverrides {
  * A cache used to keep track of what types have already been calculated.
  */
 export type ImmutabilityCache = WeakMap<object, Immutability>;
+
+/**
+ * The bounds on the immutability of a type.
+ */
+type ImmutabilityLimits = {
+  min: Immutability;
+  max: Immutability;
+};
 
 /**
  * A global cache that can be used between consumers.
@@ -119,11 +124,87 @@ export function getTypeImmutability(
 }
 
 /**
+ * The different states a task can be in.
+ */
+type TaskState =
+  | TaskStateTriage
+  | TaskStateChildrenReducer
+  | TaskStateWithLimits
+  | TaskStateCheckDone
+  | TaskStateApplyOverride
+  | TaskStateDone;
+
+type TaskStateBase = {
+  stage: TaskStateStage;
+  immutability: Immutability;
+  typeData: Readonly<TypeData>;
+};
+
+type TaskStateTriage = TaskStateBase & {
+  stage: TaskStateStage.Triage;
+};
+
+type TaskStateWithLimits = TaskStateBase & {
+  limits: ImmutabilityLimits;
+  stage:
+    | TaskStateStage.ObjectIndexSignature
+    | TaskStateStage.ObjectProperties
+    | TaskStateStage.ObjectTypeReference
+    | TaskStateStage.Done;
+};
+
+type TaskStateChildrenReducer = TaskStateBase & {
+  stage: TaskStateStage.ReduceChildren;
+  children: ReadonlyArray<{ immutability: Immutability }>;
+  childrenReducer: (a: Immutability, b: Immutability) => Immutability;
+};
+
+// eslint-disable-next-line functional/no-mixed-types
+type TaskStateCheckDone = {
+  stage: TaskStateStage.CheckDone;
+  taskState: TaskStateWithLimits;
+  notDoneAction: () => void;
+};
+
+type TaskStateApplyOverride = {
+  stage: TaskStateStage.ApplyOverride;
+  taskState: Exclude<TaskState, TaskStateApplyOverride | TaskStateCheckDone>;
+  override: ImmutabilityOverrides[number];
+};
+
+type TaskStateDone = TaskStateBase & {
+  stage: TaskStateStage.Done;
+};
+
+/**
+ * The stage of a taskState.
+ */
+const enum TaskStateStage {
+  Triage,
+  ReduceChildren,
+  ObjectProperties,
+  ObjectTypeReference,
+  ObjectIndexSignature,
+  CheckDone,
+  ApplyOverride,
+  Done,
+}
+
+type Stack = TaskState[];
+
+type Parameters = Readonly<{
+  program: ts.Program;
+  overrides: ImmutabilityOverrides;
+  cache: ImmutabilityCache;
+  immutabilityLimits: Readonly<ImmutabilityLimits>;
+}>;
+
+/**
  * Get the immutability of the given type data.
  */
 function getTypeImmutabilityHelper(
   program: ts.Program,
-  typeData: Readonly<TypeData>,
+  td: Readonly<TypeData>,
   overrides: ImmutabilityOverrides,
   useCache: ImmutabilityCache | boolean,
   maxImmutability: Immutability,
@@ -135,250 +216,523 @@ function getTypeImmutabilityHelper(
         ? new WeakMap()
         : useCache;
 
-  const cached = getCachedData(program, cache, typeData);
-  if (cached !== undefined) {
-    return cached;
-  }
-
-  const override = getOverride(program, typeData, overrides);
-  const overrideTo = override?.to;
-  const overrideFrom = override?.from;
-
-  // Early escape if we don't need to check the override from.
-  if (overrideTo !== undefined && overrideFrom === undefined) {
-    cacheData(program, cache, typeData, overrideTo);
-    return overrideTo;
-  }
-
-  cacheData(program, cache, typeData, Immutability.Calculating);
-
-  const immutability = calculateTypeImmutability(
+  const parameters: Parameters = {
     program,
-    typeData,
     overrides,
     cache,
-    maxImmutability,
-  );
+    immutabilityLimits: {
+      min: Immutability.Mutable,
+      max: maxImmutability,
+    },
+  };
 
-  if (overrideTo !== undefined) {
-    assert(overrideFrom !== undefined);
-    if (
-      (overrideFrom <= immutability && immutability <= overrideTo) ||
-      (overrideFrom >= immutability && immutability >= overrideTo)
-    ) {
-      cacheData(program, cache, typeData, overrideTo);
-      return overrideTo;
+  const m_stack: Stack = [createNewTaskState(td)];
+  let m_PreviousImmutability = Immutability.Unknown;
+  let m_state: TaskState;
+  do {
+    m_state = m_stack.pop() ?? assert.fail();
+
+    switch (m_state.stage) {
+      case TaskStateStage.Triage: {
+        taskTriage(parameters, m_stack, m_state);
+        break;
+      }
+      case TaskStateStage.ReduceChildren: {
+        taskReduceChildren(m_state);
+        break;
+      }
+      case TaskStateStage.ObjectTypeReference: {
+        taskObjectTypeReference(m_stack, m_state);
+        break;
+      }
+      case TaskStateStage.ObjectIndexSignature: {
+        taskObjectIndexSignature(parameters, m_stack, m_state);
+        break;
+      }
+      case TaskStateStage.ApplyOverride: {
+        taskApplyOverride(m_state);
+        m_state = m_state.taskState;
+        break;
+      }
+      case TaskStateStage.CheckDone: {
+        taskCheckDone(m_state, m_PreviousImmutability);
+        m_state = m_state.taskState;
+        break;
+      }
+      case TaskStateStage.Done: {
+        break;
+      }
+      default: {
+        assert.fail("Unexpected taskState stage");
+      }
     }
-  }
 
-  cacheData(program, cache, typeData, immutability);
-  return immutability;
+    if (m_state.immutability !== Immutability.Calculating) {
+      cacheData(program, cache, m_state.typeData, m_state.immutability);
+      m_PreviousImmutability = m_state.immutability;
+    }
+  } while (m_stack.length > 0);
+
+  if (m_state.immutability === Immutability.Calculating) {
+    assert.fail('Tried to return immutability of "Calculating"');
+    // @ts-expect-error Unreachable Code
+    return Immutability.Unknown;
+  }
+  return m_state.immutability;
+}
+
+/**
+ * Create the state for a new task.
+ */
+function createNewTaskState(typeData: TypeData): TaskStateTriage {
+  return {
+    typeData,
+    stage: TaskStateStage.Triage,
+    immutability: Immutability.Calculating,
+  };
+}
+
+/**
+ * Create the state for a new task that reduces the children task states.
+ */
+function createChildrenReducerTaskState(
+  parent: TaskStateBase,
+  children: TaskStateChildrenReducer["children"],
+  childrenReducer: TaskStateChildrenReducer["childrenReducer"],
+): TaskStateChildrenReducer {
+  return {
+    typeData: parent.typeData,
+    children,
+    childrenReducer,
+    stage: TaskStateStage.ReduceChildren,
+    immutability: Immutability.Calculating,
+  };
+}
+
+/**
+ * Create the state for a new task that checks if the previous task has found
+ * the type's immutability. If it hasn't the given action is called.
+ */
+function createCheckDoneTaskState(
+  taskState: TaskStateCheckDone["taskState"],
+  notDoneAction: TaskStateCheckDone["notDoneAction"],
+): TaskStateCheckDone {
+  return {
+    taskState,
+    notDoneAction,
+    stage: TaskStateStage.CheckDone,
+  };
+}
+
+/**
+ * Create the state for a new task that applies an override if the from
+ * immutability check matches.
+ */
+function createApplyOverrideTaskState(
+  taskState: TaskStateApplyOverride["taskState"],
+  override: ImmutabilityOverrides[number],
+): TaskStateApplyOverride {
+  return {
+    taskState,
+    override,
+    stage: TaskStateStage.ApplyOverride,
+  };
 }
 
 /**
  * Get the override for the type if it has one.
  */
-function getOverride(
-  program: ts.Program,
-  typeData: Readonly<TypeData>,
-  overrides: ImmutabilityOverrides,
-) {
-  return overrides.find((potentialOverride) =>
-    typeMatchesSpecifier(typeData, potentialOverride.type, program),
+function getOverride(parameters: Parameters, typeData: TypeData) {
+  return parameters.overrides.find((potentialOverride) =>
+    typeMatchesSpecifier(typeData, potentialOverride.type, parameters.program),
   );
 }
 
 /**
- * Calculated the immutability of the given type.
+ * Process the state and create any new next task that need to be used to process it.
  */
-function calculateTypeImmutability(
-  program: ts.Program,
-  typeData: Readonly<TypeData>,
-  overrides: ImmutabilityOverrides,
-  cache: ImmutabilityCache,
-  maxImmutability: Immutability,
-): Immutability {
-  // Union?
-  if (isUnionType(typeData.type)) {
-    return typeData.type.types
-      .map((type, index) => {
-        const typeNode =
-          typeData.typeNode !== null && ts.isUnionTypeNode(typeData.typeNode)
-            ? typeData.typeNode.types[index]
-            : undefined; // TODO: can we safely get a union type node nested within a different type node?
-
-        return getTypeImmutabilityHelper(
-          program,
-          getTypeData(type, typeNode),
-          overrides,
-          cache,
-          maxImmutability,
-        );
-      })
-      .reduce(min);
+function taskTriage(
+  parameters: Parameters,
+  m_stack: Stack,
+  m_state: TaskStateTriage,
+): void {
+  const cached = getCachedData(
+    parameters.program,
+    parameters.cache,
+    m_state.typeData,
+  );
+  if (cached !== undefined) {
+    m_state.immutability = cached;
+    return;
   }
 
-  // Intersection?
-  if (isIntersectionType(typeData.type)) {
-    return objectImmutability(
-      program,
-      typeData,
-      overrides,
-      cache,
-      maxImmutability,
-    );
-  }
-
-  // Conditional?
-  if (isConditionalType(typeData.type)) {
-    return [typeData.type.root.node.trueType, typeData.type.root.node.falseType]
-      .map((typeNode) => {
-        const checker = program.getTypeChecker();
-        const type = checker.getTypeFromTypeNode(typeNode);
-
-        return getTypeImmutabilityHelper(
-          program,
-          getTypeData(type, typeNode),
-          overrides,
-          cache,
-          maxImmutability,
-        );
-      })
-      .reduce(min);
-  }
-
-  // (Non-namespace) Function?
-  if (
-    typeData.type.getCallSignatures().length > 0 &&
-    typeData.type.getProperties().length === 0
-  ) {
-    return Immutability.Immutable;
-  }
-
-  const checker = program.getTypeChecker();
-
-  // Tuple?
-  if (checker.isTupleType(typeData.type)) {
-    if (!typeData.type.target.readonly) {
-      return Immutability.Mutable;
+  const override = getOverride(parameters, m_state.typeData);
+  if (override?.to !== undefined) {
+    // Early escape if we don't need to check the override from.
+    if (override.from === undefined) {
+      m_state.immutability = override.to;
+      cacheData(
+        parameters.program,
+        parameters.cache,
+        m_state.typeData,
+        m_state.immutability,
+      );
+      return;
     }
 
-    return arrayImmutability(
-      program,
-      typeData as Readonly<
-        TypeData & {
-          type: ts.TypeReference;
-        }
-      >,
-      overrides,
-      cache,
-      maxImmutability,
-    );
+    m_stack.push(createApplyOverrideTaskState(m_state, override));
   }
 
-  // Array?
-  if (checker.isArrayType(typeData.type)) {
-    return arrayImmutability(
-      program,
-      typeData as Readonly<
-        TypeData & {
-          type: ts.TypeReference;
-        }
-      >,
-      overrides,
-      cache,
-      maxImmutability,
-    );
+  assert(m_state.immutability === Immutability.Calculating);
+  cacheData(
+    parameters.program,
+    parameters.cache,
+    m_state.typeData,
+    m_state.immutability,
+  );
+
+  if (isUnionType(m_state.typeData.type)) {
+    handleTypeUnion(m_stack, m_state);
+    return;
   }
 
-  // Other type of object?
-  if (isObjectType(typeData.type)) {
-    return objectImmutability(
-      program,
-      typeData,
-      overrides,
-      cache,
-      maxImmutability,
-    );
+  if (isIntersectionType(m_state.typeData.type)) {
+    handleTypeIntersection(parameters, m_stack, m_state);
+    return;
+  }
+
+  if (isConditionalType(m_state.typeData.type)) {
+    handleTypeConditional(parameters, m_stack, m_state);
+    return;
+  }
+
+  if (isFunction(m_state.typeData.type)) {
+    handleTypeFunction(m_state);
+    return;
+  }
+
+  const checker = parameters.program.getTypeChecker();
+
+  if (checker.isTupleType(m_state.typeData.type)) {
+    handleTypeTuple(parameters, m_stack, m_state);
+    return;
+  }
+
+  if (checker.isArrayType(m_state.typeData.type)) {
+    handleTypeArray(parameters, m_stack, m_state);
+    return;
+  }
+
+  if (isObjectType(m_state.typeData.type)) {
+    handleTypeObject(parameters, m_stack, m_state);
+    return;
   }
 
   // Must be a primitive.
-  return Immutability.Immutable;
+  handleTypePrimitive(m_state);
 }
 
 /**
- * Get the immutability of the given array.
+ * We know we're dealling with a TypeReference, check its type arguments.
+ * If we're not done, move on to the ObjectIndexSignature task.
  */
-function arrayImmutability(
-  program: ts.Program,
-  typeData: Readonly<
-    TypeData & {
-      type: ts.TypeReference;
-    }
-  >,
-  overrides: ImmutabilityOverrides,
-  cache: ImmutabilityCache,
-  maxImmutability: Immutability,
-): Immutability {
-  const shallowImmutability = objectImmutability(
-    program,
-    typeData,
-    overrides,
-    cache,
-    maxImmutability,
+function taskObjectTypeReference(m_stack: Stack, m_state: TaskStateWithLimits) {
+  m_stack.push(
+    createCheckDoneTaskState(m_state, () => {
+      m_state.stage = TaskStateStage.ObjectIndexSignature;
+      m_stack.push(m_state);
+    }),
   );
+  handleTypeArguments(m_stack, m_state);
+}
+
+/**
+ * We know we're dealling with an object, check its index signatures.
+ */
+function taskObjectIndexSignature(
+  parameters: Parameters,
+  m_stack: Stack,
+  m_state: TaskStateWithLimits,
+) {
+  assert(
+    m_state.typeData.typeNode === null ||
+      isIntersectionType(m_state.typeData.type) ===
+        ts.isIntersectionTypeNode(m_state.typeData.typeNode),
+  );
+
+  const [types, typeNodes] = isIntersectionType(m_state.typeData.type)
+    ? [
+        m_state.typeData.type.types,
+        (m_state.typeData.typeNode as ts.IntersectionTypeNode | null)?.types,
+      ]
+    : [
+        [m_state.typeData.type],
+        m_state.typeData.typeNode === null
+          ? undefined
+          : [m_state.typeData.typeNode],
+      ];
+
+  m_stack.push(
+    createCheckDoneTaskState(m_state, () => {
+      m_state.stage = TaskStateStage.Done;
+      m_state.immutability = max(m_state.limits.min, m_state.limits.max);
+      m_stack.push(m_state);
+    }),
+
+    createCheckDoneTaskState(m_state, () => {
+      const children = types.flatMap((type, index) =>
+        createIndexSignatureTaskStates(
+          parameters,
+          m_state,
+          ts.IndexKind.Number,
+          getTypeData(type, typeNodes?.[index]),
+        ),
+      );
+      if (children.length > 0) {
+        m_stack.push(
+          createChildrenReducerTaskState(m_state, children, max),
+          ...children,
+        );
+      }
+    }),
+  );
+
+  const children = types.flatMap((type, index) =>
+    createIndexSignatureTaskStates(
+      parameters,
+      m_state,
+      ts.IndexKind.String,
+      getTypeData(type, typeNodes?.[index]),
+    ),
+  );
+  if (children.length > 0) {
+    m_stack.push(
+      createChildrenReducerTaskState(m_state, children, max),
+      ...children,
+    );
+  }
+}
+
+/**
+ * Apply an override if its criteria are met.
+ */
+function taskApplyOverride(m_state: TaskStateApplyOverride) {
+  assert(
+    m_state.override.from !== undefined,
+    "Override should have already been applied",
+  );
+
   if (
-    shallowImmutability <= Immutability.ReadonlyShallow ||
-    shallowImmutability >= maxImmutability
+    (m_state.override.from <= m_state.taskState.immutability &&
+      m_state.taskState.immutability <= m_state.override.to) ||
+    (m_state.override.from >= m_state.taskState.immutability &&
+      m_state.taskState.immutability >= m_state.override.to)
   ) {
-    return shallowImmutability;
+    m_state.taskState.immutability = m_state.override.to;
+  }
+}
+
+/**
+ * Check if we're found the type's immutability.
+ */
+function taskCheckDone(
+  m_state: TaskStateCheckDone,
+  immutability: Immutability,
+) {
+  if (immutability !== Immutability.Calculating) {
+    m_state.taskState.limits.max = min(
+      m_state.taskState.limits.max,
+      immutability,
+    );
+    if (m_state.taskState.limits.min >= m_state.taskState.limits.max) {
+      m_state.taskState.immutability = m_state.taskState.limits.min;
+      return;
+    }
   }
 
-  const deepImmutability = typeArgumentsImmutability(
-    program,
-    typeData as TypeReferenceData,
-    overrides,
-    cache,
-    maxImmutability,
-  );
+  m_state.notDoneAction();
+}
 
-  return clamp(
-    Immutability.ReadonlyShallow,
-    deepImmutability,
-    shallowImmutability,
+/**
+ * Reduce the children's immutability values to a single value.
+ */
+function taskReduceChildren(m_state: TaskStateChildrenReducer): void {
+  m_state.immutability = (
+    m_state.children[0] ?? assert.fail("no children")
+  ).immutability;
+  for (let m_index = 1; m_index < m_state.children.length; m_index++) {
+    m_state.immutability = m_state.childrenReducer(
+      m_state.immutability,
+      m_state.children[m_index]!.immutability,
+    );
+  }
+}
+
+/**
+ * Handle a type we know is a union.
+ */
+function handleTypeUnion(m_stack: Stack, m_state: TaskStateTriage) {
+  assert(isUnionType(m_state.typeData.type));
+
+  const children = m_state.typeData.type.types.map((type, index) => {
+    const typeNode =
+      m_state.typeData.typeNode !== null &&
+      ts.isUnionTypeNode(m_state.typeData.typeNode)
+        ? m_state.typeData.typeNode.types[index]
+        : undefined; // TODO: can we safely get a union type node nested within a different type node?
+
+    return createNewTaskState(getTypeData(type, typeNode));
+  });
+
+  m_stack.push(
+    createChildrenReducerTaskState(m_state, children, min),
+    ...children,
   );
 }
 
 /**
- * Get the immutability of the given object.
+ * Handle a type we know is an intersection.
  */
-function objectImmutability(
-  program: ts.Program,
-  typeData: Readonly<TypeData>,
-  overrides: ImmutabilityOverrides,
-  cache: ImmutabilityCache,
-  maxImmutability: Immutability,
-): Immutability {
-  const checker = program.getTypeChecker();
+function handleTypeIntersection(
+  parameters: Parameters,
+  m_stack: Stack,
+  m_state: TaskState,
+) {
+  assert(m_state.stage === TaskStateStage.Triage);
 
-  let m_maxImmutability = maxImmutability;
-  let m_minImmutability = Immutability.Mutable;
+  handleTypeObject(parameters, m_stack, m_state);
+}
 
-  const properties = typeData.type.getProperties();
-  // eslint-disable-next-line functional/no-conditional-statements
+/**
+ * Handle a type we know is a conditional type.
+ */
+function handleTypeConditional(
+  parameters: Parameters,
+  m_stack: Stack,
+  m_state: TaskState,
+) {
+  assert(m_state.stage === TaskStateStage.Triage);
+  assert(isConditionalType(m_state.typeData.type));
+
+  const checker = parameters.program.getTypeChecker();
+  const children = [
+    m_state.typeData.type.root.node.trueType,
+    m_state.typeData.type.root.node.falseType,
+  ].map((typeNode) => {
+    const type = checker.getTypeFromTypeNode(typeNode);
+    return createNewTaskState(getTypeData(type, typeNode));
+  });
+
+  m_stack.push(
+    createChildrenReducerTaskState(m_state, children, min),
+    ...children,
+  );
+}
+
+/**
+ * Handle a type we know is a non-namespace function.
+ */
+function handleTypeFunction(m_state: TaskState) {
+  assert(m_state.stage === TaskStateStage.Triage);
+
+  m_state.immutability = Immutability.Immutable;
+}
+
+/**
+ * Handle a type we know is a tuple.
+ */
+function handleTypeTuple(
+  parameters: Parameters,
+  m_stack: Stack,
+  m_state: TaskState,
+) {
+  assert(m_state.stage === TaskStateStage.Triage);
+  assert(
+    parameters.program.getTypeChecker().isTupleType(m_state.typeData.type),
+  );
+
+  if (!m_state.typeData.type.target.readonly) {
+    m_state.immutability = Immutability.Mutable;
+    return;
+  }
+  handleTypeArray(parameters, m_stack, m_state);
+}
+
+/**
+ * Handle a type we know is an array (this includes tuples).
+ */
+function handleTypeArray(
+  parameters: Parameters,
+  m_stack: Stack,
+  m_state: TaskState,
+) {
+  assert(m_state.stage === TaskStateStage.Triage);
+
+  // It will have limits after being processed by `handleTypeObject`.
+  const m_stateWithLimits = m_state as unknown as TaskStateWithLimits;
+  m_stack.push(
+    createCheckDoneTaskState(m_stateWithLimits, () => {
+      m_stateWithLimits.stage = TaskStateStage.Done;
+      m_stateWithLimits.immutability = max(
+        m_stateWithLimits.limits.min,
+        m_stateWithLimits.limits.max,
+      );
+      m_stack.push(m_stateWithLimits);
+    }),
+
+    createCheckDoneTaskState(m_stateWithLimits, () => {
+      if (isTypeReferenceWithTypeArguments(m_stateWithLimits.typeData.type)) {
+        handleTypeArguments(m_stack, m_stateWithLimits);
+      }
+    }),
+  );
+
+  handleTypeObject(parameters, m_stack, m_state);
+}
+
+/**
+ * Handle a type that all we know is that it's an object.
+ */
+function handleTypeObject(
+  parameters: Parameters,
+  m_stack: Stack,
+  m_state: TaskStateTriage,
+) {
+  // Add limits.
+  const m_stateWithLimits = m_state as unknown as TaskStateWithLimits;
+  m_stateWithLimits.stage = TaskStateStage.ObjectProperties;
+  m_stateWithLimits.limits = {
+    ...parameters.immutabilityLimits,
+  };
+
+  m_stack.push(
+    createCheckDoneTaskState(m_stateWithLimits, () => {
+      if (isTypeReferenceWithTypeArguments(m_stateWithLimits.typeData.type)) {
+        m_stateWithLimits.stage = TaskStateStage.ObjectTypeReference;
+        m_stack.push(m_stateWithLimits);
+        return;
+      }
+
+      m_stateWithLimits.stage = TaskStateStage.ObjectIndexSignature;
+      m_stack.push(m_stateWithLimits);
+    }),
+  );
+
+  const checker = parameters.program.getTypeChecker();
+
+  const properties = m_stateWithLimits.typeData.type.getProperties();
   if (properties.length > 0) {
-    // eslint-disable-next-line functional/no-loop-statements
     for (const property of properties) {
       if (
         isPropertyReadonlyInType(
-          typeData.type,
+          m_stateWithLimits.typeData.type,
           property.getEscapedName(),
           checker,
         ) ||
         // Ignore "length" for tuples.
         // TODO: Report this issue to upstream.
         ((property.escapedName as string) === "length" &&
-          checker.isTupleType(typeData.type))
+          checker.isTupleType(m_stateWithLimits.typeData.type))
       ) {
         continue;
       }
@@ -397,7 +751,10 @@ function objectImmutability(
               isSymbolFlagSet(declaration.symbol, ts.SymbolFlags.Method),
           )
         ) {
-          m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);
+          m_stateWithLimits.limits.max = min(
+            m_stateWithLimits.limits.max,
+            Immutability.ReadonlyDeep,
+          );
           continue;
         }
 
@@ -409,38 +766,41 @@ function objectImmutability(
               ts.isFunctionTypeNode(declaration.type),
           )
         ) {
-          m_maxImmutability = min(m_maxImmutability, Immutability.ReadonlyDeep);
+          m_stateWithLimits.limits.max = min(
+            m_stateWithLimits.limits.max,
+            Immutability.ReadonlyDeep,
+          );
           continue;
         }
       }
 
-      return Immutability.Mutable;
+      m_stateWithLimits.immutability = Immutability.Mutable;
+      return;
     }
+  }
 
-    m_minImmutability = Immutability.ReadonlyShallow;
+  const propertyNodes = new Map<string, ts.TypeNode>(
+    m_stateWithLimits.typeData.typeNode !== null &&
+    hasType(m_stateWithLimits.typeData.typeNode) &&
+    m_stateWithLimits.typeData.typeNode.type !== undefined &&
+    ts.isTypeLiteralNode(m_stateWithLimits.typeData.typeNode.type)
+      ? m_stateWithLimits.typeData.typeNode.type.members
+          .map((member): [string, ts.TypeNode] | undefined =>
+            member.name === undefined ||
+            !hasType(member) ||
+            member.type === undefined
+              ? undefined
+              : [propertyNameToString(member.name), member.type],
+          )
+          .filter(<T>(v: T | undefined): v is T => v !== undefined)
+      : [],
+  );
 
-    const propertyNodes = new Map<string, ts.TypeNode>(
-      typeData.typeNode !== null &&
-      hasType(typeData.typeNode) &&
-      typeData.typeNode.type !== undefined &&
-      ts.isTypeLiteralNode(typeData.typeNode.type)
-        ? typeData.typeNode.type.members
-            .map((member): [string, ts.TypeNode] | undefined =>
-              member.name === undefined ||
-              !hasType(member) ||
-              member.type === undefined
-                ? undefined
-                : [propertyNameToString(member.name), member.type],
-            )
-            .filter(<T>(v: T | undefined): v is T => v !== undefined)
-        : [],
-    );
-
-    // eslint-disable-next-line functional/no-loop-statements
-    for (const property of properties) {
+  const children = properties
+    .map((property) => {
       const propertyType = getTypeOfPropertyOfType(
         checker,
-        typeData.type,
+        m_stateWithLimits.typeData.type,
         property,
       );
       if (
@@ -448,158 +808,90 @@ function objectImmutability(
         (isIntrinsicType(propertyType) &&
           propertyType.intrinsicName === "error")
       ) {
-        continue;
+        return null;
       }
 
       const propertyTypeNode = propertyNodes.get(
         property.getEscapedName() as string,
       );
 
-      const result = getTypeImmutabilityHelper(
-        program,
-        getTypeData(propertyType, propertyTypeNode),
-        overrides,
-        cache,
-        maxImmutability,
-      );
-      m_maxImmutability = min(m_maxImmutability, result);
-      if (m_minImmutability >= m_maxImmutability) {
-        return m_minImmutability;
-      }
-    }
-  }
+      return createNewTaskState(getTypeData(propertyType, propertyTypeNode));
+    })
+    .filter((taskState): taskState is TaskStateTriage => taskState !== null);
 
-  if (isTypeReference(typeData.type)) {
-    const result = typeArgumentsImmutability(
-      program,
-      typeData as TypeReferenceData,
-      overrides,
-      cache,
-      maxImmutability,
+  if (children.length > 0) {
+    m_stateWithLimits.limits.min = Immutability.ReadonlyShallow;
+
+    m_stack.push(
+      createChildrenReducerTaskState(m_stateWithLimits, children, min),
+      ...children,
     );
-    m_maxImmutability = min(m_maxImmutability, result);
-    if (m_minImmutability >= m_maxImmutability) {
-      return m_minImmutability;
-    }
   }
-
-  const types = isIntersectionType(typeData.type)
-    ? typeData.type.types
-    : [typeData.type];
-
-  const typeNodes =
-    typeData.typeNode === null
-      ? undefined
-      : ts.isIntersectionTypeNode(typeData.typeNode)
-        ? typeData.typeNode.types
-        : [typeData.typeNode];
-
-  const stringIndexSigImmutability = types
-    .map((type, index) =>
-      indexSignatureImmutability(
-        program,
-        getTypeData(type, typeNodes?.[index]),
-        ts.IndexKind.String,
-        overrides,
-        cache,
-        maxImmutability,
-      ),
-    )
-    .reduce(max);
-
-  m_maxImmutability = min(stringIndexSigImmutability, m_maxImmutability);
-  if (m_minImmutability >= m_maxImmutability) {
-    return m_minImmutability;
-  }
-
-  const numberIndexSigImmutability = types
-    .map((type, index) =>
-      indexSignatureImmutability(
-        program,
-        getTypeData(type, typeNodes?.[index]),
-        ts.IndexKind.Number,
-        overrides,
-        cache,
-        maxImmutability,
-      ),
-    )
-    .reduce(max);
-
-  m_maxImmutability = min(numberIndexSigImmutability, m_maxImmutability);
-  if (m_minImmutability >= m_maxImmutability) {
-    return m_minImmutability;
-  }
-
-  return max(m_minImmutability, m_maxImmutability);
 }
 
 /**
- * Get the immutability of the given type arguments.
+ * Handle the type arguments of a type reference.
  */
-function typeArgumentsImmutability(
-  program: ts.Program,
-  typeData: Readonly<TypeReferenceData>,
-  overrides: ImmutabilityOverrides,
-  cache: ImmutabilityCache,
-  maxImmutability: Immutability,
-): Immutability {
-  if (
-    typeData.type.typeArguments !== undefined &&
-    typeData.type.typeArguments.length > 0
-  ) {
-    return typeData.type.typeArguments
-      .map((type) =>
-        getTypeImmutabilityHelper(
-          program,
-          getTypeData(type, undefined), // TODO: can we get a type node for this?
-          overrides,
-          cache,
-          maxImmutability,
-        ),
-      )
-      .reduce(min);
-  }
+function handleTypeArguments(m_stack: Stack, m_state: TaskStateWithLimits) {
+  assert(isTypeReferenceWithTypeArguments(m_state.typeData.type));
 
-  return Immutability.Unknown;
+  const children = m_state.typeData.type.typeArguments.map((type) =>
+    createNewTaskState(getTypeData(type, undefined)),
+  );
+  m_stack.push(
+    createChildrenReducerTaskState(m_state, children, min),
+    ...children,
+  );
 }
 
 /**
- * Get the immutability of the given index signature.
+ * Handle a primitive type.
  */
-function indexSignatureImmutability(
-  program: ts.Program,
-  typeData: Readonly<TypeData>,
+function handleTypePrimitive(m_state: TaskStateTriage) {
+  m_state.immutability = Immutability.Immutable;
+}
+
+/**
+ * Create the task states for analyzing an object's index signatures.
+ */
+function createIndexSignatureTaskStates(
+  parameters: Parameters,
+  m_state: TaskStateBase,
   kind: ts.IndexKind,
-  overrides: ImmutabilityOverrides,
-  cache: ImmutabilityCache,
-  maxImmutability: Immutability,
-): Immutability {
-  const checker = program.getTypeChecker();
+  typeData: TypeData,
+): Array<Exclude<TaskState, TaskStateCheckDone | TaskStateApplyOverride>> {
+  const checker = parameters.program.getTypeChecker();
   const indexInfo = checker.getIndexInfoOfType(typeData.type, kind);
   if (indexInfo === undefined) {
-    return Immutability.Unknown;
+    m_state.immutability = Immutability.Unknown;
+    return [];
   }
 
-  if (maxImmutability <= Immutability.ReadonlyShallow) {
-    return Immutability.ReadonlyShallow;
+  if (parameters.immutabilityLimits.max <= Immutability.ReadonlyShallow) {
+    m_state.immutability = Immutability.ReadonlyShallow;
+    return [];
   }
 
   if (indexInfo.isReadonly) {
     if (indexInfo.type === typeData.type) {
-      return maxImmutability;
+      m_state.immutability = parameters.immutabilityLimits.max;
+      return [];
     }
 
-    return max(
-      Immutability.ReadonlyShallow,
-      getTypeImmutabilityHelper(
-        program,
-        getTypeData(indexInfo.type, undefined), // TODO: can we get a type node for this?
-        overrides,
-        cache,
-        maxImmutability,
-      ),
+    const child = createNewTaskState(
+      getTypeData(indexInfo.type, undefined), // TODO: can we get a type node for this?
     );
+
+    return [
+      createChildrenReducerTaskState(
+        m_state,
+        [{ immutability: Immutability.ReadonlyShallow }, child],
+        max,
+      ),
+      child,
+    ];
   }
 
-  return Immutability.Mutable;
+  m_state.immutability = Immutability.Mutable;
+  return [];
 }

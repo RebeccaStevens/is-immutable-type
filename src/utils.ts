@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { isIntrinsicErrorType } from "ts-api-utils";
+import { isIntrinsicErrorType, isTypeReference } from "ts-api-utils";
 import ts from "typescript";
 
 import { typeToString, type TypeName } from "./type-to-string";
@@ -348,4 +348,28 @@ function qualifiedNameToString(qualifiedName: ts.QualifiedName): string {
   return `${entityNameToString(qualifiedName.left)}.${identifierToString(
     qualifiedName.right,
   )}`;
+}
+
+/**
+ * Is type a (non-namespace) function?
+ */
+export function isFunction(type: ts.Type) {
+  return (
+    type.getCallSignatures().length > 0 && type.getProperties().length === 0
+  );
+}
+
+/**
+ * Is type a type reference with type arguments?
+ */
+export function isTypeReferenceWithTypeArguments(
+  type: ts.Type,
+): type is ts.TypeReference & {
+  typeArguments: NonNullable<ts.TypeReference["typeArguments"]>;
+} {
+  return (
+    isTypeReference(type) &&
+    type.typeArguments !== undefined &&
+    type.typeArguments.length > 0
+  );
 }
