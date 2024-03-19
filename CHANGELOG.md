@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [2.0.2](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.1...v2.0.2) (2024-03-19)
+
+
+### Performance Improvements
+
+* switch to using an iterative stack ([#394](https://github.com/RebeccaStevens/is-immutable-type/issues/394)) ([2858ad3](https://github.com/RebeccaStevens/is-immutable-type/commit/2858ad3e7432cac5db02287c3eaaf1c3fa299441))
+
 ## [2.0.1](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.0...v2.0.1) (2023-07-15)
 
 
