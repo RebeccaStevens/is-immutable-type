@@ -71,6 +71,9 @@ export function getDefaultOverrides(): ImmutabilityOverrides {
  */
 export type ImmutabilityCache = WeakMap<object, Immutability>;
 
+/**
+ * The bounds on the immutability of a type.
+ */
 type ImmutabilityLimits = {
   min: Immutability;
   max: Immutability;
@@ -120,6 +123,9 @@ export function getTypeImmutability(
   );
 }
 
+/**
+ * The different states a task can be in.
+ */
 type TaskState =
   | TaskStateTriage
   | TaskStateChildrenReducer
@@ -275,6 +281,9 @@ function getTypeImmutabilityHelper(
   return m_state.immutability;
 }
 
+/**
+ * Create the state for a new task.
+ */
 function createNewTaskState(typeData: TypeData): TaskStateTriage {
   return {
     typeData,
@@ -283,6 +292,9 @@ function createNewTaskState(typeData: TypeData): TaskStateTriage {
   };
 }
 
+/**
+ * Create the state for a new task that reduces the children task states.
+ */
 function createChildrenReducerTaskState(
   parent: TaskStateBase,
   children: TaskStateChildrenReducer["children"],
@@ -297,6 +309,10 @@ function createChildrenReducerTaskState(
   };
 }
 
+/**
+ * Create the state for a new task that checks if the previous task has found
+ * the type's immutability. If it hasn't the given action is called.
+ */
 function createCheckDoneTaskState(
   taskState: TaskStateCheckDone["taskState"],
   notDoneAction: TaskStateCheckDone["notDoneAction"],
@@ -308,6 +324,10 @@ function createCheckDoneTaskState(
   };
 }
 
+/**
+ * Create the state for a new task that applies an override if the from
+ * immutability check matches.
+ */
 function createApplyOverrideTaskState(
   taskState: TaskStateApplyOverride["taskState"],
   override: ImmutabilityOverrides[number],
@@ -329,7 +349,7 @@ function getOverride(parameters: Parameters, typeData: TypeData) {
 }
 
 /**
- * The first stage for all types.
+ * Process the state and create any new next task that need to be used to process it.
  */
 function taskTriage(
   parameters: Parameters,
@@ -412,6 +432,10 @@ function taskTriage(
   handleTypePrimitive(m_state);
 }
 
+/**
+ * We know we're dealling with a TypeReference, check its type arguments.
+ * If we're not done, move on to the ObjectIndexSignature task.
+ */
 function taskObjectTypeReference(m_stack: Stack, m_state: TaskStateWithLimits) {
   m_stack.push(
     createCheckDoneTaskState(m_state, () => {
@@ -422,6 +446,9 @@ function taskObjectTypeReference(m_stack: Stack, m_state: TaskStateWithLimits) {
   handleTypeArguments(m_stack, m_state);
 }
 
+/**
+ * We know we're dealling with an object, check its index signatures.
+ */
 function taskObjectIndexSignature(
   parameters: Parameters,
   m_stack: Stack,
@@ -451,6 +478,7 @@ function taskObjectIndexSignature(
       m_state.immutability = max(m_state.limits.min, m_state.limits.max);
       m_stack.push(m_state);
     }),
+
     createCheckDoneTaskState(m_state, () => {
       const children = types.flatMap((type, index) =>
         createIndexSignatureTaskStates(
@@ -485,6 +513,9 @@ function taskObjectIndexSignature(
   }
 }
 
+/**
+ * Apply an override if its criteria are met.
+ */
 function taskApplyOverride(m_state: TaskStateApplyOverride) {
   assert(
     m_state.override.from !== undefined,
@@ -501,6 +532,9 @@ function taskApplyOverride(m_state: TaskStateApplyOverride) {
   }
 }
 
+/**
+ * Check if we're found the type's immutability.
+ */
 function taskCheckDone(
   m_state: TaskStateCheckDone,
   immutability: Immutability,
@@ -519,6 +553,9 @@ function taskCheckDone(
   m_state.notDoneAction();
 }
 
+/**
+ * Reduce the children's immutability values to a single value.
+ */
 function taskReduceChildren(m_state: TaskStateChildrenReducer): void {
   m_state.immutability = (
     m_state.children[0] ?? assert.fail("no children")
@@ -531,6 +568,9 @@ function taskReduceChildren(m_state: TaskStateChildrenReducer): void {
   }
 }
 
+/**
+ * Handle a type we know is a union.
+ */
 function handleTypeUnion(m_stack: Stack, m_state: TaskStateTriage) {
   assert(isUnionType(m_state.typeData.type));
 
@@ -550,6 +590,9 @@ function handleTypeUnion(m_stack: Stack, m_state: TaskStateTriage) {
   );
 }
 
+/**
+ * Handle a type we know is an intersection.
+ */
 function handleTypeIntersection(
   parameters: Parameters,
   m_stack: Stack,
@@ -560,6 +603,9 @@ function handleTypeIntersection(
   handleTypeObject(parameters, m_stack, m_state);
 }
 
+/**
+ * Handle a type we know is a conditional type.
+ */
 function handleTypeConditional(
   parameters: Parameters,
   m_stack: Stack,
@@ -583,12 +629,18 @@ function handleTypeConditional(
   );
 }
 
+/**
+ * Handle a type we know is a non-namespace function.
+ */
 function handleTypeFunction(m_state: TaskState) {
   assert(m_state.stage === TaskStateStage.Triage);
 
   m_state.immutability = Immutability.Immutable;
 }
 
+/**
+ * Handle a type we know is a tuple.
+ */
 function handleTypeTuple(
   parameters: Parameters,
   m_stack: Stack,
@@ -606,6 +658,9 @@ function handleTypeTuple(
   handleTypeArray(parameters, m_stack, m_state);
 }
 
+/**
+ * Handle a type we know is an array (this includes tuples).
+ */
 function handleTypeArray(
   parameters: Parameters,
   m_stack: Stack,
@@ -635,6 +690,9 @@ function handleTypeArray(
   handleTypeObject(parameters, m_stack, m_state);
 }
 
+/**
+ * Handle a type that all we know is that it's an object.
+ */
 function handleTypeObject(
   parameters: Parameters,
   m_stack: Stack,
@@ -771,6 +829,9 @@ function handleTypeObject(
   }
 }
 
+/**
+ * Handle the type arguments of a type reference.
+ */
 function handleTypeArguments(m_stack: Stack, m_state: TaskStateWithLimits) {
   assert(isTypeReferenceWithTypeArguments(m_state.typeData.type));
 
@@ -783,10 +844,16 @@ function handleTypeArguments(m_stack: Stack, m_state: TaskStateWithLimits) {
   );
 }
 
+/**
+ * Handle a primitive type.
+ */
 function handleTypePrimitive(m_state: TaskStateTriage) {
   m_state.immutability = Immutability.Immutable;
 }
 
+/**
+ * Create the task states for analyzing an object's index signatures.
+ */
 function createIndexSignatureTaskStates(
   parameters: Parameters,
   m_state: TaskStateBase,
