@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+
 import {
   hasType,
   isIntrinsicType,
@@ -97,10 +99,7 @@ class TypeName {
                 this.checker.getTypeFromTypeNode(node),
               ),
             );
-            this.m_data.nameWithArguments =
-              wrapperArguments === undefined
-                ? null
-                : `${this.m_data.name}<${wrapperArguments}>`;
+            this.m_data.nameWithArguments = `${this.m_data.name}<${wrapperArguments}>`;
           }
         } else {
           const typeArguments = isTypeReference(this.typeData.type)
@@ -163,10 +162,7 @@ class TypeName {
               this.m_data.alias,
               aliasType.aliasTypeArguments,
             );
-            this.m_data.aliasWithArguments =
-              aliasArguments === undefined
-                ? null
-                : `${this.m_data.alias}<${aliasArguments}>`;
+            this.m_data.aliasWithArguments = `${this.m_data.alias}<${aliasArguments}>`;
           }
         }
       }
@@ -192,8 +188,7 @@ class TypeName {
             this.typeData.typeNode.typeArguments,
           );
 
-          this.m_data.evaluated =
-            typeArguments === undefined ? name : `${name}<${typeArguments}>`;
+          this.m_data.evaluated = `${name}<${typeArguments}>`;
         }
       } else {
         this.m_data.evaluated = this.checker.typeToString(this.typeData.type);
@@ -220,22 +215,19 @@ function typeArgumentsToString(
         )
       : getTypeData(typeLike, undefined);
     if (typeData.type === typeArgument.type) {
+      assert(name !== undefined);
       return name;
     }
-    const typeName = typeToString(program, typeArgument);
+    const typeName = typeToStringHelper(program, typeArgument);
+    if (typeName === null) {
+      return undefined;
+    }
     return (
       typeName.getNameWithArguments() ??
       typeName.getName() ??
       typeName.getEvaluated()
     );
   });
-
-  if (typeArgumentStrings.includes(undefined)) {
-    console.warn(
-      "`typeArgumentStrings` contains `undefined`, this is likely a bug in `is-immutable-type`",
-    );
-    return undefined;
-  }
 
   return typeArgumentStrings.join(",");
 }
@@ -249,10 +241,23 @@ export function typeToString(
   program: ts.Program,
   typeData: Readonly<TypeData>,
 ): TypeName {
+  const typeName = typeToStringHelper(program, typeData);
+  assert(typeName !== null);
+  return typeName;
+}
+
+/**
+ * Implementation of typeToString.
+ */
+function typeToStringHelper(
+  program: ts.Program,
+  typeData: Readonly<TypeData>,
+): TypeName | null {
   const cached = getCachedData(program, cache, typeData);
   if (cached !== undefined) {
     return cached;
   }
+  cacheData(program, cache, typeData, null);
   const typeName = new TypeName(program, typeData);
   cacheData(program, cache, typeData, typeName);
   return typeName;
