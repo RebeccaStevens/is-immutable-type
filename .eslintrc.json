@@ -49,10 +49,15 @@
         "@typescript-eslint/no-unsafe-call": "off",
         "@typescript-eslint/no-unsafe-member-access": "off",
         "@typescript-eslint/no-unsafe-return": "off",
+        "import/no-relative-parent-imports": "off",
         "vitest/expect-expect": [
           "error",
           {
-            "assertFunctionNames": ["expect", "runTestImmutability"]
+            "assertFunctionNames": [
+              "expect",
+              "runTestImmutability",
+              "runTestName"
+            ]
           }
         ]
       }

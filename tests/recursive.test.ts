@@ -1,8 +1,9 @@
+import dedent from "dedent";
 import { describe, it } from "vitest";
 
 import { Immutability } from "#is-immutable-type";
 
-import { runTestImmutability } from "./helpers";
+import { runTestImmutability, runTestName } from "./helpers";
 
 describe("Recursive Types", () => {
   describe("direct", () => {
@@ -71,5 +72,21 @@ describe("Recursive Types", () => {
         runTestImmutability(code, Immutability.Immutable);
       },
     );
+  });
+
+  describe("Complex", () => {
+    it("Handles more complex recursive types", () => {
+      const code = dedent`
+        type TransposeArray<T extends ReadonlyArray<ReadonlyArray<unknown>>> =
+          T extends readonly [infer X, ...infer XS]
+            ? [X[], ...TransposeArray<XS>]
+            : T extends ReadonlyArray<infer X>
+              ? X[][]
+              : never;
+      `;
+
+      runTestImmutability(code, Immutability.Mutable);
+      runTestName(code, "TransposeArray<T>");
+    });
   });
 });
