@@ -6,7 +6,7 @@ import {
   isSymbolFlagSet,
   isTypeReference,
 } from "ts-api-utils";
-import ts from "typescript";
+import ts, { type TypeReference } from "typescript";
 
 import {
   cacheData,
@@ -207,14 +207,19 @@ function typeArgumentsToString(
   name: string | undefined,
   typeArguments: ReadonlyArray<ts.Type> | ts.NodeArray<ts.TypeNode>,
 ) {
-  const typeArgumentStrings = typeArguments.map((typeLike) => {
+  const typeArgumentStrings = typeArguments.map((typeLike, index) => {
     const typeArgument = isTypeNode(typeLike)
       ? getTypeData(
           program.getTypeChecker().getTypeFromTypeNode(typeLike),
           typeLike,
         )
       : getTypeData(typeLike, undefined);
-    if (typeData.type === typeArgument.type) {
+    if (
+      typeData.type === typeArgument.type ||
+      (isTypeReference(typeArgument.type) &&
+        (typeData.type as TypeReference).typeArguments?.[index] ===
+          typeArgument.type)
+    ) {
       assert(name !== undefined);
       return name;
     }

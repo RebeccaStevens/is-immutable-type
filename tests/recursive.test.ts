@@ -85,6 +85,7 @@ describe("Recursive Types", () => {
               : never;
       `;
 
+      runTestImmutability(code, Immutability.Mutable);
       runTestName(code, "TransposeArray<T>");
     });
   });
