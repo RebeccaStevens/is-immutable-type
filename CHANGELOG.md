@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [2.0.3](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.2...v2.0.3) (2024-03-22)
+
+
+### Bug Fixes
+
+* infinite loop in typeToString ([4f87951](https://github.com/RebeccaStevens/is-immutable-type/commit/4f87951d31b2cdd88437ded094390b0c95fff217))
+* remove another infinate loop ([c36259c](https://github.com/RebeccaStevens/is-immutable-type/commit/c36259ce0e7410da4b92b5c2608dfe73003f341d))
+
 ## [2.0.2](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.1...v2.0.2) (2024-03-19)
 
 
