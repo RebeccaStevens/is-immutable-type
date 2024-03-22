@@ -99,22 +99,31 @@ class TypeName {
                 this.checker.getTypeFromTypeNode(node),
               ),
             );
-            this.m_data.nameWithArguments = `${this.m_data.name}<${wrapperArguments}>`;
+            this.m_data.nameWithArguments =
+              wrapperArguments === undefined
+                ? null
+                : `${this.m_data.name}<${wrapperArguments}>`;
           }
         } else {
           const typeArguments = isTypeReference(this.typeData.type)
             ? this.checker.getTypeArguments(this.typeData.type)
             : undefined;
 
-          this.m_data.nameWithArguments =
-            typeArguments !== undefined && typeArguments.length > 0
-              ? `${this.m_data.name}<${typeArgumentsToString(
-                  this.program,
-                  this.typeData,
-                  this.m_data.name,
-                  typeArguments,
-                )}>`
-              : null;
+          if (typeArguments === undefined || typeArguments.length === 0) {
+            this.m_data.nameWithArguments = null;
+          } else {
+            const wrapperArguments = typeArgumentsToString(
+              this.program,
+              this.typeData,
+              this.m_data.name,
+              typeArguments,
+            );
+
+            this.m_data.nameWithArguments =
+              wrapperArguments === undefined
+                ? null
+                : `${this.m_data.name}<${wrapperArguments}>`;
+          }
         }
       }
     }
@@ -162,7 +171,10 @@ class TypeName {
               this.m_data.alias,
               aliasType.aliasTypeArguments,
             );
-            this.m_data.aliasWithArguments = `${this.m_data.alias}<${aliasArguments}>`;
+            this.m_data.aliasWithArguments =
+              aliasArguments === undefined
+                ? null
+                : `${this.m_data.alias}<${aliasArguments}>`;
           }
         }
       }
@@ -188,7 +200,8 @@ class TypeName {
             this.typeData.typeNode.typeArguments,
           );
 
-          this.m_data.evaluated = `${name}<${typeArguments}>`;
+          this.m_data.evaluated =
+            typeArguments === undefined ? name : `${name}<${typeArguments}>`;
         }
       } else {
         this.m_data.evaluated = this.checker.typeToString(this.typeData.type);
@@ -220,7 +233,6 @@ function typeArgumentsToString(
         (typeData.type as TypeReference).typeArguments?.[index] ===
           typeArgument.type)
     ) {
-      assert(name !== undefined);
       return name;
     }
     const typeName = typeToStringHelper(program, typeArgument);
@@ -233,6 +245,11 @@ function typeArgumentsToString(
       typeName.getEvaluated()
     );
   });
+
+  if (typeArgumentStrings.includes(undefined)) {
+    assert(typeArgumentStrings.every((type) => type === undefined));
+    return undefined;
+  }
 
   return typeArgumentStrings.join(",");
 }
