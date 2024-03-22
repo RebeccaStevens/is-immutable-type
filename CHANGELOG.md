@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [2.0.4](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.3...v2.0.4) (2024-03-22)
+
+
+### Bug Fixes
+
+* regression in getting a type's name ([3864987](https://github.com/RebeccaStevens/is-immutable-type/commit/386498737a43a61102f66f12001db844de22d115))
+
 ## [2.0.3](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.2...v2.0.3) (2024-03-22)
 
 
