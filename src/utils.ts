@@ -1,9 +1,8 @@
 import path from "node:path";
 
 import { isIntrinsicErrorType, isTypeReference } from "ts-api-utils";
+import { typeNodeToString, typeToString, type TypeName } from "type-to-string";
 import ts from "typescript";
-
-import { typeToString, type TypeName } from "./type-to-string";
 
 type PatternSpecifier =
   | {
@@ -148,7 +147,10 @@ export function typeMatchesSpecifier(
     return false;
   }
 
-  const typeName = typeToString(program, typeData);
+  const typeName =
+    typeData.typeNode === null
+      ? typeToString(program, typeData.type)
+      : typeNodeToString(program, typeData.typeNode);
   if (typeof specifier === "string" || specifier instanceof RegExp) {
     return typeNameMatchesSpecifier(typeName, specifier);
   }

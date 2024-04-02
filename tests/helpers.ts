@@ -14,9 +14,6 @@ import {
   type ImmutabilityOverrides,
 } from "#is-immutable-type";
 
-import { typeToString } from "../src/type-to-string";
-import { getTypeData } from "../src/utils";
-
 /**
  * Create a TS environment to run the tests in.
  *
@@ -131,33 +128,4 @@ export function runTestImmutability(
   } else {
     expect(expected).to.be.not.equal(Immutability.Mutable);
   }
-}
-
-/**
- * Run tests against "typeToString".
- */
-export function runTestName(
-  test:
-    | string
-    | Readonly<{
-        code: string;
-        line?: number;
-      }>,
-  expected: string,
-  message?: string,
-): void {
-  const { code, line } =
-    typeof test === "string" ? { code: test, line: undefined } : test;
-
-  const { program, type, typeNode } = getType(code, line);
-  const typeData = getTypeData(type, typeNode);
-
-  const actual = typeToString(program, typeData);
-  expect([
-    actual.getName(),
-    actual.getNameWithArguments(),
-    actual.getAlias(),
-    actual.getAliasWithArguments(),
-    actual.getEvaluated(),
-  ]).to.include(expected, message);
 }

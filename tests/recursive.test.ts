@@ -3,7 +3,7 @@ import { describe, it } from "vitest";
 
 import { Immutability } from "#is-immutable-type";
 
-import { runTestImmutability, runTestName } from "./helpers";
+import { runTestImmutability } from "./helpers";
 
 describe("Recursive Types", () => {
   describe("direct", () => {
@@ -86,7 +86,6 @@ describe("Recursive Types", () => {
       `;
 
       runTestImmutability(code, Immutability.Mutable);
-      runTestName(code, "TransposeArray<T>");
     });
   });
 });
