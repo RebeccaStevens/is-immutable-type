@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [2.0.5](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.4...v2.0.5) (2024-04-04)
+
+
+### Bug Fixes
+
+* improve comparison of file paths ([ce76598](https://github.com/RebeccaStevens/is-immutable-type/commit/ce7659890323c68ba748e2aeb6e4b1df432dc054))
+
 ## [2.0.4](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.3...v2.0.4) (2024-03-22)
 
 
