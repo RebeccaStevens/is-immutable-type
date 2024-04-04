@@ -299,7 +299,7 @@ function isTypeDeclaredFromLocal(
       if (program.isSourceFileFromExternalLibrary(declaration)) {
         return false;
       }
-      const fileName = declaration.fileName.toLowerCase();
+      const fileName = declaration.path.toLowerCase();
       if (!fileName.startsWith(cwd)) {
         return false;
       }
