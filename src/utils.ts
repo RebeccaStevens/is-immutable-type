@@ -1,7 +1,16 @@
 import path from "node:path";
 
 import { isIntrinsicErrorType, isTypeReference } from "ts-api-utils";
-import { typeNodeToString, typeToString, type TypeName } from "type-to-string";
+import {
+  TypeNodeFormatFlags,
+  getTypeAliasAsString,
+  getTypeNodeAliasAsString,
+  getTypeReferenceAsString,
+  getTypeReferenceNodeAsString,
+  typeNodeAsWritten,
+  typeNodeToString,
+  typeToString,
+} from "type-to-string";
 import ts from "typescript";
 
 type PatternSpecifier =
@@ -135,6 +144,16 @@ export function getCachedData<V>(
   return cache.get(identity);
 }
 
+const typeFormatFlags =
+  TypeNodeFormatFlags.AddUndefined |
+  TypeNodeFormatFlags.NoTruncation |
+  TypeNodeFormatFlags.OmitParameterModifiers |
+  TypeNodeFormatFlags.OmitTypeLiterals |
+  TypeNodeFormatFlags.UseFullyQualifiedType |
+  TypeNodeFormatFlags.WriteArrayAsGenericType |
+  TypeNodeFormatFlags.WriteArrowStyleSignature |
+  TypeNodeFormatFlags.WriteTypeArgumentsOfSignature;
+
 /**
  * Does the given type/typeNode match the given specifier.
  */
@@ -147,16 +166,14 @@ export function typeMatchesSpecifier(
     return false;
   }
 
-  const typeName =
-    typeData.typeNode === null
-      ? typeToString(program, typeData.type)
-      : typeNodeToString(program, typeData.typeNode);
   if (typeof specifier === "string" || specifier instanceof RegExp) {
-    return typeNameMatchesSpecifier(typeName, specifier);
+    return typeNameMatchesSpecifier(typeData, program, specifier);
   }
-  if (!typeNameMatchesSpecifier(typeName, specifier)) {
+
+  if (!typeNameMatchesSpecifier(typeData, program, specifier)) {
     return false;
   }
+
   const declarationFiles =
     typeData.type
       .getSymbol()
@@ -180,11 +197,25 @@ export function typeMatchesSpecifier(
   }
 }
 
+const typeNameCache = new WeakMap<
+  Readonly<TypeData>,
+  Partial<{
+    name: string | null;
+    alias: string | null;
+    nameWithArguments: string | null;
+    aliasWithArguments: string | null;
+    asWritten: string | null;
+    evaluatedTypeNode: string | null;
+    evaluatedType: string;
+  }>
+>();
+
 /**
  * Test if the given type name matches the given specifier.
  */
 function typeNameMatchesSpecifier(
-  typeName: TypeName,
+  typeData: Readonly<TypeData>,
+  program: ts.Program,
   specifier: TypeSpecifier,
 ): boolean {
   const names =
@@ -206,40 +237,126 @@ function typeNameMatchesSpecifier(
             ? specifier.pattern
             : [specifier.pattern];
 
-  const name = typeName.getName();
-  if (name !== null) {
-    if (names.includes(name)) {
+  let m_typeNames = typeNameCache.get(typeData);
+  if (m_typeNames === undefined) {
+    m_typeNames = {};
+    typeNameCache.set(typeData, m_typeNames);
+  }
+
+  if (m_typeNames.name === undefined) {
+    m_typeNames.name =
+      typeData.typeNode === null
+        ? getTypeReferenceAsString(program, typeData.type, false)
+        : getTypeReferenceNodeAsString(program, typeData.typeNode, false);
+  }
+  if (m_typeNames.name !== null) {
+    if (names.includes(m_typeNames.name)) {
       return true;
     }
-    const nameWithArguments = typeName.getNameWithArguments();
-    if (patterns.some((pattern) => pattern.test(nameWithArguments ?? name))) {
+
+    if (patterns.some((pattern) => pattern.test(m_typeNames.name!))) {
       return true;
     }
   }
 
-  const alias = typeName.getAlias();
-  if (alias !== null) {
-    if (names.includes(alias)) {
-      return true;
-    }
-    if (patterns.some((pattern) => pattern.test(alias))) {
-      return true;
-    }
+  if (m_typeNames.alias === undefined) {
+    m_typeNames.alias =
+      typeData.typeNode === null
+        ? getTypeAliasAsString(typeData.type, false)
+        : getTypeNodeAliasAsString(typeData.typeNode, false);
   }
-
-  const aliasWithArguments = typeName.getAliasWithArguments();
-  if (
-    aliasWithArguments !== null &&
-    patterns.some((pattern) => pattern.test(aliasWithArguments))
-  ) {
+  if (m_typeNames.alias !== null && names.includes(m_typeNames.alias)) {
     return true;
   }
 
-  const evaluated = typeName.getEvaluated();
-  return (
-    names.includes(evaluated) ||
-    patterns.some((pattern) => pattern.test(evaluated))
-  );
+  if (m_typeNames.nameWithArguments === undefined) {
+    m_typeNames.nameWithArguments =
+      typeData.typeNode === null
+        ? getTypeReferenceAsString(program, typeData.type, true)
+        : getTypeReferenceNodeAsString(program, typeData.typeNode, true);
+  }
+  if (
+    m_typeNames.nameWithArguments !== null &&
+    m_typeNames.name !== m_typeNames.nameWithArguments
+  ) {
+    if (names.includes(m_typeNames.nameWithArguments)) {
+      return true;
+    }
+
+    if (
+      patterns.some((pattern) => pattern.test(m_typeNames.nameWithArguments!))
+    ) {
+      return true;
+    }
+  }
+
+  if (m_typeNames.aliasWithArguments === undefined) {
+    m_typeNames.aliasWithArguments =
+      typeData.typeNode === null
+        ? getTypeAliasAsString(typeData.type, true)
+        : getTypeNodeAliasAsString(typeData.typeNode, true);
+  }
+  if (
+    m_typeNames.aliasWithArguments !== null &&
+    m_typeNames.alias !== m_typeNames.aliasWithArguments
+  ) {
+    if (names.includes(m_typeNames.aliasWithArguments)) {
+      return true;
+    }
+
+    if (
+      patterns.some((pattern) => pattern.test(m_typeNames.aliasWithArguments!))
+    ) {
+      return true;
+    }
+  }
+
+  if (m_typeNames.asWritten === undefined) {
+    m_typeNames.asWritten =
+      typeData.typeNode === null ? null : typeNodeAsWritten(typeData.typeNode);
+  }
+  if (m_typeNames.asWritten !== null) {
+    if (names.includes(m_typeNames.asWritten)) {
+      return true;
+    }
+
+    if (patterns.some((pattern) => pattern.test(m_typeNames.asWritten!))) {
+      return true;
+    }
+  }
+
+  if (m_typeNames.evaluatedTypeNode === undefined) {
+    m_typeNames.evaluatedTypeNode =
+      typeData.typeNode === null
+        ? null
+        : typeNodeToString(program, typeData.typeNode, typeFormatFlags);
+  }
+  if (m_typeNames.evaluatedTypeNode !== null) {
+    if (names.includes(m_typeNames.evaluatedTypeNode)) {
+      return true;
+    }
+
+    if (
+      patterns.some((pattern) => pattern.test(m_typeNames.evaluatedTypeNode!))
+    ) {
+      return true;
+    }
+  }
+
+  if (m_typeNames.evaluatedType === undefined) {
+    m_typeNames.evaluatedType = typeToString(
+      program,
+      typeData.type,
+      undefined,
+      typeFormatFlags,
+    );
+  }
+
+  if (names.includes(m_typeNames.evaluatedType)) {
+    return true;
+  }
+
+  return patterns.some((pattern) => pattern.test(m_typeNames.evaluatedType!));
 }
 
 /**
