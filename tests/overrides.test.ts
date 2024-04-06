@@ -329,14 +329,14 @@ describe("Overrides", () => {
 
   describe("wrapper by pattern", () => {
     describe.each([
-      // {
-      //   overrides: [
-      //     {
-      //       type: /^ReadonlyDeep<.+>$/u,
-      //       to: Immutability.ReadonlyDeep,
-      //     },
-      //   ],
-      // },
+      {
+        overrides: [
+          {
+            type: /^ReadonlyDeep<.+>$/u,
+            to: Immutability.ReadonlyDeep,
+          },
+        ],
+      },
       {
         overrides: [
           {
