@@ -12,8 +12,8 @@ dependencies:
     specifier: ^1.3.0
     version: 1.3.0(typescript@5.4.3)
   type-to-string:
-    specifier: ^1.0.0
-    version: 1.0.0(ts-api-utils@1.3.0)(typescript@5.4.3)
+    specifier: ^2.0.0
+    version: 2.0.0(ts-api-utils@1.3.0)(typescript@5.4.3)
 
 devDependencies:
   '@commitlint/cli':
@@ -7282,8 +7282,8 @@ packages:
     engines: {node: '>=16'}
     dev: true
 
-  /type-to-string@1.0.0(ts-api-utils@1.3.0)(typescript@5.4.3):
-    resolution: {integrity: sha512-Ufg4MJRP9rt2tPmXgdoyktv//uRl31lJ7buaSJx5o764hJp5HD7T5gm7nRhSZ3gRRqVwIy/u1A78SW79rqeErQ==}
+  /type-to-string@2.0.0(ts-api-utils@1.3.0)(typescript@5.4.3):
+    resolution: {integrity: sha512-tQhiWuq8+FkAYEAQ+Po1VPwzUhPVOXupzsVxZ/n9hN6oP92KXOpf4CFX0wclYa7QsrP4eBUIMydYJyv3ttRVRA==}
     peerDependencies:
       ts-api-utils: '>=1.3.0'
       typescript: '>=5.0.0'
