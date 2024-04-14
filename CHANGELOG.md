@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [2.1.1](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.1.0...v2.1.1) (2024-04-14)
+
+
+### Bug Fixes
+
+* use safe way of getting an identifier's text ([18ef5e0](https://github.com/RebeccaStevens/is-immutable-type/commit/18ef5e0ef85dc525ddf9e1c33a510d22a5b44a4b))
+
 # [2.1.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.6...v2.1.0) (2024-04-14)
 
 
