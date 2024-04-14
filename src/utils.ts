@@ -347,7 +347,7 @@ export function entityNameToString(entityName: ts.EntityName): string {
 export function identifierToString(
   identifier: ts.Identifier | ts.PrivateIdentifier,
 ): string {
-  return identifier.escapedText as string;
+  return identifier.getText();
 }
 
 /**
