@@ -344,9 +344,9 @@ function createApplyOverrideTaskState(
 function getOverride(parameters: Parameters, typeData: TypeData) {
   return parameters.overrides.find((potentialOverride) =>
     typeDataMatchesSpecifier(
-      typeData,
-      potentialOverride.type,
       parameters.program,
+      potentialOverride.type,
+      typeData,
     ),
   );
 }

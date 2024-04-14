@@ -4,16 +4,6 @@ import typeMatchesSpecifier, {
   type TypeDeclarationLibSpecifier,
   type TypeDeclarationPackageSpecifier,
 } from "ts-declaration-location";
-import {
-  TypeNodeFormatFlags,
-  getTypeAliasAsString,
-  getTypeNodeAliasAsString,
-  getTypeReferenceAsString,
-  getTypeReferenceNodeAsString,
-  typeNodeAsWritten,
-  typeNodeToString,
-  typeToString,
-} from "type-to-string";
 import ts from "typescript";
 
 type PatternSpecifier =
@@ -129,23 +119,13 @@ export function getCachedData<V>(
   return cache.get(identity);
 }
 
-const typeFormatFlags =
-  TypeNodeFormatFlags.AddUndefined |
-  TypeNodeFormatFlags.NoTruncation |
-  TypeNodeFormatFlags.OmitParameterModifiers |
-  TypeNodeFormatFlags.OmitTypeLiterals |
-  TypeNodeFormatFlags.UseFullyQualifiedType |
-  TypeNodeFormatFlags.WriteArrayAsGenericType |
-  TypeNodeFormatFlags.WriteArrowStyleSignature |
-  TypeNodeFormatFlags.WriteTypeArgumentsOfSignature;
-
 /**
  * Does the given type/typeNode match the given specifier.
  */
 export function typeDataMatchesSpecifier(
-  typeData: Readonly<TypeData>,
-  specifier: TypeSpecifier,
   program: ts.Program,
+  specifier: TypeSpecifier,
+  typeData: Readonly<TypeData>,
 ): boolean {
   if (isIntrinsicErrorType(typeData.type)) {
     return false;
@@ -160,19 +140,6 @@ export function typeDataMatchesSpecifier(
     typeNameMatchesSpecifier(program, specifier, typeData)
   );
 }
-
-const typeNameCache = new WeakMap<
-  Readonly<TypeData>,
-  Partial<{
-    name: string | null;
-    alias: string | null;
-    nameWithArguments: string | null;
-    aliasWithArguments: string | null;
-    asWritten: string | null;
-    evaluatedTypeNode: string | null;
-    evaluatedType: string;
-  }>
->();
 
 /**
  * Test if the given type name matches the given specifier.
@@ -201,126 +168,106 @@ function typeNameMatchesSpecifier(
             ? specifier.pattern
             : [specifier.pattern];
 
-  let m_typeNames = typeNameCache.get(typeData);
-  if (m_typeNames === undefined) {
-    m_typeNames = {};
-    typeNameCache.set(typeData, m_typeNames);
-  }
-
-  if (m_typeNames.name === undefined) {
-    m_typeNames.name =
-      typeData.typeNode === null
-        ? getTypeReferenceAsString(program, typeData.type, false)
-        : getTypeReferenceNodeAsString(program, typeData.typeNode, false);
-  }
-  if (m_typeNames.name !== null) {
-    if (names.includes(m_typeNames.name)) {
+  const typeNameAlias = getTypeAliasName(typeData);
+  if (typeNameAlias !== null) {
+    if (names.includes(typeNameAlias)) {
       return true;
     }
 
-    if (patterns.some((pattern) => pattern.test(m_typeNames.name!))) {
+    if (patterns.some((pattern) => pattern.test(typeNameAlias))) {
       return true;
     }
   }
 
-  if (m_typeNames.alias === undefined) {
-    m_typeNames.alias =
-      typeData.typeNode === null
-        ? getTypeAliasAsString(typeData.type, false)
-        : getTypeNodeAliasAsString(typeData.typeNode, false);
+  const typeValue = getTypeAsString(program, typeData);
+  if (names.includes(typeValue)) {
+    return true;
   }
-  if (m_typeNames.alias !== null && names.includes(m_typeNames.alias)) {
+  if (patterns.some((pattern) => pattern.test(typeValue))) {
     return true;
   }
 
-  if (m_typeNames.nameWithArguments === undefined) {
-    m_typeNames.nameWithArguments =
-      typeData.typeNode === null
-        ? getTypeReferenceAsString(program, typeData.type, true)
-        : getTypeReferenceNodeAsString(program, typeData.typeNode, true);
+  const typeNameName = extractTypeName(typeValue);
+  if (typeNameName !== null) {
+    if (names.includes(typeNameName)) {
+      return true;
+    }
+
+    if (patterns.some((pattern) => pattern.test(typeNameName))) {
+      return true;
+    }
   }
+
+  // Special handling for arrays not written in generic syntax.
   if (
-    m_typeNames.nameWithArguments !== null &&
-    m_typeNames.name !== m_typeNames.nameWithArguments
+    program.getTypeChecker().isArrayType(typeData.type) &&
+    typeData.typeNode !== null
   ) {
-    if (names.includes(m_typeNames.nameWithArguments)) {
-      return true;
-    }
-
     if (
-      patterns.some((pattern) => pattern.test(m_typeNames.nameWithArguments!))
+      (ts.isTypeOperatorNode(typeData.typeNode) &&
+        typeData.typeNode.operator === ts.SyntaxKind.ReadonlyKeyword) ||
+      (ts.isTypeOperatorNode(typeData.typeNode.parent) &&
+        typeData.typeNode.parent.operator === ts.SyntaxKind.ReadonlyKeyword)
     ) {
+      if (names.includes("ReadonlyArray")) {
+        return true;
+      }
+    } else if (names.includes("Array")) {
       return true;
     }
   }
 
-  if (m_typeNames.aliasWithArguments === undefined) {
-    m_typeNames.aliasWithArguments =
-      typeData.typeNode === null
-        ? getTypeAliasAsString(typeData.type, true)
-        : getTypeNodeAliasAsString(typeData.typeNode, true);
-  }
-  if (
-    m_typeNames.aliasWithArguments !== null &&
-    m_typeNames.alias !== m_typeNames.aliasWithArguments
-  ) {
-    if (names.includes(m_typeNames.aliasWithArguments)) {
-      return true;
-    }
+  return false;
+}
 
-    if (
-      patterns.some((pattern) => pattern.test(m_typeNames.aliasWithArguments!))
-    ) {
-      return true;
-    }
+/**
+ * Get the type alias name from the given type data.
+ *
+ * Null will be returned if the type is not a type alias.
+ */
+function getTypeAliasName(typeData: TypeData) {
+  if (typeData.typeNode === null) {
+    const t =
+      "target" in typeData.type
+        ? (typeData.type.target as ts.Type)
+        : typeData.type;
+    return t.aliasSymbol?.getName() ?? null;
   }
 
-  if (m_typeNames.asWritten === undefined) {
-    m_typeNames.asWritten =
-      typeData.typeNode === null ? null : typeNodeAsWritten(typeData.typeNode);
-  }
-  if (m_typeNames.asWritten !== null) {
-    if (names.includes(m_typeNames.asWritten)) {
-      return true;
-    }
+  return ts.isTypeAliasDeclaration(typeData.typeNode.parent)
+    ? identifierToString(typeData.typeNode.parent.name)
+    : null;
+}
 
-    if (patterns.some((pattern) => pattern.test(m_typeNames.asWritten!))) {
-      return true;
-    }
-  }
+/**
+ * Get the type as a string.
+ */
+function getTypeAsString(program: ts.Program, typeData: TypeData) {
+  return typeData.typeNode === null
+    ? program
+        .getTypeChecker()
+        .typeToString(
+          typeData.type,
+          undefined,
+          ts.TypeFormatFlags.AddUndefined |
+            ts.TypeFormatFlags.NoTruncation |
+            ts.TypeFormatFlags.OmitParameterModifiers |
+            ts.TypeFormatFlags.UseFullyQualifiedType |
+            ts.TypeFormatFlags.WriteArrayAsGenericType |
+            ts.TypeFormatFlags.WriteArrowStyleSignature |
+            ts.TypeFormatFlags.WriteTypeArgumentsOfSignature,
+        )
+    : typeData.typeNode.getText();
+}
 
-  if (m_typeNames.evaluatedTypeNode === undefined) {
-    m_typeNames.evaluatedTypeNode =
-      typeData.typeNode === null
-        ? null
-        : typeNodeToString(program, typeData.typeNode, typeFormatFlags);
-  }
-  if (m_typeNames.evaluatedTypeNode !== null) {
-    if (names.includes(m_typeNames.evaluatedTypeNode)) {
-      return true;
-    }
-
-    if (
-      patterns.some((pattern) => pattern.test(m_typeNames.evaluatedTypeNode!))
-    ) {
-      return true;
-    }
-  }
-
-  if (m_typeNames.evaluatedType === undefined) {
-    m_typeNames.evaluatedType = typeToString(
-      program,
-      typeData.type,
-      undefined,
-      typeFormatFlags,
-    );
-  }
-
-  if (names.includes(m_typeNames.evaluatedType)) {
-    return true;
-  }
-
-  return patterns.some((pattern) => pattern.test(m_typeNames.evaluatedType!));
+/**
+ * Get the type name extracted from the the type's string.
+ *
+ * This only work if the type is a type reference.
+ */
+function extractTypeName(typeValue: string) {
+  const match = /^([^<]+)<.+>$/u.exec(typeValue);
+  return match?.[1] ?? null;
 }
 
 /**
