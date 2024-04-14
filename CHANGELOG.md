@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+# [2.1.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.6...v2.1.0) (2024-04-14)
+
+
+### Features
+
+* file specifiers can now use globs to match the file path ([d4e60a2](https://github.com/RebeccaStevens/is-immutable-type/commit/d4e60a2ddf5a1bb7edcccc5c516c86d83fde9f45))
+* file specifiers can now use globs to match the file path ([#404](https://github.com/RebeccaStevens/is-immutable-type/issues/404)) ([cf68cc0](https://github.com/RebeccaStevens/is-immutable-type/commit/cf68cc0e25b3e0c5817dc84d8df80567e040f1b4))
+
 ## [2.0.6](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.0.5...v2.0.6) (2024-04-06)
 
 
