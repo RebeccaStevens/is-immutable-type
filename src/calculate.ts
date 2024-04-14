@@ -24,7 +24,7 @@ import {
   isTypeNode,
   isTypeReferenceWithTypeArguments,
   propertyNameToString,
-  typeMatchesSpecifier,
+  typeDataMatchesSpecifier,
   type TypeData,
   type TypeSpecifier,
 } from "./utils";
@@ -159,7 +159,6 @@ type TaskStateChildrenReducer = TaskStateBase & {
   childrenReducer: (a: Immutability, b: Immutability) => Immutability;
 };
 
-// eslint-disable-next-line functional/no-mixed-types
 type TaskStateCheckDone = {
   stage: TaskStateStage.CheckDone;
   taskState: TaskStateWithLimits;
@@ -344,7 +343,11 @@ function createApplyOverrideTaskState(
  */
 function getOverride(parameters: Parameters, typeData: TypeData) {
   return parameters.overrides.find((potentialOverride) =>
-    typeMatchesSpecifier(typeData, potentialOverride.type, parameters.program),
+    typeDataMatchesSpecifier(
+      typeData,
+      potentialOverride.type,
+      parameters.program,
+    ),
   );
 }
 

@@ -1,6 +1,9 @@
-import path from "node:path";
-
 import { isIntrinsicErrorType, isTypeReference } from "ts-api-utils";
+import typeMatchesSpecifier, {
+  type TypeDeclarationFileSpecifier,
+  type TypeDeclarationLibSpecifier,
+  type TypeDeclarationPackageSpecifier,
+} from "ts-declaration-location";
 import {
   TypeNodeFormatFlags,
   getTypeAliasAsString,
@@ -23,27 +26,9 @@ type PatternSpecifier =
       pattern: RegExp | RegExp[];
     };
 
-type FileSpecifier = PatternSpecifier & {
-  from: "file";
-
-  /**
-   * The path to look in for the type, relative to project directory.
-   */
-  path?: string;
-};
-
-type LibSpecifier = PatternSpecifier & {
-  from: "lib";
-};
-
-type PackageSpecifier = PatternSpecifier & {
-  from: "package";
-
-  /**
-   * The package to look in.
-   */
-  package: string;
-};
+type FileSpecifier = PatternSpecifier & TypeDeclarationFileSpecifier;
+type LibSpecifier = PatternSpecifier & TypeDeclarationLibSpecifier;
+type PackageSpecifier = PatternSpecifier & TypeDeclarationPackageSpecifier;
 
 /**
  * How a type can be specified.
@@ -157,7 +142,7 @@ const typeFormatFlags =
 /**
  * Does the given type/typeNode match the given specifier.
  */
-export function typeMatchesSpecifier(
+export function typeDataMatchesSpecifier(
   typeData: Readonly<TypeData>,
   specifier: TypeSpecifier,
   program: ts.Program,
@@ -167,34 +152,13 @@ export function typeMatchesSpecifier(
   }
 
   if (typeof specifier === "string" || specifier instanceof RegExp) {
-    return typeNameMatchesSpecifier(typeData, program, specifier);
+    return typeNameMatchesSpecifier(program, specifier, typeData);
   }
 
-  if (!typeNameMatchesSpecifier(typeData, program, specifier)) {
-    return false;
-  }
-
-  const declarationFiles =
-    typeData.type
-      .getSymbol()
-      ?.getDeclarations()
-      ?.map((declaration) => declaration.getSourceFile()) ?? [];
-
-  switch (specifier.from) {
-    case "file": {
-      return isTypeDeclaredFromLocal(specifier.path, declarationFiles, program);
-    }
-    case "lib": {
-      return isTypeDeclaredFromLib(declarationFiles, program);
-    }
-    case "package": {
-      return isTypeDeclaredInPackage(
-        specifier.package,
-        declarationFiles,
-        program,
-      );
-    }
-  }
+  return (
+    typeMatchesSpecifier(program, specifier, typeData.type) &&
+    typeNameMatchesSpecifier(program, specifier, typeData)
+  );
 }
 
 const typeNameCache = new WeakMap<
@@ -214,9 +178,9 @@ const typeNameCache = new WeakMap<
  * Test if the given type name matches the given specifier.
  */
 function typeNameMatchesSpecifier(
-  typeData: Readonly<TypeData>,
   program: ts.Program,
   specifier: TypeSpecifier,
+  typeData: Readonly<TypeData>,
 ): boolean {
   const names =
     typeof specifier === "string"
@@ -357,80 +321,6 @@ function typeNameMatchesSpecifier(
   }
 
   return patterns.some((pattern) => pattern.test(m_typeNames.evaluatedType!));
-}
-
-/**
- * Test if the type is declared in a TypeScript lib.
- */
-function isTypeDeclaredFromLib(
-  declarationFiles: ReadonlyArray<ts.SourceFile>,
-  program: ts.Program,
-): boolean {
-  // Intrinsic type (i.e. string, number, boolean, etc).
-  if (declarationFiles.length === 0) {
-    return true;
-  }
-  return declarationFiles.some((declaration) =>
-    program.isSourceFileDefaultLibrary(declaration),
-  );
-}
-
-/**
- * Test if the type is declared in a TypeScript package.
- */
-function isTypeDeclaredInPackage(
-  packageName: string,
-  declarationFiles: ReadonlyArray<ts.SourceFile>,
-  program: ts.Program,
-): boolean {
-  // Handle scoped packages - if the name starts with @, remove it and replace / with __
-  const typesPackageName = packageName.replace(/^@([^/]+)\//u, "$1__");
-
-  const matcher = new RegExp(`${packageName}|${typesPackageName}`, "u");
-  return declarationFiles.some((declaration) => {
-    const packageIdName = program.sourceFileToPackageName.get(declaration.path);
-    return (
-      packageIdName !== undefined &&
-      matcher.test(packageIdName) &&
-      program.isSourceFileFromExternalLibrary(declaration)
-    );
-  });
-}
-
-/**
- * Test if the type is declared in a local file.
- */
-function isTypeDeclaredFromLocal(
-  relativePath: string | undefined,
-  declarationFiles: ReadonlyArray<ts.SourceFile>,
-  program: ts.Program,
-): boolean {
-  if (relativePath === undefined) {
-    const cwd = program.getCurrentDirectory().toLowerCase();
-    const typeRoots = ts.getEffectiveTypeRoots(
-      program.getCompilerOptions(),
-      program,
-    );
-
-    return declarationFiles.some((declaration) => {
-      if (program.isSourceFileFromExternalLibrary(declaration)) {
-        return false;
-      }
-      const fileName = declaration.path.toLowerCase();
-      if (!fileName.startsWith(cwd)) {
-        return false;
-      }
-      return (
-        typeRoots?.some((typeRoot) => fileName.startsWith(typeRoot)) !== true
-      );
-    });
-  }
-  const absolutePath = path
-    .join(program.getCurrentDirectory(), relativePath)
-    .toLowerCase();
-  return declarationFiles.some(
-    (declaration) => declaration.fileName.toLowerCase() === absolutePath,
-  );
 }
 
 /**
