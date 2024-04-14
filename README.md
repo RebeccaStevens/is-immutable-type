@@ -68,7 +68,7 @@ test if a value is `Unknown`.
 
 ## Definitions
 
-- `Immutable`: Everything is deeply read only and nothing can be modified.
+- `Immutable`: Everything is deeply read-only and nothing can be modified.
 - `ReadonlyDeep`: The data is deeply immutable but methods are not.
 - `ReadonlyShallow`: The data is shallowly immutable, but at least one deep value is not.
 - `Mutable`: The data is shallowly mutable.
@@ -95,7 +95,7 @@ the calculated immutability is between the `to` value and this value
 
 The `type` is specified with a `TypeSpecifier`.\
 This can either be a `string` that will match against the type's name or a regex
-pattern that will match against the the type's name and any type arguments.\
+pattern that will match against the type's name and any type arguments.\
 Additionally, you can specify where the type needs to come from for it to be
 overridden.\
 To do this, use an object, with either a `name` or `pattern` value; and a `from`
@@ -123,7 +123,7 @@ such.
 
 ### Default Overrides
 
-By default the following TypeScript lib types are overridden to be `Mutable`:
+By default, the following TypeScript lib types are overridden to be `Mutable`:
 
 - `Map`
 - `Set`
@@ -140,7 +140,7 @@ to lose them. You can obtain them with `getDefaultOverrides()`.
 
 ### Another Use for Overrides
 
-Currently due to limitations in TypeScript, it is impossible to write a utility
+Currently, due to limitations in TypeScript, it is impossible to write a utility
 type that will transform any given type to an immutable version of it in all
 cases. ([See this issue](https://github.com/microsoft/TypeScript/issues/29732))
 
@@ -156,7 +156,7 @@ immutable regardless, you can provide an override stating as such.
 
 ## Caching
 
-By default we use a global cache to speed up the calculation of multiple types'
+By default, we use a global cache to speed up the calculation of multiple types'
 immutability. This prevents us from needing to calculate the immutability of
 the same types over and over again.
 
@@ -188,7 +188,7 @@ type Foo = Readonly<ReadonlySet<string>>;
 type Bar = Readonly<ReadonlyMap<string, number>>;
 ```
 
-However it should be noted that this does not work for arrays. TypeScript will
+However, it should be noted that this does not work for arrays. TypeScript will
 treat `Readonly<Array<T>>` exactly the same as `ReadonlyArray<T>` and
 as a consequence `Readonly<ReadonlyArray<T>>` is also treated the same.
 
@@ -201,7 +201,7 @@ type ImmutableShallow<T extends {}> = {
 };
 ```
 
-Now the follow will correctly be marked as `Immutable`.
+Now the following will correctly be marked as `Immutable`.
 
 ```ts
 type Foo = ImmutableShallow<readonly string[]>;
