@@ -1,6 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+# [3.0.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.1.1...v3.0.0) (2024-04-15)
+
+
+### Performance Improvements
+
+* simplify how type are converted to string ([2b545e4](https://github.com/RebeccaStevens/is-immutable-type/commit/2b545e4809fee40123584ee6c122342b01b8efca))
+* simplify how type are converted to string ([#405](https://github.com/RebeccaStevens/is-immutable-type/issues/405)) ([39d5d21](https://github.com/RebeccaStevens/is-immutable-type/commit/39d5d21c98cbaa7a82ff39f6c3f62d929dd0021a))
+
+
+### BREAKING CHANGES
+
+* types aren't processed as much and thus not all override patterns are still
+supported
+* types aren't processed as much and thus not all override patterns are still
+supported
+
 ## [2.1.1](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.1.0...v2.1.1) (2024-04-14)
 
 
