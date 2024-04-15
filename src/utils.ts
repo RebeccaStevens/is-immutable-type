@@ -31,6 +31,16 @@ export type TypeSpecifier =
   | PackageSpecifier;
 
 /**
+ * Check if a type matches a specifier.
+ */
+export type TypeMatchesPatternSpecifier = (
+  program: ts.Program,
+  typeData: Readonly<TypeData>,
+  names: ReadonlyArray<string>,
+  patterns: ReadonlyArray<RegExp>,
+) => boolean;
+
+/**
  * Type guard to check if a Node has a Symbol.
  */
 export function hasSymbol(
@@ -126,18 +136,29 @@ export function typeDataMatchesSpecifier(
   program: ts.Program,
   specifier: TypeSpecifier,
   typeData: Readonly<TypeData>,
+  typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier,
 ): boolean {
   if (isIntrinsicErrorType(typeData.type)) {
     return false;
   }
 
   if (typeof specifier === "string" || specifier instanceof RegExp) {
-    return typeNameMatchesSpecifier(program, specifier, typeData);
+    return typeNameMatchesSpecifier(
+      program,
+      specifier,
+      typeData,
+      typeMatchesPatternSpecifier,
+    );
   }
 
   return (
     typeMatchesSpecifier(program, specifier, typeData.type) &&
-    typeNameMatchesSpecifier(program, specifier, typeData)
+    typeNameMatchesSpecifier(
+      program,
+      specifier,
+      typeData,
+      typeMatchesPatternSpecifier,
+    )
   );
 }
 
@@ -148,6 +169,7 @@ function typeNameMatchesSpecifier(
   program: ts.Program,
   specifier: TypeSpecifier,
   typeData: Readonly<TypeData>,
+  typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier,
 ): boolean {
   const names =
     typeof specifier === "string"
@@ -168,6 +190,18 @@ function typeNameMatchesSpecifier(
             ? specifier.pattern
             : [specifier.pattern];
 
+  return typeMatchesPatternSpecifier(program, typeData, names, patterns);
+}
+
+/**
+ * The default `TypeMatchesPatternSpecifier`.
+ */
+export function defaultTypeMatchesPatternSpecifier(
+  program: ts.Program,
+  typeData: Readonly<TypeData>,
+  names: ReadonlyArray<string>,
+  patterns: ReadonlyArray<RegExp>,
+) {
   const typeNameAlias = getTypeAliasName(typeData);
   if (typeNameAlias !== null) {
     if (names.includes(typeNameAlias)) {

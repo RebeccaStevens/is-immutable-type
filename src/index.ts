@@ -1,8 +1,8 @@
 export {
+  getDefaultOverrides,
+  getTypeImmutability,
   type ImmutabilityCache,
   type ImmutabilityOverrides,
-  getTypeImmutability,
-  getDefaultOverrides,
 } from "./calculate";
 export {
   clamp,
@@ -21,4 +21,4 @@ export {
   isReadonlyDeepType,
   isReadonlyShallowType,
 } from "./is";
-export { type TypeSpecifier } from "./utils";
+export { type TypeMatchesPatternSpecifier, type TypeSpecifier } from "./utils";

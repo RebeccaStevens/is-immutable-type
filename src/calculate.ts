@@ -17,6 +17,7 @@ import { max, min } from "./compare";
 import { Immutability } from "./immutability";
 import {
   cacheData,
+  defaultTypeMatchesPatternSpecifier,
   getCachedData,
   getTypeData,
   hasSymbol,
@@ -26,6 +27,7 @@ import {
   propertyNameToString,
   typeDataMatchesSpecifier,
   type TypeData,
+  type TypeMatchesPatternSpecifier,
   type TypeSpecifier,
 } from "./utils";
 
@@ -98,6 +100,9 @@ const globalCache: ImmutabilityCache = new WeakMap();
  * @param maxImmutability - If set then any return value equal to or greater
  * than this value will state the type's minimum immutability rather than it's
  * actual. This allows for early-escapes to be made in the type calculation.
+ * @param typeMatchesPatternSpecifier - Allows for overriding how we check if a
+ * type matches a pattern. This is used for checking if an override should be
+ * applied or not.
  */
 export function getTypeImmutability(
   program: ts.Program,
@@ -105,6 +110,7 @@ export function getTypeImmutability(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
   maxImmutability = Immutability.Immutable,
+  typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier = defaultTypeMatchesPatternSpecifier,
 ): Immutability {
   const givenTypeNode = isTypeNode(typeOrTypeNode);
 
@@ -120,6 +126,7 @@ export function getTypeImmutability(
     overrides,
     useCache,
     maxImmutability,
+    typeMatchesPatternSpecifier,
   );
 }
 
@@ -196,6 +203,7 @@ type Parameters = Readonly<{
   overrides: ImmutabilityOverrides;
   cache: ImmutabilityCache;
   immutabilityLimits: Readonly<ImmutabilityLimits>;
+  typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier;
 }>;
 
 /**
@@ -207,6 +215,7 @@ function getTypeImmutabilityHelper(
   overrides: ImmutabilityOverrides,
   useCache: ImmutabilityCache | boolean,
   maxImmutability: Immutability,
+  typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier,
 ): Immutability {
   const cache: ImmutabilityCache =
     useCache === true
@@ -223,6 +232,7 @@ function getTypeImmutabilityHelper(
       min: Immutability.Mutable,
       max: maxImmutability,
     },
+    typeMatchesPatternSpecifier,
   };
 
   const m_stack: Stack = [createNewTaskState(td)];
@@ -347,6 +357,7 @@ function getOverride(parameters: Parameters, typeData: TypeData) {
       parameters.program,
       potentialOverride.type,
       typeData,
+      parameters.typeMatchesPatternSpecifier,
     ),
   );
 }
