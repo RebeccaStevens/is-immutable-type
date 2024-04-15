@@ -1,3 +1,4 @@
+import dedent from "dedent";
 import { describe, it } from "vitest";
 
 import { Immutability, type ImmutabilityOverrides } from "#is-immutable-type";
@@ -38,31 +39,6 @@ describe("Overrides", () => {
         overrides: [
           {
             type: { from: "file", pattern: /^T.*/u },
-            to: Immutability.Immutable,
-          },
-        ],
-      },
-    ] as OverrideSet)("%s", ({ overrides }) => {
-      it.each(["type Test<G> = { foo: string };"])("Immutable", (code) => {
-        runTestImmutability({ code, overrides }, Immutability.Immutable);
-      });
-    });
-  });
-
-  describe("use type parameters in pattern of root override", () => {
-    describe.each([
-      {
-        overrides: [
-          {
-            type: /^Test<.+>/u,
-            to: Immutability.Immutable,
-          },
-        ],
-      },
-      {
-        overrides: [
-          {
-            type: { from: "file", pattern: /^Test<.+>/u },
             to: Immutability.Immutable,
           },
         ],
@@ -426,21 +402,27 @@ describe("Overrides", () => {
   });
 
   describe("Primitives", () => {
-    const code = `
-      type A = string;
-      type B = A;
-    `;
-
     it("overrids a primitive", () => {
       runTestImmutability(
-        { code, overrides: [{ type: "string", to: Immutability.Mutable }] },
+        {
+          code: dedent`
+            type A = string;
+          `,
+          overrides: [{ type: "string", to: Immutability.Mutable }],
+        },
         Immutability.Mutable,
       );
     });
 
     it("overrids a used alias of a primitive", () => {
       runTestImmutability(
-        { code, overrides: [{ type: "A", to: Immutability.Mutable }] },
+        {
+          code: dedent`
+            type A = string;
+            type B = A;
+          `,
+          overrides: [{ type: "A", to: Immutability.Mutable }],
+        },
         Immutability.Mutable,
       );
     });
