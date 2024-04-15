@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+# [3.1.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v3.0.0...v3.1.0) (2024-04-15)
+
+
+### Features
+
+* allow for overriding how we check if a type matches a specifier ([b3bb9f3](https://github.com/RebeccaStevens/is-immutable-type/commit/b3bb9f3949f0c7b6b4cf79822fcf2faf82321e2e))
+* allow for overriding how we check if a type matches a specifier ([#406](https://github.com/RebeccaStevens/is-immutable-type/issues/406)) ([9480a37](https://github.com/RebeccaStevens/is-immutable-type/commit/9480a371972f9401ce16e7956983ec5b7a495e64))
+
 # [3.0.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v2.1.1...v3.0.0) (2024-04-15)
 
 
