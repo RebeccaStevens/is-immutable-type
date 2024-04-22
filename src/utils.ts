@@ -6,15 +6,19 @@ import typeMatchesSpecifier, {
 } from "ts-declaration-location";
 import ts from "typescript";
 
-type PatternSpecifier =
+type PatternSpecifier = {
+  name?: string | string[];
+  ignoreName?: string | string[];
+  pattern?: RegExp | RegExp[];
+  ignorePattern?: RegExp | RegExp[];
+} & (
   | {
       name: string | string[];
-      pattern?: undefined;
     }
   | {
-      name?: undefined;
       pattern: RegExp | RegExp[];
-    };
+    }
+);
 
 type FileSpecifier = PatternSpecifier & TypeDeclarationFileSpecifier;
 type LibSpecifier = PatternSpecifier & TypeDeclarationLibSpecifier;
@@ -35,9 +39,10 @@ export type TypeSpecifier =
  */
 export type TypeMatchesPatternSpecifier = (
   program: ts.Program,
-  typeData: Readonly<TypeData>,
-  names: ReadonlyArray<string>,
-  patterns: ReadonlyArray<RegExp>,
+  type: ts.Type,
+  typeNode: ts.TypeNode | null,
+  include: ReadonlyArray<string | RegExp>,
+  exclude: ReadonlyArray<string | RegExp>,
 ) => boolean;
 
 /**
@@ -179,18 +184,44 @@ function typeNameMatchesSpecifier(
         : Array.isArray(specifier.name)
           ? specifier.name
           : [specifier.name];
-  const patterns =
-    typeof specifier === "string"
-      ? []
-      : specifier instanceof RegExp
-        ? [specifier]
-        : specifier.pattern === undefined
-          ? []
-          : Array.isArray(specifier.pattern)
-            ? specifier.pattern
-            : [specifier.pattern];
 
-  return typeMatchesPatternSpecifier(program, typeData, names, patterns);
+  const patterns =
+    specifier instanceof RegExp
+      ? [specifier]
+      : typeof specifier === "string" || specifier.pattern === undefined
+        ? []
+        : Array.isArray(specifier.pattern)
+          ? specifier.pattern
+          : [specifier.pattern];
+
+  const ignoreNames =
+    typeof specifier === "string" ||
+    specifier instanceof RegExp ||
+    specifier.ignoreName === undefined
+      ? []
+      : Array.isArray(specifier.ignoreName)
+        ? specifier.ignoreName
+        : [specifier.ignoreName];
+
+  const ignorePatterns =
+    typeof specifier === "string" ||
+    specifier instanceof RegExp ||
+    specifier.ignorePattern === undefined
+      ? []
+      : Array.isArray(specifier.ignorePattern)
+        ? specifier.ignorePattern
+        : [specifier.ignorePattern];
+
+  const include = [...names, ...patterns];
+  const exclude = [...ignoreNames, ...ignorePatterns];
+
+  return typeMatchesPatternSpecifier(
+    program,
+    typeData.type,
+    typeData.typeNode,
+    include,
+    exclude,
+  );
 }
 
 /**
@@ -198,60 +229,81 @@ function typeNameMatchesSpecifier(
  */
 export function defaultTypeMatchesPatternSpecifier(
   program: ts.Program,
-  typeData: Readonly<TypeData>,
-  names: ReadonlyArray<string>,
-  patterns: ReadonlyArray<RegExp>,
+  type: ts.Type,
+  typeNode: ts.TypeNode | null,
+  include: ReadonlyArray<string | RegExp>,
+  exclude: ReadonlyArray<string | RegExp> = [],
 ) {
-  const typeNameAlias = getTypeAliasName(typeData);
+  if (include.length === 0) {
+    return false;
+  }
+
+  let m_shouldInclude = false;
+
+  const typeNameAlias = getTypeAliasName(type, typeNode);
   if (typeNameAlias !== null) {
-    if (names.includes(typeNameAlias)) {
-      return true;
-    }
+    const testTypeNameAlias = (pattern: string | RegExp) =>
+      typeof pattern === "string"
+        ? pattern === typeNameAlias
+        : pattern.test(typeNameAlias);
 
-    if (patterns.some((pattern) => pattern.test(typeNameAlias))) {
-      return true;
+    if (exclude.some(testTypeNameAlias)) {
+      return false;
     }
+    m_shouldInclude ||= include.some(testTypeNameAlias);
   }
 
-  const typeValue = getTypeAsString(program, typeData);
-  if (names.includes(typeValue)) {
-    return true;
+  const typeValue = getTypeAsString(program, type, typeNode);
+  const testTypeValue = (pattern: string | RegExp) =>
+    typeof pattern === "string"
+      ? pattern === typeValue
+      : pattern.test(typeValue);
+
+  if (exclude.some(testTypeValue)) {
+    return false;
   }
-  if (patterns.some((pattern) => pattern.test(typeValue))) {
-    return true;
-  }
+  m_shouldInclude ||= include.some(testTypeValue);
 
   const typeNameName = extractTypeName(typeValue);
   if (typeNameName !== null) {
-    if (names.includes(typeNameName)) {
-      return true;
-    }
+    const testTypeNameName = (pattern: string | RegExp) =>
+      typeof pattern === "string"
+        ? pattern === typeNameName
+        : pattern.test(typeNameName);
 
-    if (patterns.some((pattern) => pattern.test(typeNameName))) {
-      return true;
+    if (exclude.some(testTypeNameName)) {
+      return false;
     }
+    m_shouldInclude ||= include.some(testTypeNameName);
   }
 
   // Special handling for arrays not written in generic syntax.
-  if (
-    program.getTypeChecker().isArrayType(typeData.type) &&
-    typeData.typeNode !== null
-  ) {
+  if (program.getTypeChecker().isArrayType(type) && typeNode !== null) {
     if (
-      (ts.isTypeOperatorNode(typeData.typeNode) &&
-        typeData.typeNode.operator === ts.SyntaxKind.ReadonlyKeyword) ||
-      (ts.isTypeOperatorNode(typeData.typeNode.parent) &&
-        typeData.typeNode.parent.operator === ts.SyntaxKind.ReadonlyKeyword)
+      (ts.isTypeOperatorNode(typeNode) &&
+        typeNode.operator === ts.SyntaxKind.ReadonlyKeyword) ||
+      (ts.isTypeOperatorNode(typeNode.parent) &&
+        typeNode.parent.operator === ts.SyntaxKind.ReadonlyKeyword)
     ) {
-      if (names.includes("ReadonlyArray")) {
-        return true;
+      const testIsReadonlyArray = (pattern: string | RegExp) =>
+        typeof pattern === "string" && pattern === "ReadonlyArray";
+
+      if (exclude.some(testIsReadonlyArray)) {
+        return false;
       }
-    } else if (names.includes("Array")) {
-      return true;
+      m_shouldInclude ||= include.some(testIsReadonlyArray);
+    } else {
+      const testIsArray = (pattern: string | RegExp) =>
+        typeof pattern === "string" && pattern === "Array";
+
+      if (exclude.some(testIsArray)) {
+        return false;
+      }
+      m_shouldInclude ||= include.some(testIsArray);
     }
   }
 
-  return false;
+  return m_shouldInclude;
 }
 
 /**
@@ -259,29 +311,30 @@ export function defaultTypeMatchesPatternSpecifier(
  *
  * Null will be returned if the type is not a type alias.
  */
-function getTypeAliasName(typeData: TypeData) {
-  if (typeData.typeNode === null) {
-    const t =
-      "target" in typeData.type
-        ? (typeData.type.target as ts.Type)
-        : typeData.type;
+function getTypeAliasName(type: ts.Type, typeNode: ts.TypeNode | null) {
+  if (typeNode === null) {
+    const t = "target" in type ? (type.target as ts.Type) : type;
     return t.aliasSymbol?.getName() ?? null;
   }
 
-  return ts.isTypeAliasDeclaration(typeData.typeNode.parent)
-    ? identifierToString(typeData.typeNode.parent.name)
+  return ts.isTypeAliasDeclaration(typeNode.parent)
+    ? typeNode.parent.name.getText()
     : null;
 }
 
 /**
  * Get the type as a string.
  */
-function getTypeAsString(program: ts.Program, typeData: TypeData) {
-  return typeData.typeNode === null
+function getTypeAsString(
+  program: ts.Program,
+  type: ts.Type,
+  typeNode: ts.TypeNode | null,
+) {
+  return typeNode === null
     ? program
         .getTypeChecker()
         .typeToString(
-          typeData.type,
+          type,
           undefined,
           ts.TypeFormatFlags.AddUndefined |
             ts.TypeFormatFlags.NoTruncation |
@@ -291,7 +344,7 @@ function getTypeAsString(program: ts.Program, typeData: TypeData) {
             ts.TypeFormatFlags.WriteArrowStyleSignature |
             ts.TypeFormatFlags.WriteTypeArgumentsOfSignature,
         )
-    : typeData.typeNode.getText();
+    : typeNode.getText();
 }
 
 /**
