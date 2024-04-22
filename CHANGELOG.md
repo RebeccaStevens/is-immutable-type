@@ -1,6 +1,20 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+# [4.0.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v3.1.0...v4.0.0) (2024-04-22)
+
+
+### Features
+
+* allow for ignoring types ([0b24320](https://github.com/RebeccaStevens/is-immutable-type/commit/0b24320561a4f7507e470736322fa8fa3429c24b))
+* allow for ignoring types ([#407](https://github.com/RebeccaStevens/is-immutable-type/issues/407)) ([f17550a](https://github.com/RebeccaStevens/is-immutable-type/commit/f17550a7195fa66bd407ae72d569e70dd8fa307f))
+
+
+### BREAKING CHANGES
+
+* `TypeMatchesPatternSpecifier`'s signature has changed
+* TypeMatchesPatternSpecifier's signature has changed
+
 # [3.1.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v3.0.0...v3.1.0) (2024-04-15)
 
 
