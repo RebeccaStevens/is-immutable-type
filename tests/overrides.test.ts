@@ -48,6 +48,30 @@ describe("Overrides", () => {
         runTestImmutability({ code, overrides }, Immutability.Immutable);
       });
     });
+
+    // Test ignoring.
+    describe.each([
+      {
+        overrides: [
+          {
+            type: { from: "file", pattern: /^T.*/u, ignoreName: "Test" },
+            to: Immutability.Immutable,
+          },
+        ],
+      },
+      {
+        overrides: [
+          {
+            type: { from: "file", pattern: /^T.*/u, ignorePattern: /^Test$/u },
+            to: Immutability.Immutable,
+          },
+        ],
+      },
+    ] as OverrideSet)("%s", ({ overrides }) => {
+      it.each(["type Test<G> = { foo: string };"])("Immutable", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.Mutable);
+      });
+    });
   });
 
   describe("expression by name", () => {
