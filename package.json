@@ -128,5 +128,5 @@
     "eslint": "*",
     "typescript": ">=4.7.4"
   },
-  "packageManager": "pnpm@8.15.5"
+  "packageManager": "pnpm@9.1.2"
 }
