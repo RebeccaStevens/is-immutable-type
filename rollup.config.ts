@@ -1,7 +1,6 @@
 import rollupPluginReplace from "@rollup/plugin-replace";
 import { rollupPlugin as rollupPluginDeassert } from "deassert";
 import { type RollupOptions } from "rollup";
-import rollupPluginAutoExternal from "rollup-plugin-auto-external";
 import rollupPluginTs from "rollup-plugin-ts";
 
 import pkg from "./package.json" assert { type: "json" };
@@ -29,8 +28,12 @@ const library = {
     },
   ],
 
+  external: [
+    ...Object.keys(pkg.dependencies),
+    ...Object.keys(pkg.peerDependencies),
+  ],
+
   plugins: [
-    rollupPluginAutoExternal(),
     rollupPluginTs({
       transpileOnly: true,
       tsconfig: "tsconfig.build.json",

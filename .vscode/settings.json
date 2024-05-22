@@ -1,36 +1,59 @@
 {
+  // Enable the ESlint flat config support
+  "eslint.experimental.useFlatConfig": true,
+
+  // Disable the default formatter, use eslint instead
+  "prettier.enable": false,
+  "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "source.fixAll.eslint": "explicit",
-    "source.formatDocument": "explicit",
-    "source.organizeImports": "explicit",
-    "source.sortImports": "explicit"
-  },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file",
-  "editor.rulers": [80],
-  "files.associations": {
-    ".markdownlint.json": "jsonc",
-    ".markdownlintignore": "ignore"
-  },
-  "files.exclude": {
-    "coverage/": true
+    "source.fixAll": "explicit"
   },
   "files.trimTrailingWhitespace": true,
-  "search.exclude": {
-    "**/.git/": true,
-    ".nyc_output/": true,
-    ".vscode/": true,
-    "dist/": true,
-    "pnpm-lock.yaml": true
-  },
-  "typescript.tsdk": "./node_modules/typescript/lib",
-  "vitest.commandLine": "pnpm run test:js:watch",
+
+  // Silent the stylistic rules in you IDE, but still auto fix them
+  "eslint.rules.customizations": [
+    { "rule": "style/*", "severity": "off" },
+    { "rule": "*-indent", "severity": "off" },
+    { "rule": "*-spacing", "severity": "off" },
+    { "rule": "*-spaces", "severity": "off" },
+    { "rule": "*-order", "severity": "off" },
+    { "rule": "*-dangle", "severity": "off" },
+    { "rule": "*-newline", "severity": "off" },
+    { "rule": "*quotes", "severity": "off" },
+    { "rule": "*semi", "severity": "off" }
+  ],
+
+  // Enable eslint for all supported languages
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "vue",
+    "html",
+    "markdown",
+    "json",
+    "jsonc",
+    "yaml"
+  ],
+
+  "editor.rulers": [80],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "*.jsonc",
+        "tsconfig.json",
+        "tsconfig.*.json",
+        ".vscode/*.json"
+      ],
+      "schema": {
+        "allowTrailingCommas": true
+      }
+    }
+  ],
+
   "[markdown]": {
-    "editor.rulers": [160]
-  },
-  "[properties]": {
-    "editor.defaultFormatter": "foxundermoon.shell-format"
+    "editor.rulers": [120]
   }
 }

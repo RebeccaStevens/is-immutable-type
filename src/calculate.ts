@@ -16,6 +16,9 @@ import ts from "typescript";
 import { max, min } from "./compare";
 import { Immutability } from "./immutability";
 import {
+  type TypeData,
+  type TypeMatchesPatternSpecifier,
+  type TypeSpecifier,
   cacheData,
   defaultTypeMatchesPatternSpecifier,
   getCachedData,
@@ -26,9 +29,6 @@ import {
   isTypeReferenceWithTypeArguments,
   propertyNameToString,
   typeDataMatchesSpecifier,
-  type TypeData,
-  type TypeMatchesPatternSpecifier,
-  type TypeSpecifier,
 } from "./utils";
 
 /**
@@ -293,7 +293,7 @@ function getTypeImmutabilityHelper(
 /**
  * Create the state for a new task.
  */
-function createNewTaskState(typeData: TypeData): TaskStateTriage {
+function createNewTaskState(typeData: Readonly<TypeData>): TaskStateTriage {
   return {
     typeData,
     stage: TaskStateStage.Triage,
@@ -305,7 +305,7 @@ function createNewTaskState(typeData: TypeData): TaskStateTriage {
  * Create the state for a new task that reduces the children task states.
  */
 function createChildrenReducerTaskState(
-  parent: TaskStateBase,
+  parent: Readonly<TaskStateBase>,
   children: TaskStateChildrenReducer["children"],
   childrenReducer: TaskStateChildrenReducer["childrenReducer"],
 ): TaskStateChildrenReducer {
@@ -339,7 +339,7 @@ function createCheckDoneTaskState(
  */
 function createApplyOverrideTaskState(
   taskState: TaskStateApplyOverride["taskState"],
-  override: ImmutabilityOverrides[number],
+  override: Readonly<ImmutabilityOverrides[number]>,
 ): TaskStateApplyOverride {
   return {
     taskState,
@@ -351,7 +351,7 @@ function createApplyOverrideTaskState(
 /**
  * Get the override for the type if it has one.
  */
-function getOverride(parameters: Parameters, typeData: TypeData) {
+function getOverride(parameters: Parameters, typeData: Readonly<TypeData>) {
   return parameters.overrides.find((potentialOverride) =>
     typeDataMatchesSpecifier(
       parameters.program,
@@ -872,7 +872,7 @@ function createIndexSignatureTaskStates(
   parameters: Parameters,
   m_state: TaskStateBase,
   kind: ts.IndexKind,
-  typeData: TypeData,
+  typeData: Readonly<TypeData>,
 ): Array<Exclude<TaskState, TaskStateCheckDone | TaskStateApplyOverride>> {
   const checker = parameters.program.getTypeChecker();
   const indexInfo = checker.getIndexInfoOfType(typeData.type, kind);

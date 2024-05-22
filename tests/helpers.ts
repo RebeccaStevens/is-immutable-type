@@ -4,14 +4,14 @@ import ts from "typescript";
 import { expect } from "vitest";
 
 import {
-  getTypeImmutability,
   Immutability,
+  type ImmutabilityCache,
+  type ImmutabilityOverrides,
+  getTypeImmutability,
   isImmutableType,
   isMutableType,
   isReadonlyDeepType,
   isReadonlyShallowType,
-  type ImmutabilityCache,
-  type ImmutabilityOverrides,
 } from "#is-immutable-type";
 
 /**
