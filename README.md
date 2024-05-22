@@ -35,25 +35,30 @@ pnpm add is-immutable-type
 # Usage
 
 ```ts
-import { getTypeImmutability, Immutability, isReadonlyDeep, isUnknown } from "is-immutable-type";
+import {
+  Immutability,
+  getTypeImmutability,
+  isReadonlyDeep,
+  isUnknown,
+} from "is-immutable-type";
 import { hasType } from "ts-api-utils";
 import type ts from "typescript";
 
 function example(program: ts.Program, node: ts.Node) {
   const typeNodeOrType = hasType(node)
-    // Use the TypeNode if it's avaliable.
-    ? node.type
-    // Otherwise, get the Type.
-    : program.getTypeChecker().getTypeAtLocation(node);
+    ? // Use the TypeNode if it's avaliable.
+      node.type
+    : // Otherwise, get the Type.
+      program.getTypeChecker().getTypeAtLocation(node);
 
   const immutability = getTypeImmutability(program, typeNodeOrType);
 
   if (isUnknown(immutability)) {
-    console.log("`immutability` is `Unknown`").
+    console.log("`immutability` is `Unknown`");
   } else if (isReadonlyDeep(immutability)) {
-    console.log("`immutability` is `ReadonlyDeep` or `Immutable`").
+    console.log("`immutability` is `ReadonlyDeep` or `Immutable`");
   } else {
-    console.log("`immutability` is `ReadonlyShallow` or `Mutable`").
+    console.log("`immutability` is `ReadonlyShallow` or `Mutable`");
   }
 }
 ```
@@ -108,7 +113,12 @@ either `lib` (TypeScript's lib), `package` (a node_modules package), or `file`
 Always treat TypeScript's `ReadonlyArray`s as `Immutable`.
 
 ```ts
-[{ type: { from: "lib", name: "ReadonlyArray" }, to: Immutability.Immutable, }]
+[
+  {
+    type: { from: "lib", name: "ReadonlyArray" },
+    to: Immutability.Immutable,
+  },
+];
 ```
 
 ### Example 2
@@ -118,7 +128,13 @@ But if the instance type was calculated as `ReadonlyShallow`, it will stay as
 such.
 
 ```ts
-[{ type: { from: "lib", name: "ReadonlyArray" }, to: Immutability.Immutable, from: Immutability.ReadonlyDeep }]
+[
+  {
+    type: { from: "lib", name: "ReadonlyArray" },
+    to: Immutability.Immutable,
+    from: Immutability.ReadonlyDeep,
+  },
+];
 ```
 
 ### Default Overrides
@@ -151,7 +167,16 @@ type. If you want this library to treat types wrapped in `ReadonlyDeep` as
 immutable regardless, you can provide an override stating as such.
 
 ```ts
-[{ type: { from: "package", package: "type-fest" pattern: /^ReadonlyDeep<.+>$/u }, to: Immutability.Immutable }]
+[
+  {
+    type: {
+      from: "package",
+      package: "type-fest",
+      pattern: /^ReadonlyDeep<.+>$/u,
+    },
+    to: Immutability.Immutable,
+  },
+];
 ```
 
 ## Caching
@@ -202,6 +227,8 @@ type ImmutableShallow<T extends {}> = {
 ```
 
 Now the following will correctly be marked as `Immutable`.
+
+<!-- eslint-disable ts/array-type -->
 
 ```ts
 type Foo = ImmutableShallow<readonly string[]>;

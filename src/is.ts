@@ -1,16 +1,16 @@
 import type ts from "typescript";
 
 import {
-  getDefaultOverrides,
-  getTypeImmutability,
   type ImmutabilityCache,
   type ImmutabilityOverrides,
+  getDefaultOverrides,
+  getTypeImmutability,
 } from "./calculate";
 import {
   isImmutable,
+  isMutable,
   isReadonlyDeep,
   isReadonlyShallow,
-  isMutable,
 } from "./compare";
 import { Immutability } from "./immutability";
 

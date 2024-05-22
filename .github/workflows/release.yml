@@ -25,10 +25,10 @@ jobs:
     uses: ./.github/workflows/lint-markdown.yml
   lint_packages:
     uses: ./.github/workflows/lint-packages.yml
-  lint_prettier:
-    uses: ./.github/workflows/lint-prettier.yml
   lint_spelling:
     uses: ./.github/workflows/lint-spelling.yml
+  lint_yaml:
+    uses: ./.github/workflows/lint-yaml.yml
   test:
     uses: ./.github/workflows/test-js.yml
   type_check:
@@ -37,12 +37,11 @@ jobs:
   release:
     needs:
       - lint_js
-      - lint_knip_dev
       - lint_knip_prod
       - lint_markdown
       - lint_packages
-      - lint_prettier
       - lint_spelling
+      - lint_yaml
       - test
       - type_check
     runs-on: ubuntu-latest
@@ -57,7 +56,8 @@ jobs:
         run: pnpm run build
 
       - name: Release
-        run: pnpm run release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: echo "Do Release Here"
+        # run: pnpm run release
+        # env:
+        #   GITHUB_TOKEN: ${{ github.token }}
+        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
