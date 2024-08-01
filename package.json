@@ -94,7 +94,7 @@
     "eslint-plugin-eslint-comments": "3.2.0",
     "eslint-plugin-format": "0.1.1",
     "eslint-plugin-functional": "7.0.0-alpha.5",
-    "eslint-plugin-import-x": "0.5.0",
+    "eslint-plugin-import-x": "3.1.0",
     "eslint-plugin-jsdoc": "48.2.5",
     "eslint-plugin-jsonc": "2.15.1",
     "eslint-plugin-markdown": "5.0.0",
