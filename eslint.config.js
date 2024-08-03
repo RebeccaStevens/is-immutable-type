@@ -3,9 +3,10 @@ import rsEslint from "@rebeccastevens/eslint-config";
 
 export default rsEslint(
   {
+    projectRoot: import.meta.dirname,
     mode: "library",
     typescript: {
-      tsconfig: "tsconfig.eslint.json",
+      unsafe: "off",
     },
     formatters: true,
     functional: false,
