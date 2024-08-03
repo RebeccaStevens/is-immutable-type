@@ -39,8 +39,8 @@ jobs:
       - lint_js
       - lint_knip_prod
       - lint_markdown
-      - lint_packages
       - lint_spelling
+      - lint_packages
       - lint_yaml
       - test
       - type_check
@@ -51,13 +51,14 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/prepare
+        with:
+          node-version: v20
 
       - name: Build
         run: pnpm run build
 
       - name: Release
-        run: echo "Do Release Here"
-        # run: pnpm run release
-        # env:
-        #   GITHUB_TOKEN: ${{ github.token }}
-        #   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm run release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
