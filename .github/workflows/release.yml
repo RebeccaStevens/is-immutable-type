@@ -32,7 +32,7 @@ jobs:
   test:
     uses: ./.github/workflows/test-js.yml
   type_check:
-    uses: ./.github/workflows/type-check.yml
+    uses: ./.github/workflows/typecheck.yml
 
   release:
     needs:
