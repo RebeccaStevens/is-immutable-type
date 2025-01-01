@@ -1,6 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [5.0.1](https://github.com/RebeccaStevens/is-immutable-type/compare/v5.0.0...v5.0.1) (2025-01-01)
+
 # [5.0.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v4.0.0...v5.0.0) (2024-08-03)
 
 
