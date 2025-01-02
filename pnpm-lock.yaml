@@ -72,6 +72,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 2.1.8
         version: 2.1.8(vitest@2.1.8(@types/node@20.14.14))
+      '@vitest/eslint-plugin':
+        specifier: 1.0.1
+        version: 1.0.1(@typescript-eslint/utils@8.16.0(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4))(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4)(vitest@2.1.8(@types/node@20.14.14))
       commitizen:
         specifier: 4.3.0
         version: 4.3.0(@types/node@20.14.14)(typescript@5.5.4)
@@ -147,9 +150,6 @@ importers:
       eslint-plugin-unicorn:
         specifier: 56.0.0
         version: 56.0.0(eslint@9.13.0(jiti@2.4.2))
-      eslint-plugin-vitest:
-        specifier: 0.5.4
-        version: 0.5.4(@typescript-eslint/eslint-plugin@8.8.0(@typescript-eslint/parser@8.8.0(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4))(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4))(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4)(vitest@2.1.8(@types/node@20.14.14))
       eslint-plugin-yml:
         specifier: 1.14.0
         version: 1.14.0(eslint@9.13.0(jiti@2.4.2))
@@ -1849,6 +1849,21 @@ packages:
       vitest: 2.1.8
     peerDependenciesMeta:
       '@vitest/browser':
+        optional: true
+
+  '@vitest/eslint-plugin@1.0.1':
+    resolution: {integrity: sha512-albpL56cL9XMwHJWCWZqjDxkuDkBXBF3WpPGOv6q2WA3cipCP41cKEwfSGktoRNGmPN77wuX452O8pM+z+ApNw==}
+    peerDependencies:
+      '@typescript-eslint/utils': '>= 8.0'
+      eslint: '>= 8.57.0'
+      typescript: '>= 5.0.0'
+      vitest: '*'
+    peerDependenciesMeta:
+      '@typescript-eslint/utils':
+        optional: true
+      typescript:
+        optional: true
+      vitest:
         optional: true
 
   '@vitest/expect@2.1.8':
@@ -6783,6 +6798,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/visitor-keys': 7.18.0
+    optional: true
 
   '@typescript-eslint/scope-manager@8.16.0':
     dependencies:
@@ -6806,7 +6822,8 @@ snapshots:
       - eslint
       - supports-color
 
-  '@typescript-eslint/types@7.18.0': {}
+  '@typescript-eslint/types@7.18.0':
+    optional: true
 
   '@typescript-eslint/types@8.16.0': {}
 
@@ -6826,6 +6843,7 @@ snapshots:
       typescript: 5.5.4
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@typescript-eslint/typescript-estree@8.16.0(typescript@5.5.4)':
     dependencies:
@@ -6867,6 +6885,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
+    optional: true
 
   '@typescript-eslint/utils@8.16.0(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4)':
     dependencies:
@@ -6895,6 +6914,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.18.0
       eslint-visitor-keys: 3.4.3
+    optional: true
 
   '@typescript-eslint/visitor-keys@8.16.0':
     dependencies:
@@ -6930,6 +6950,14 @@ snapshots:
       vitest: 2.1.8(@types/node@20.14.14)
     transitivePeerDependencies:
       - supports-color
+
+  '@vitest/eslint-plugin@1.0.1(@typescript-eslint/utils@8.16.0(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4))(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4)(vitest@2.1.8(@types/node@20.14.14))':
+    dependencies:
+      eslint: 9.13.0(jiti@2.4.2)
+    optionalDependencies:
+      '@typescript-eslint/utils': 8.16.0(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4)
+      typescript: 5.5.4
+      vitest: 2.1.8(@types/node@20.14.14)
 
   '@vitest/expect@2.1.8':
     dependencies:
@@ -7070,7 +7098,8 @@ snapshots:
 
   array-timsort@1.0.3: {}
 
-  array-union@2.1.0: {}
+  array-union@2.1.0:
+    optional: true
 
   array.prototype.findlastindex@1.2.5:
     dependencies:
@@ -8076,6 +8105,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
+    optional: true
 
   eslint-plugin-yml@1.14.0(eslint@9.13.0(jiti@2.4.2)):
     dependencies:
@@ -8517,6 +8547,7 @@ snapshots:
       ignore: 5.3.1
       merge2: 1.4.1
       slash: 3.0.0
+    optional: true
 
   globby@13.2.2:
     dependencies:
@@ -9851,7 +9882,8 @@ snapshots:
     dependencies:
       unicode-emoji-modifier-base: 1.0.0
 
-  slash@3.0.0: {}
+  slash@3.0.0:
+    optional: true
 
   slash@4.0.0: {}
 
