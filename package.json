@@ -83,7 +83,7 @@
     "@typescript/vfs": "1.6.0",
     "@vitest/coverage-v8": "2.1.9",
     "commitizen": "4.3.0",
-    "cspell": "8.17.5",
+    "cspell": "8.18.1",
     "cz-conventional-changelog": "3.3.0",
     "deassert": "1.0.2",
     "dedent": "1.5.3",
