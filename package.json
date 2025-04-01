@@ -64,8 +64,8 @@
     "ts-declaration-location": "^1.0.4"
   },
   "devDependencies": {
-    "@commitlint/cli": "19.7.1",
-    "@commitlint/config-conventional": "19.7.1",
+    "@commitlint/cli": "19.8.0",
+    "@commitlint/config-conventional": "19.8.0",
     "@cspell/dict-cryptocurrencies": "5.0.0",
     "@eslint/compat": "1.1.1",
     "@rebeccastevens/eslint-config": "3.0.0",
