@@ -32,7 +32,7 @@ importers:
         version: 1.1.1
       '@rebeccastevens/eslint-config':
         specifier: 3.0.0
-        version: 3.0.0(92639fe7286bb71fe04f181b15ad9bfa)
+        version: 3.0.0(a46aea1e384d653e0c2cde163ae02e9f)
       '@rollup/plugin-replace':
         specifier: 6.0.1
         version: 6.0.1(rollup@4.22.4)
@@ -100,8 +100,8 @@ importers:
         specifier: 4.3.2
         version: 4.3.2(eslint-plugin-import-x@4.1.1(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@9.13.0(jiti@2.4.2))
       eslint-merge-processors:
-        specifier: 0.1.0
-        version: 0.1.0(eslint@9.13.0(jiti@2.4.2))
+        specifier: 2.0.0
+        version: 2.0.0(eslint@9.13.0(jiti@2.4.2))
       eslint-plugin-eslint-comments:
         specifier: 3.2.0
         version: 3.2.0(eslint@9.13.0(jiti@2.4.2))
@@ -2725,8 +2725,8 @@ packages:
       eslint-plugin-import-x:
         optional: true
 
-  eslint-merge-processors@0.1.0:
-    resolution: {integrity: sha512-IvRXXtEajLeyssvW4wJcZ2etxkR9mUf4zpNwgI+m/Uac9RfXHskuJefkHUcawVzePnd6xp24enp5jfgdHzjRdQ==}
+  eslint-merge-processors@2.0.0:
+    resolution: {integrity: sha512-sUuhSf3IrJdGooquEUB5TNpGNpBoQccbnaLHsb1XkBLUPPqCNivCpY05ZcpCOiV9uHwO2yxXEWVczVclzMxYlA==}
     peerDependencies:
       eslint: '*'
 
@@ -6650,7 +6650,7 @@ snapshots:
       '@pnpm/network.ca-file': 1.0.2
       config-chain: 1.1.13
 
-  '@rebeccastevens/eslint-config@3.0.0(92639fe7286bb71fe04f181b15ad9bfa)':
+  '@rebeccastevens/eslint-config@3.0.0(a46aea1e384d653e0c2cde163ae02e9f)':
     dependencies:
       '@antfu/install-pkg': 0.3.3
       '@clack/prompts': 0.7.0
@@ -6665,7 +6665,7 @@ snapshots:
       eslint-config-prettier: 10.1.1(eslint@9.13.0(jiti@2.4.2))
       eslint-flat-config-utils: 2.0.1
       eslint-import-resolver-typescript: 4.3.2(eslint-plugin-import-x@4.1.1(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4))(eslint-plugin-import@2.29.1)(eslint@9.13.0(jiti@2.4.2))
-      eslint-merge-processors: 0.1.0(eslint@9.13.0(jiti@2.4.2))
+      eslint-merge-processors: 2.0.0(eslint@9.13.0(jiti@2.4.2))
       eslint-plugin-eslint-comments: 3.2.0(eslint@9.13.0(jiti@2.4.2))
       eslint-plugin-format: 0.1.2(eslint@9.13.0(jiti@2.4.2))
       eslint-plugin-functional: 7.0.0(eslint@9.13.0(jiti@2.4.2))(typescript@5.5.4)
@@ -8068,7 +8068,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-merge-processors@0.1.0(eslint@9.13.0(jiti@2.4.2)):
+  eslint-merge-processors@2.0.0(eslint@9.13.0(jiti@2.4.2)):
     dependencies:
       eslint: 9.13.0(jiti@2.4.2)
 
