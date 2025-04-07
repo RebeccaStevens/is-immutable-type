@@ -88,7 +88,7 @@
     "deassert": "1.0.2",
     "dedent": "1.5.3",
     "eslint": "9.13.0",
-    "eslint-config-prettier": "9.1.0",
+    "eslint-config-prettier": "10.1.1",
     "eslint-flat-config-utils": "0.3.0",
     "eslint-import-resolver-typescript": "4.3.2",
     "eslint-merge-processors": "0.1.0",
