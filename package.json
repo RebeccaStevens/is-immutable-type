@@ -87,7 +87,7 @@
     "cz-conventional-changelog": "3.3.0",
     "deassert": "1.0.2",
     "dedent": "1.5.3",
-    "eslint": "9.25.1",
+    "eslint": "9.28.0",
     "eslint-config-prettier": "10.1.1",
     "eslint-flat-config-utils": "2.0.1",
     "eslint-import-resolver-typescript": "4.3.2",
