@@ -67,7 +67,7 @@
     "@commitlint/cli": "20.1.0",
     "@commitlint/config-conventional": "20.0.0",
     "@cspell/dict-cryptocurrencies": "5.0.0",
-    "@eslint/compat": "1.1.1",
+    "@eslint/compat": "2.0.0",
     "@rebeccastevens/eslint-config": "3.0.0",
     "@rollup/plugin-replace": "6.0.1",
     "@semantic-release/changelog": "6.0.3",
