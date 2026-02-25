@@ -32,7 +32,7 @@ importers:
         version: 2.0.0(eslint@9.39.2(jiti@2.4.2))
       '@rebeccastevens/eslint-config':
         specifier: 3.0.0
-        version: 3.0.0(73348cec4d859c96276428eaf179ebc2)
+        version: 3.0.0(d605a4f5a402d0727b4f9a27435815c4)
       '@rollup/plugin-replace':
         specifier: 6.0.1
         version: 6.0.1(rollup@4.22.4)
@@ -55,8 +55,8 @@ importers:
         specifier: 14.1.0
         version: 14.1.0(semantic-release@25.0.3(typescript@5.5.4))
       '@stylistic/eslint-plugin':
-        specifier: 4.4.1
-        version: 4.4.1(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4)
+        specifier: 5.9.0
+        version: 5.9.0(eslint@9.39.2(jiti@2.4.2))
       '@types/node':
         specifier: 20.14.14
         version: 20.14.14
@@ -1753,11 +1753,11 @@ packages:
     engines: {node: '>=8.10'}
     hasBin: true
 
-  '@stylistic/eslint-plugin@4.4.1':
-    resolution: {integrity: sha512-CEigAk7eOLyHvdgmpZsKFwtiqS2wFwI1fn4j09IU9GmD4euFM4jEBAViWeCqaNLlbX2k2+A/Fq9cje4HQBXuJQ==}
+  '@stylistic/eslint-plugin@5.9.0':
+    resolution: {integrity: sha512-FqqSkvDMYJReydrMhlugc71M76yLLQWNfmGq+SIlLa7N3kHp8Qq8i2PyWrVNAfjOyOIY+xv9XaaYwvVW7vroMA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      eslint: '>=9.0.0'
+      eslint: ^9.0.0 || ^10.0.0
 
   '@tybys/wasm-util@0.9.0':
     resolution: {integrity: sha512-6+7nlbMVX/PVDCwaIQ8nTOPveOcFLSt8GcXdx8hD0bt39uWxYT88uXzqTd4fTvqta7oeUJqudepapKNt2DYJFw==}
@@ -6804,7 +6804,7 @@ snapshots:
       '@pnpm/network.ca-file': 1.0.2
       config-chain: 1.1.13
 
-  '@rebeccastevens/eslint-config@3.0.0(73348cec4d859c96276428eaf179ebc2)':
+  '@rebeccastevens/eslint-config@3.0.0(d605a4f5a402d0727b4f9a27435815c4)':
     dependencies:
       '@antfu/install-pkg': 0.3.3
       '@clack/prompts': 0.7.0
@@ -6812,7 +6812,7 @@ snapshots:
       globals: 15.9.0
       local-pkg: 0.5.0
     optionalDependencies:
-      '@stylistic/eslint-plugin': 4.4.1(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4)
+      '@stylistic/eslint-plugin': 5.9.0(eslint@9.39.2(jiti@2.4.2))
       '@typescript-eslint/eslint-plugin': 8.56.1(@typescript-eslint/parser@8.56.1(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4))(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4)
       '@typescript-eslint/parser': 8.56.1(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4)
       '@typescript-eslint/utils': 8.56.1(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4)
@@ -7020,17 +7020,15 @@ snapshots:
       ignore: 5.3.1
       p-map: 4.0.0
 
-  '@stylistic/eslint-plugin@4.4.1(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4)':
+  '@stylistic/eslint-plugin@5.9.0(eslint@9.39.2(jiti@2.4.2))':
     dependencies:
-      '@typescript-eslint/utils': 8.56.1(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4)
+      '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.2(jiti@2.4.2))
+      '@typescript-eslint/types': 8.56.1
       eslint: 9.39.2(jiti@2.4.2)
       eslint-visitor-keys: 4.2.1
       espree: 10.4.0
       estraverse: 5.3.0
       picomatch: 4.0.3
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
 
   '@tybys/wasm-util@0.9.0':
     dependencies:
