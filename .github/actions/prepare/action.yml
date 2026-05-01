@@ -15,7 +15,7 @@ runs:
         git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
         git config --global user.name ${GITHUB_ACTOR}
       shell: bash
-    - uses: pnpm/action-setup@v5
+    - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
