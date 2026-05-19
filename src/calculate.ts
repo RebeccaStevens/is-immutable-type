@@ -406,7 +406,7 @@ function taskTriage(
   );
 
   if (isUnionType(m_state.typeData.type)) {
-    handleTypeUnion(m_stack, m_state);
+    handleTypeUnion(parameters, m_stack, m_state);
     return;
   }
 
@@ -585,15 +585,38 @@ function taskReduceChildren(m_state: TaskStateChildrenReducer): void {
 /**
  * Handle a type we know is a union.
  */
-function handleTypeUnion(m_stack: Stack, m_state: TaskStateTriage) {
+function handleTypeUnion(
+  parameters: Parameters,
+  m_stack: Stack,
+  m_state: TaskStateTriage,
+) {
   assert(isUnionType(m_state.typeData.type));
 
-  const children = m_state.typeData.type.types.map((type, index) => {
-    const typeNode =
-      m_state.typeData.typeNode !== null &&
-      ts.isUnionTypeNode(m_state.typeData.typeNode)
-        ? m_state.typeData.typeNode.types[index]
-        : undefined; // TODO: can we safely get a union type node nested within a different type node?
+  const checker = parameters.program.getTypeChecker();
+
+  // TypeScript canonicalizes the constituents of `type.types` (e.g. primitives
+  // first), while the AST preserves source order, so pair each TS type with
+  // the typeNode whose checker-derived type matches it rather than zipping by
+  // index. Without this, lookups that prefer `typeNode.getText()` (overrides,
+  // alias names) would consult the wrong AST node.
+  const unionTypeNode =
+    m_state.typeData.typeNode === null
+      ? null
+      : findUnionTypeNode(checker, m_state.typeData.typeNode);
+  const m_typeNodes =
+    unionTypeNode === null ? null : [...unionTypeNode.types];
+
+  const children = m_state.typeData.type.types.map((type) => {
+    let typeNode: ts.TypeNode | undefined;
+    if (m_typeNodes !== null) {
+      const matchIndex = m_typeNodes.findIndex(
+        (node) => checker.getTypeFromTypeNode(node) === type,
+      );
+      if (matchIndex >= 0) {
+        // Splice so duplicate constituents don't both bind to the same node.
+        typeNode = m_typeNodes.splice(matchIndex, 1)[0];
+      }
+    }
 
     return createNewTaskState(getTypeData(type, typeNode));
   });
@@ -602,6 +625,39 @@ function handleTypeUnion(m_stack: Stack, m_state: TaskStateTriage) {
     createChildrenReducerTaskState(m_state, children, min),
     ...children,
   );
+}
+
+/**
+ * Find a UnionTypeNode reachable from the given typeNode, unwrapping
+ * parentheses and resolving type-alias references whose declaration is itself
+ * a union. Returns null if no UnionTypeNode is reachable (e.g. the typeNode
+ * is a generic instantiation or a non-alias reference).
+ */
+function findUnionTypeNode(
+  checker: ts.TypeChecker,
+  typeNode: ts.TypeNode,
+): ts.UnionTypeNode | null {
+  if (ts.isUnionTypeNode(typeNode)) {
+    return typeNode;
+  }
+  if (ts.isParenthesizedTypeNode(typeNode)) {
+    return findUnionTypeNode(checker, typeNode.type);
+  }
+  if (ts.isTypeReferenceNode(typeNode)) {
+    const nameNode = ts.isQualifiedName(typeNode.typeName)
+      ? typeNode.typeName.right
+      : typeNode.typeName;
+    const symbol = checker.getSymbolAtLocation(nameNode);
+    for (const declaration of symbol?.declarations ?? []) {
+      if (ts.isTypeAliasDeclaration(declaration)) {
+        const nested = findUnionTypeNode(checker, declaration.type);
+        if (nested !== null) {
+          return nested;
+        }
+      }
+    }
+  }
+  return null;
 }
 
 /**
