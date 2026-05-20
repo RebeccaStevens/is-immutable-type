@@ -451,4 +451,49 @@ describe("Overrides", () => {
       );
     });
   });
+
+  describe("name matches regardless of how the type is spelled", () => {
+    const overrides = [
+      { type: "Foo", to: Immutability.ReadonlyShallow },
+    ] as ImmutabilityOverrides;
+
+    it("plain reference (baseline)", () => {
+      runTestImmutability(
+        {
+          code: dedent`
+            interface Foo { readonly bar: number; readonly baz(): void; }
+            type Test = Foo;
+          `,
+          overrides,
+        },
+        Immutability.ReadonlyShallow,
+      );
+    });
+
+    it("namespace-qualified reference", () => {
+      runTestImmutability(
+        {
+          code: dedent`
+            namespace ns { export interface Foo { readonly bar: number; readonly baz(): void; } }
+            type Test = ns.Foo;
+          `,
+          overrides,
+        },
+        Immutability.ReadonlyShallow,
+      );
+    });
+
+    it("nested namespace-qualified reference", () => {
+      runTestImmutability(
+        {
+          code: dedent`
+            namespace outer { export namespace inner { export interface Foo { readonly bar: number; readonly baz(): void; } } }
+            type Test = outer.inner.Foo;
+          `,
+          overrides,
+        },
+        Immutability.ReadonlyShallow,
+      );
+    });
+  });
 });
