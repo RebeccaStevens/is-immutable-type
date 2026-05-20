@@ -277,6 +277,28 @@ export function defaultTypeMatchesPatternSpecifier(
     m_shouldInclude ||= include.some(testTypeNameName);
   }
 
+  // Source-spelling candidates (typeNode.getText(), the extracted generic
+  // head) miss when the type is reached via a qualified path, namespace, or
+  // `import("...").X` — none of those tokenize to the simple type name. Test
+  // the checker's canonical symbol name as well so e.g. `ns.Foo` matches an
+  // override on `Foo`.
+  const typeSymbolName = getTypeSymbolName(type);
+  if (
+    typeSymbolName !== null &&
+    typeSymbolName !== typeNameAlias &&
+    typeSymbolName !== typeNameName
+  ) {
+    const testTypeSymbolName = (pattern: string | RegExp) =>
+      typeof pattern === "string"
+        ? pattern === typeSymbolName
+        : pattern.test(typeSymbolName);
+
+    if (exclude.some(testTypeSymbolName)) {
+      return false;
+    }
+    m_shouldInclude ||= include.some(testTypeSymbolName);
+  }
+
   // Special handling for arrays not written in generic syntax.
   if (program.getTypeChecker().isArrayType(type) && typeNode !== null) {
     if (
@@ -304,6 +326,22 @@ export function defaultTypeMatchesPatternSpecifier(
   }
 
   return m_shouldInclude;
+}
+
+/**
+ * Get the canonical (leaf) symbol name of the given type — what you'd call
+ * the type if you ignored qualification, source spelling, and aliasing.
+ *
+ * Returns null for types with no usable symbol (intrinsic primitives,
+ * anonymous object literals whose symbol is the internal "__type", etc.).
+ */
+function getTypeSymbolName(type: ts.Type): string | null {
+  const target = "target" in type ? (type.target as ts.Type) : type;
+  const name = target.symbol?.getName();
+  if (name === undefined || name.startsWith("__")) {
+    return null;
+  }
+  return name;
 }
 
 /**
