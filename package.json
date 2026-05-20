@@ -121,7 +121,7 @@
     "rollup-plugin-ts": "3.4.5",
     "semantic-release": "25.0.3",
     "tsc-files": "1.1.4",
-    "typescript": "5.5.4",
+    "typescript": "6.0.3",
     "vite-tsconfig-paths": "6.0.5",
     "vitest": "3.2.4",
     "yaml-eslint-parser": "2.0.0"
