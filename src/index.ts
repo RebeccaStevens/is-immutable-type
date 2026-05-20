@@ -1,3 +1,5 @@
+/// <reference path="../typings/typescript.d.ts" />
+
 export {
   getDefaultOverrides,
   getTypeImmutability,
