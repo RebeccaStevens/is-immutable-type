@@ -1,12 +1,6 @@
 name: Prepare
 description: Prepares the repo for a typical CI job
 
-inputs:
-  node-version:
-    required: false
-    description: "`node-version` passed to `actions/setup-node`."
-    default: "20"
-
 runs:
   using: "composite"
   steps:
@@ -18,7 +12,7 @@ runs:
     - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v6
       with:
-        node-version: ${{ inputs.node-version }}
+        node-version-file: ".nvmrc"
         cache: "pnpm"
     - run: pnpm install --frozen-lockfile --ignore-scripts
       shell: bash
