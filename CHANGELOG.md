@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [5.0.2](https://github.com/RebeccaStevens/is-immutable-type/compare/v5.0.1...v5.0.2) (2026-05-21)
+
+
+### Bug Fixes
+
+* match overrides by canonical type-symbol name ([#590](https://github.com/RebeccaStevens/is-immutable-type/issues/590)) ([b3f884a](https://github.com/RebeccaStevens/is-immutable-type/commit/b3f884ad64fb70b95744ecaea33638b4dc5c4736))
+* pair union constituents with typeNodes by checker identity ([#588](https://github.com/RebeccaStevens/is-immutable-type/issues/588)) ([f99cba9](https://github.com/RebeccaStevens/is-immutable-type/commit/f99cba97b0c02d8aeee2af220f9663257d6545ca))
+
 ## [5.0.1](https://github.com/RebeccaStevens/is-immutable-type/compare/v5.0.0...v5.0.1) (2025-01-01)
 
 # [5.0.0](https://github.com/RebeccaStevens/is-immutable-type/compare/v4.0.0...v5.0.0) (2024-08-03)
