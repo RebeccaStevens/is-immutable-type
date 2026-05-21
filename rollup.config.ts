@@ -1,18 +1,21 @@
-import rollupPluginReplace from "@rollup/plugin-replace";
-import { rollupPlugin as rollupPluginDeassert } from "deassert";
+import rollupPluginTypescript from "@rollup/plugin-typescript";
 import type { RollupOptions } from "rollup";
-import rollupPluginTs from "rollup-plugin-ts";
+import rollupPluginDeassert from "rollup-plugin-deassert";
+import generateDtsBundle from "rollup-plugin-dts-bundle-generator-2";
 
 import pkg from "./package.json" with { type: "json" };
 
-const treeshake = {
-  annotations: true,
-  moduleSideEffects: [],
-  propertyReadSideEffects: false,
-  unknownGlobalSideEffects: false,
-} satisfies RollupOptions["treeshake"];
+type PackageJSON = typeof pkg & {
+  dependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+};
 
-const library = {
+const externalDependencies = [
+  ...Object.keys((pkg as PackageJSON).dependencies),
+  ...Object.keys((pkg as PackageJSON).peerDependencies),
+];
+
+export default {
   input: "src/index.ts",
 
   output: [
@@ -20,6 +23,7 @@ const library = {
       file: pkg.exports.import,
       format: "esm",
       sourcemap: false,
+      importAttributesKey: "with",
     },
     {
       file: pkg.exports.require,
@@ -28,28 +32,39 @@ const library = {
     },
   ],
 
-  external: [
-    ...Object.keys(pkg.dependencies),
-    ...Object.keys(pkg.peerDependencies),
-  ],
-
   plugins: [
-    rollupPluginTs({
-      transpileOnly: true,
-      tsconfig: "tsconfig.build.json",
-    }),
-    rollupPluginReplace({
-      values: {
-        "import.meta.vitest": "undefined",
-      },
-      preventAssignment: true,
+    rollupPluginTypescript({
+      tsconfig: "src/tsconfig.build.json",
+      outDir: "dist",
     }),
     rollupPluginDeassert({
       include: ["**/*.{js,ts}"],
     }),
+    generateDtsBundle({
+      compilation: {
+        preferredConfigPath: "src/tsconfig.build.json",
+      },
+      output: {
+        exportReferencedTypes: false,
+        inlineDeclareExternals: true,
+      },
+    }),
   ],
 
-  treeshake,
-} satisfies RollupOptions;
+  treeshake: {
+    annotations: true,
+    moduleSideEffects: [],
+    propertyReadSideEffects: false,
+    unknownGlobalSideEffects: false,
+  },
 
-export default [library];
+  external: (source) => {
+    if (
+      source.startsWith("node:") ||
+      externalDependencies.some((dep) => dep === source || source.startsWith(`${dep}/`))
+    ) {
+      return true;
+    }
+    return undefined;
+  },
+} satisfies RollupOptions;

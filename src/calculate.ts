@@ -109,14 +109,12 @@ export function getTypeImmutability(
   typeOrTypeNode: ts.Type | ts.TypeNode,
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
-  maxImmutability = Immutability.Immutable,
+  maxImmutability: Immutability = Immutability.Immutable,
   typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier = defaultTypeMatchesPatternSpecifier,
 ): Immutability {
   const givenTypeNode = isTypeNode(typeOrTypeNode);
 
-  const type = givenTypeNode
-    ? program.getTypeChecker().getTypeFromTypeNode(typeOrTypeNode)
-    : typeOrTypeNode;
+  const type = givenTypeNode ? program.getTypeChecker().getTypeFromTypeNode(typeOrTypeNode) : typeOrTypeNode;
   const typeNode = givenTypeNode ? typeOrTypeNode : undefined;
 
   const typeData = getTypeData(type, typeNode);
@@ -217,12 +215,7 @@ function getTypeImmutabilityHelper(
   maxImmutability: Immutability,
   typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier,
 ): Immutability {
-  const cache: ImmutabilityCache =
-    useCache === true
-      ? globalCache
-      : useCache === false
-        ? new WeakMap()
-        : useCache;
+  const cache: ImmutabilityCache = useCache === true ? globalCache : useCache === false ? new WeakMap() : useCache;
 
   const parameters: Parameters = {
     program,
@@ -235,37 +228,37 @@ function getTypeImmutabilityHelper(
     typeMatchesPatternSpecifier,
   };
 
-  const m_stack: Stack = [createNewTaskState(td)];
-  let m_PreviousImmutability = Immutability.Unknown;
-  let m_state: TaskState;
+  const mut_stack: Stack = [createNewTaskState(td)];
+  let mut_PreviousImmutability = Immutability.Unknown;
+  let mut_state: TaskState;
   do {
-    m_state = m_stack.pop() ?? assert.fail();
+    mut_state = mut_stack.pop() ?? assert.fail();
 
-    switch (m_state.stage) {
+    switch (mut_state.stage) {
       case TaskStateStage.Triage: {
-        taskTriage(parameters, m_stack, m_state);
+        taskTriage(parameters, mut_stack, mut_state);
         break;
       }
       case TaskStateStage.ReduceChildren: {
-        taskReduceChildren(m_state);
+        taskReduceChildren(mut_state);
         break;
       }
       case TaskStateStage.ObjectTypeReference: {
-        taskObjectTypeReference(m_stack, m_state);
+        taskObjectTypeReference(mut_stack, mut_state);
         break;
       }
       case TaskStateStage.ObjectIndexSignature: {
-        taskObjectIndexSignature(parameters, m_stack, m_state);
+        taskObjectIndexSignature(parameters, mut_stack, mut_state);
         break;
       }
       case TaskStateStage.ApplyOverride: {
-        taskApplyOverride(m_state);
-        m_state = m_state.taskState;
+        taskApplyOverride(mut_state);
+        mut_state = mut_state.taskState;
         break;
       }
       case TaskStateStage.CheckDone: {
-        taskCheckDone(m_state, m_PreviousImmutability);
-        m_state = m_state.taskState;
+        taskCheckDone(mut_state, mut_PreviousImmutability);
+        mut_state = mut_state.taskState;
         break;
       }
       case TaskStateStage.Done: {
@@ -276,18 +269,18 @@ function getTypeImmutabilityHelper(
       }
     }
 
-    if (m_state.immutability !== Immutability.Calculating) {
-      cacheData(program, cache, m_state.typeData, m_state.immutability);
-      m_PreviousImmutability = m_state.immutability;
+    if (mut_state.immutability !== Immutability.Calculating) {
+      cacheData(program, cache, mut_state.typeData, mut_state.immutability);
+      mut_PreviousImmutability = mut_state.immutability;
     }
-  } while (m_stack.length > 0);
+  } while (mut_stack.length > 0);
 
-  if (m_state.immutability === Immutability.Calculating) {
+  if (mut_state.immutability === Immutability.Calculating) {
     assert.fail('Tried to return immutability of "Calculating"');
     // @ts-expect-error Unreachable Code
     return Immutability.Unknown;
   }
-  return m_state.immutability;
+  return mut_state.immutability;
 }
 
 /**
@@ -365,219 +358,166 @@ function getOverride(parameters: Parameters, typeData: Readonly<TypeData>) {
 /**
  * Process the state and create any new next task that need to be used to process it.
  */
-function taskTriage(
-  parameters: Parameters,
-  m_stack: Stack,
-  m_state: TaskStateTriage,
-): void {
-  const cached = getCachedData(
-    parameters.program,
-    parameters.cache,
-    m_state.typeData,
-  );
+function taskTriage(parameters: Parameters, mut_stack: Stack, mut_state: TaskStateTriage): void {
+  const cached = getCachedData(parameters.program, parameters.cache, mut_state.typeData);
   if (cached !== undefined) {
-    m_state.immutability = cached;
+    mut_state.immutability = cached;
     return;
   }
 
-  const override = getOverride(parameters, m_state.typeData);
+  const override = getOverride(parameters, mut_state.typeData);
   if (override?.to !== undefined) {
     // Early escape if we don't need to check the override from.
     if (override.from === undefined) {
-      m_state.immutability = override.to;
-      cacheData(
-        parameters.program,
-        parameters.cache,
-        m_state.typeData,
-        m_state.immutability,
-      );
+      mut_state.immutability = override.to;
+      cacheData(parameters.program, parameters.cache, mut_state.typeData, mut_state.immutability);
       return;
     }
 
-    m_stack.push(createApplyOverrideTaskState(m_state, override));
+    mut_stack.push(createApplyOverrideTaskState(mut_state, override));
   }
 
-  assert(m_state.immutability === Immutability.Calculating);
-  cacheData(
-    parameters.program,
-    parameters.cache,
-    m_state.typeData,
-    m_state.immutability,
-  );
+  assert(mut_state.immutability === Immutability.Calculating);
+  cacheData(parameters.program, parameters.cache, mut_state.typeData, mut_state.immutability);
 
-  if (isUnionType(m_state.typeData.type)) {
-    handleTypeUnion(parameters, m_stack, m_state);
+  if (isUnionType(mut_state.typeData.type)) {
+    handleTypeUnion(parameters, mut_stack, mut_state);
     return;
   }
 
-  if (isIntersectionType(m_state.typeData.type)) {
-    handleTypeIntersection(parameters, m_stack, m_state);
+  if (isIntersectionType(mut_state.typeData.type)) {
+    handleTypeIntersection(parameters, mut_stack, mut_state);
     return;
   }
 
-  if (isConditionalType(m_state.typeData.type)) {
-    handleTypeConditional(parameters, m_stack, m_state);
+  if (isConditionalType(mut_state.typeData.type)) {
+    handleTypeConditional(parameters, mut_stack, mut_state);
     return;
   }
 
-  if (isFunction(m_state.typeData.type)) {
-    handleTypeFunction(m_state);
+  if (isFunction(mut_state.typeData.type)) {
+    handleTypeFunction(mut_state);
     return;
   }
 
   const checker = parameters.program.getTypeChecker();
 
-  if (checker.isTupleType(m_state.typeData.type)) {
-    handleTypeTuple(parameters, m_stack, m_state);
+  if (checker.isTupleType(mut_state.typeData.type)) {
+    handleTypeTuple(parameters, mut_stack, mut_state);
     return;
   }
 
-  if (checker.isArrayType(m_state.typeData.type)) {
-    handleTypeArray(parameters, m_stack, m_state);
+  if (checker.isArrayType(mut_state.typeData.type)) {
+    handleTypeArray(parameters, mut_stack, mut_state);
     return;
   }
 
-  if (isObjectType(m_state.typeData.type)) {
-    handleTypeObject(parameters, m_stack, m_state);
+  if (isObjectType(mut_state.typeData.type)) {
+    handleTypeObject(parameters, mut_stack, mut_state);
     return;
   }
 
   // Must be a primitive.
-  handleTypePrimitive(m_state);
+  handleTypePrimitive(mut_state);
 }
 
 /**
  * We know we're dealling with a TypeReference, check its type arguments.
  * If we're not done, move on to the ObjectIndexSignature task.
  */
-function taskObjectTypeReference(m_stack: Stack, m_state: TaskStateWithLimits) {
-  m_stack.push(
-    createCheckDoneTaskState(m_state, () => {
-      m_state.stage = TaskStateStage.ObjectIndexSignature;
-      m_stack.push(m_state);
+function taskObjectTypeReference(mut_stack: Stack, mut_state: TaskStateWithLimits) {
+  mut_stack.push(
+    createCheckDoneTaskState(mut_state, () => {
+      mut_state.stage = TaskStateStage.ObjectIndexSignature;
+      mut_stack.push(mut_state);
     }),
   );
-  handleTypeArguments(m_stack, m_state);
+  handleTypeArguments(mut_stack, mut_state);
 }
 
 /**
  * We know we're dealling with an object, check its index signatures.
  */
-function taskObjectIndexSignature(
-  parameters: Parameters,
-  m_stack: Stack,
-  m_state: TaskStateWithLimits,
-) {
+function taskObjectIndexSignature(parameters: Parameters, mut_stack: Stack, mut_state: TaskStateWithLimits) {
   assert(
-    m_state.typeData.typeNode === null ||
-      isIntersectionType(m_state.typeData.type) ===
-        ts.isIntersectionTypeNode(m_state.typeData.typeNode),
+    mut_state.typeData.typeNode === null ||
+      isIntersectionType(mut_state.typeData.type) === ts.isIntersectionTypeNode(mut_state.typeData.typeNode),
   );
 
-  const [types, typeNodes] = isIntersectionType(m_state.typeData.type)
-    ? [
-        m_state.typeData.type.types,
-        (m_state.typeData.typeNode as ts.IntersectionTypeNode | null)?.types,
-      ]
-    : [
-        [m_state.typeData.type],
-        m_state.typeData.typeNode === null
-          ? undefined
-          : [m_state.typeData.typeNode],
-      ];
+  const [types, typeNodes] = isIntersectionType(mut_state.typeData.type)
+    ? [mut_state.typeData.type.types, (mut_state.typeData.typeNode as ts.IntersectionTypeNode | null)?.types]
+    : [[mut_state.typeData.type], mut_state.typeData.typeNode === null ? undefined : [mut_state.typeData.typeNode]];
 
-  m_stack.push(
-    createCheckDoneTaskState(m_state, () => {
-      m_state.stage = TaskStateStage.Done;
-      m_state.immutability = max(m_state.limits.min, m_state.limits.max);
-      m_stack.push(m_state);
+  mut_stack.push(
+    createCheckDoneTaskState(mut_state, () => {
+      mut_state.stage = TaskStateStage.Done;
+      mut_state.immutability = max(mut_state.limits.min, mut_state.limits.max);
+      mut_stack.push(mut_state);
     }),
 
-    createCheckDoneTaskState(m_state, () => {
+    createCheckDoneTaskState(mut_state, () => {
       const children = types.flatMap((type, index) =>
         createIndexSignatureTaskStates(
           parameters,
-          m_state,
+          mut_state,
           ts.IndexKind.Number,
           getTypeData(type, typeNodes?.[index]),
         ),
       );
       if (children.length > 0) {
-        m_stack.push(
-          createChildrenReducerTaskState(m_state, children, max),
-          ...children,
-        );
+        mut_stack.push(createChildrenReducerTaskState(mut_state, children, max), ...children);
       }
     }),
   );
 
   const children = types.flatMap((type, index) =>
-    createIndexSignatureTaskStates(
-      parameters,
-      m_state,
-      ts.IndexKind.String,
-      getTypeData(type, typeNodes?.[index]),
-    ),
+    createIndexSignatureTaskStates(parameters, mut_state, ts.IndexKind.String, getTypeData(type, typeNodes?.[index])),
   );
   if (children.length > 0) {
-    m_stack.push(
-      createChildrenReducerTaskState(m_state, children, max),
-      ...children,
-    );
+    mut_stack.push(createChildrenReducerTaskState(mut_state, children, max), ...children);
   }
 }
 
 /**
  * Apply an override if its criteria are met.
  */
-function taskApplyOverride(m_state: TaskStateApplyOverride) {
-  assert(
-    m_state.override.from !== undefined,
-    "Override should have already been applied",
-  );
+function taskApplyOverride(mut_state: TaskStateApplyOverride) {
+  assert(mut_state.override.from !== undefined, "Override should have already been applied");
 
   if (
-    (m_state.override.from <= m_state.taskState.immutability &&
-      m_state.taskState.immutability <= m_state.override.to) ||
-    (m_state.override.from >= m_state.taskState.immutability &&
-      m_state.taskState.immutability >= m_state.override.to)
+    (mut_state.override.from <= mut_state.taskState.immutability &&
+      mut_state.taskState.immutability <= mut_state.override.to) ||
+    (mut_state.override.from >= mut_state.taskState.immutability &&
+      mut_state.taskState.immutability >= mut_state.override.to)
   ) {
-    m_state.taskState.immutability = m_state.override.to;
+    mut_state.taskState.immutability = mut_state.override.to;
   }
 }
 
 /**
  * Check if we're found the type's immutability.
  */
-function taskCheckDone(
-  m_state: TaskStateCheckDone,
-  immutability: Immutability,
-) {
+function taskCheckDone(mut_state: TaskStateCheckDone, immutability: Immutability) {
   if (immutability !== Immutability.Calculating) {
-    m_state.taskState.limits.max = min(
-      m_state.taskState.limits.max,
-      immutability,
-    );
-    if (m_state.taskState.limits.min >= m_state.taskState.limits.max) {
-      m_state.taskState.immutability = m_state.taskState.limits.min;
+    mut_state.taskState.limits.max = min(mut_state.taskState.limits.max, immutability);
+    if (mut_state.taskState.limits.min >= mut_state.taskState.limits.max) {
+      mut_state.taskState.immutability = mut_state.taskState.limits.min;
       return;
     }
   }
 
-  m_state.notDoneAction();
+  mut_state.notDoneAction();
 }
 
 /**
  * Reduce the children's immutability values to a single value.
  */
-function taskReduceChildren(m_state: TaskStateChildrenReducer): void {
-  m_state.immutability = (
-    m_state.children[0] ?? assert.fail("no children")
-  ).immutability;
-  for (let m_index = 1; m_index < m_state.children.length; m_index++) {
-    m_state.immutability = m_state.childrenReducer(
-      m_state.immutability,
-      m_state.children[m_index]!.immutability,
+function taskReduceChildren(mut_state: TaskStateChildrenReducer): void {
+  mut_state.immutability = (mut_state.children[0] ?? assert.fail("no children")).immutability;
+  for (let mut_index = 1; mut_index < mut_state.children.length; mut_index++) {
+    mut_state.immutability = mut_state.childrenReducer(
+      mut_state.immutability,
+      mut_state.children[mut_index]!.immutability,
     );
   }
 }
@@ -585,12 +525,8 @@ function taskReduceChildren(m_state: TaskStateChildrenReducer): void {
 /**
  * Handle a type we know is a union.
  */
-function handleTypeUnion(
-  parameters: Parameters,
-  m_stack: Stack,
-  m_state: TaskStateTriage,
-) {
-  assert(isUnionType(m_state.typeData.type));
+function handleTypeUnion(parameters: Parameters, mut_stack: Stack, mut_state: TaskStateTriage) {
+  assert(isUnionType(mut_state.typeData.type));
 
   const checker = parameters.program.getTypeChecker();
 
@@ -600,31 +536,23 @@ function handleTypeUnion(
   // index. Without this, lookups that prefer `typeNode.getText()` (overrides,
   // alias names) would consult the wrong AST node.
   const unionTypeNode =
-    m_state.typeData.typeNode === null
-      ? null
-      : findUnionTypeNode(checker, m_state.typeData.typeNode);
-  const m_typeNodes =
-    unionTypeNode === null ? null : [...unionTypeNode.types];
+    mut_state.typeData.typeNode === null ? null : findUnionTypeNode(checker, mut_state.typeData.typeNode);
+  const mut_typeNodes = unionTypeNode === null ? null : [...unionTypeNode.types];
 
-  const children = m_state.typeData.type.types.map((type) => {
+  const children = mut_state.typeData.type.types.map((type) => {
     let typeNode: ts.TypeNode | undefined;
-    if (m_typeNodes !== null) {
-      const matchIndex = m_typeNodes.findIndex(
-        (node) => checker.getTypeFromTypeNode(node) === type,
-      );
+    if (mut_typeNodes !== null) {
+      const matchIndex = mut_typeNodes.findIndex((node) => checker.getTypeFromTypeNode(node) === type);
       if (matchIndex >= 0) {
         // Splice so duplicate constituents don't both bind to the same node.
-        typeNode = m_typeNodes.splice(matchIndex, 1)[0];
+        [typeNode] = mut_typeNodes.splice(matchIndex, 1);
       }
     }
 
     return createNewTaskState(getTypeData(type, typeNode));
   });
 
-  m_stack.push(
-    createChildrenReducerTaskState(m_state, children, min),
-    ...children,
-  );
+  mut_stack.push(createChildrenReducerTaskState(mut_state, children, min), ...children);
 }
 
 /**
@@ -633,10 +561,7 @@ function handleTypeUnion(
  * a union. Returns null if no UnionTypeNode is reachable (e.g. the typeNode
  * is a generic instantiation or a non-alias reference).
  */
-function findUnionTypeNode(
-  checker: ts.TypeChecker,
-  typeNode: ts.TypeNode,
-): ts.UnionTypeNode | null {
+function findUnionTypeNode(checker: ts.TypeChecker, typeNode: ts.TypeNode): ts.UnionTypeNode | null {
   if (ts.isUnionTypeNode(typeNode)) {
     return typeNode;
   }
@@ -644,9 +569,7 @@ function findUnionTypeNode(
     return findUnionTypeNode(checker, typeNode.type);
   }
   if (ts.isTypeReferenceNode(typeNode)) {
-    const nameNode = ts.isQualifiedName(typeNode.typeName)
-      ? typeNode.typeName.right
-      : typeNode.typeName;
+    const nameNode = ts.isQualifiedName(typeNode.typeName) ? typeNode.typeName.right : typeNode.typeName;
     const symbol = checker.getSymbolAtLocation(nameNode);
     for (const declaration of symbol?.declarations ?? []) {
       if (ts.isTypeAliasDeclaration(declaration)) {
@@ -663,146 +586,112 @@ function findUnionTypeNode(
 /**
  * Handle a type we know is an intersection.
  */
-function handleTypeIntersection(
-  parameters: Parameters,
-  m_stack: Stack,
-  m_state: TaskState,
-) {
-  assert(m_state.stage === TaskStateStage.Triage);
+function handleTypeIntersection(parameters: Parameters, mut_stack: Stack, mut_state: TaskState) {
+  assert(mut_state.stage === TaskStateStage.Triage);
 
-  handleTypeObject(parameters, m_stack, m_state);
+  handleTypeObject(parameters, mut_stack, mut_state);
 }
 
 /**
  * Handle a type we know is a conditional type.
  */
-function handleTypeConditional(
-  parameters: Parameters,
-  m_stack: Stack,
-  m_state: TaskState,
-) {
-  assert(m_state.stage === TaskStateStage.Triage);
-  assert(isConditionalType(m_state.typeData.type));
+function handleTypeConditional(parameters: Parameters, mut_stack: Stack, mut_state: TaskState) {
+  assert(mut_state.stage === TaskStateStage.Triage);
+  assert(isConditionalType(mut_state.typeData.type));
 
   const checker = parameters.program.getTypeChecker();
-  const children = [
-    m_state.typeData.type.root.node.trueType,
-    m_state.typeData.type.root.node.falseType,
-  ].map((typeNode) => {
-    const type = checker.getTypeFromTypeNode(typeNode);
-    return createNewTaskState(getTypeData(type, typeNode));
-  });
-
-  m_stack.push(
-    createChildrenReducerTaskState(m_state, children, min),
-    ...children,
+  const children = [mut_state.typeData.type.root.node.trueType, mut_state.typeData.type.root.node.falseType].map(
+    (typeNode) => {
+      const type = checker.getTypeFromTypeNode(typeNode);
+      return createNewTaskState(getTypeData(type, typeNode));
+    },
   );
+
+  mut_stack.push(createChildrenReducerTaskState(mut_state, children, min), ...children);
 }
 
 /**
  * Handle a type we know is a non-namespace function.
  */
-function handleTypeFunction(m_state: TaskState) {
-  assert(m_state.stage === TaskStateStage.Triage);
+function handleTypeFunction(mut_state: TaskState) {
+  assert(mut_state.stage === TaskStateStage.Triage);
 
-  m_state.immutability = Immutability.Immutable;
+  mut_state.immutability = Immutability.Immutable;
 }
 
 /**
  * Handle a type we know is a tuple.
  */
-function handleTypeTuple(
-  parameters: Parameters,
-  m_stack: Stack,
-  m_state: TaskState,
-) {
-  assert(m_state.stage === TaskStateStage.Triage);
-  assert(
-    parameters.program.getTypeChecker().isTupleType(m_state.typeData.type),
-  );
+function handleTypeTuple(parameters: Parameters, mut_stack: Stack, mut_state: TaskState) {
+  assert(mut_state.stage === TaskStateStage.Triage);
+  assert(parameters.program.getTypeChecker().isTupleType(mut_state.typeData.type));
 
-  if (!m_state.typeData.type.target.readonly) {
-    m_state.immutability = Immutability.Mutable;
+  if (!mut_state.typeData.type.target.readonly) {
+    mut_state.immutability = Immutability.Mutable;
     return;
   }
-  handleTypeArray(parameters, m_stack, m_state);
+  handleTypeArray(parameters, mut_stack, mut_state);
 }
 
 /**
  * Handle a type we know is an array (this includes tuples).
  */
-function handleTypeArray(
-  parameters: Parameters,
-  m_stack: Stack,
-  m_state: TaskState,
-) {
-  assert(m_state.stage === TaskStateStage.Triage);
+function handleTypeArray(parameters: Parameters, mut_stack: Stack, mut_state: TaskState) {
+  assert(mut_state.stage === TaskStateStage.Triage);
 
   // It will have limits after being processed by `handleTypeObject`.
-  const m_stateWithLimits = m_state as unknown as TaskStateWithLimits;
-  m_stack.push(
-    createCheckDoneTaskState(m_stateWithLimits, () => {
-      m_stateWithLimits.stage = TaskStateStage.Done;
-      m_stateWithLimits.immutability = max(
-        m_stateWithLimits.limits.min,
-        m_stateWithLimits.limits.max,
-      );
-      m_stack.push(m_stateWithLimits);
+  const mut_stateWithLimits = mut_state as unknown as TaskStateWithLimits;
+  mut_stack.push(
+    createCheckDoneTaskState(mut_stateWithLimits, () => {
+      mut_stateWithLimits.stage = TaskStateStage.Done;
+      mut_stateWithLimits.immutability = max(mut_stateWithLimits.limits.min, mut_stateWithLimits.limits.max);
+      mut_stack.push(mut_stateWithLimits);
     }),
 
-    createCheckDoneTaskState(m_stateWithLimits, () => {
-      if (isTypeReferenceWithTypeArguments(m_stateWithLimits.typeData.type)) {
-        handleTypeArguments(m_stack, m_stateWithLimits);
+    createCheckDoneTaskState(mut_stateWithLimits, () => {
+      if (isTypeReferenceWithTypeArguments(mut_stateWithLimits.typeData.type)) {
+        handleTypeArguments(mut_stack, mut_stateWithLimits);
       }
     }),
   );
 
-  handleTypeObject(parameters, m_stack, m_state);
+  handleTypeObject(parameters, mut_stack, mut_state);
 }
 
 /**
  * Handle a type that all we know is that it's an object.
  */
-function handleTypeObject(
-  parameters: Parameters,
-  m_stack: Stack,
-  m_state: TaskStateTriage,
-) {
+function handleTypeObject(parameters: Parameters, mut_stack: Stack, mut_state: TaskStateTriage) {
   // Add limits.
-  const m_stateWithLimits = m_state as unknown as TaskStateWithLimits;
-  m_stateWithLimits.stage = TaskStateStage.ObjectProperties;
-  m_stateWithLimits.limits = {
+  const mut_stateWithLimits = mut_state as unknown as TaskStateWithLimits;
+  mut_stateWithLimits.stage = TaskStateStage.ObjectProperties;
+  mut_stateWithLimits.limits = {
     ...parameters.immutabilityLimits,
   };
 
-  m_stack.push(
-    createCheckDoneTaskState(m_stateWithLimits, () => {
-      if (isTypeReferenceWithTypeArguments(m_stateWithLimits.typeData.type)) {
-        m_stateWithLimits.stage = TaskStateStage.ObjectTypeReference;
-        m_stack.push(m_stateWithLimits);
+  mut_stack.push(
+    createCheckDoneTaskState(mut_stateWithLimits, () => {
+      if (isTypeReferenceWithTypeArguments(mut_stateWithLimits.typeData.type)) {
+        mut_stateWithLimits.stage = TaskStateStage.ObjectTypeReference;
+        mut_stack.push(mut_stateWithLimits);
         return;
       }
 
-      m_stateWithLimits.stage = TaskStateStage.ObjectIndexSignature;
-      m_stack.push(m_stateWithLimits);
+      mut_stateWithLimits.stage = TaskStateStage.ObjectIndexSignature;
+      mut_stack.push(mut_stateWithLimits);
     }),
   );
 
   const checker = parameters.program.getTypeChecker();
 
-  const properties = m_stateWithLimits.typeData.type.getProperties();
+  const properties = mut_stateWithLimits.typeData.type.getProperties();
   if (properties.length > 0) {
     for (const property of properties) {
       if (
-        isPropertyReadonlyInType(
-          m_stateWithLimits.typeData.type,
-          property.getEscapedName(),
-          checker,
-        ) ||
+        isPropertyReadonlyInType(mut_stateWithLimits.typeData.type, property.getEscapedName(), checker) ||
         // Ignore "length" for tuples.
         // TODO: Report this issue to upstream.
-        ((property.escapedName as string) === "length" &&
-          checker.isTupleType(m_stateWithLimits.typeData.type))
+        ((property.escapedName as string) === "length" && checker.isTupleType(mut_stateWithLimits.typeData.type))
       ) {
         continue;
       }
@@ -816,15 +705,10 @@ function handleTypeObject(
       if (declarations.length > 0) {
         if (
           declarations.some(
-            (declaration) =>
-              hasSymbol(declaration) &&
-              isSymbolFlagSet(declaration.symbol, ts.SymbolFlags.Method),
+            (declaration) => hasSymbol(declaration) && isSymbolFlagSet(declaration.symbol, ts.SymbolFlags.Method),
           )
         ) {
-          m_stateWithLimits.limits.max = min(
-            m_stateWithLimits.limits.max,
-            Immutability.ReadonlyDeep,
-          );
+          mut_stateWithLimits.limits.max = min(mut_stateWithLimits.limits.max, Immutability.ReadonlyDeep);
           continue;
         }
 
@@ -836,29 +720,24 @@ function handleTypeObject(
               ts.isFunctionTypeNode(declaration.type),
           )
         ) {
-          m_stateWithLimits.limits.max = min(
-            m_stateWithLimits.limits.max,
-            Immutability.ReadonlyDeep,
-          );
+          mut_stateWithLimits.limits.max = min(mut_stateWithLimits.limits.max, Immutability.ReadonlyDeep);
           continue;
         }
       }
 
-      m_stateWithLimits.immutability = Immutability.Mutable;
+      mut_stateWithLimits.immutability = Immutability.Mutable;
       return;
     }
   }
 
   const propertyNodes = new Map<string, ts.TypeNode>(
-    m_stateWithLimits.typeData.typeNode !== null &&
-    hasType(m_stateWithLimits.typeData.typeNode) &&
-    m_stateWithLimits.typeData.typeNode.type !== undefined &&
-    ts.isTypeLiteralNode(m_stateWithLimits.typeData.typeNode.type)
-      ? m_stateWithLimits.typeData.typeNode.type.members
+    mut_stateWithLimits.typeData.typeNode !== null &&
+      hasType(mut_stateWithLimits.typeData.typeNode) &&
+      mut_stateWithLimits.typeData.typeNode.type !== undefined &&
+      ts.isTypeLiteralNode(mut_stateWithLimits.typeData.typeNode.type)
+      ? mut_stateWithLimits.typeData.typeNode.type.members
           .map((member): [string, ts.TypeNode] | undefined =>
-            member.name === undefined ||
-            !hasType(member) ||
-            member.type === undefined
+            member.name === undefined || !hasType(member) || member.type === undefined
               ? undefined
               : [propertyNameToString(member.name), member.type],
           )
@@ -868,57 +747,41 @@ function handleTypeObject(
 
   const children = properties
     .map((property) => {
-      const propertyType = getTypeOfPropertyOfType(
-        checker,
-        m_stateWithLimits.typeData.type,
-        property,
-      );
-      if (
-        propertyType === undefined ||
-        (isIntrinsicType(propertyType) &&
-          propertyType.intrinsicName === "error")
-      ) {
+      const propertyType = getTypeOfPropertyOfType(checker, mut_stateWithLimits.typeData.type, property);
+      if (propertyType === undefined || (isIntrinsicType(propertyType) && propertyType.intrinsicName === "error")) {
         return null;
       }
 
-      const propertyTypeNode = propertyNodes.get(
-        property.getEscapedName() as string,
-      );
+      const propertyTypeNode = propertyNodes.get(property.getEscapedName() as string);
 
       return createNewTaskState(getTypeData(propertyType, propertyTypeNode));
     })
     .filter((taskState): taskState is TaskStateTriage => taskState !== null);
 
   if (children.length > 0) {
-    m_stateWithLimits.limits.min = Immutability.ReadonlyShallow;
+    mut_stateWithLimits.limits.min = Immutability.ReadonlyShallow;
 
-    m_stack.push(
-      createChildrenReducerTaskState(m_stateWithLimits, children, min),
-      ...children,
-    );
+    mut_stack.push(createChildrenReducerTaskState(mut_stateWithLimits, children, min), ...children);
   }
 }
 
 /**
  * Handle the type arguments of a type reference.
  */
-function handleTypeArguments(m_stack: Stack, m_state: TaskStateWithLimits) {
-  assert(isTypeReferenceWithTypeArguments(m_state.typeData.type));
+function handleTypeArguments(mut_stack: Stack, mut_state: TaskStateWithLimits) {
+  assert(isTypeReferenceWithTypeArguments(mut_state.typeData.type));
 
-  const children = m_state.typeData.type.typeArguments.map((type) =>
+  const children = mut_state.typeData.type.typeArguments.map((type) =>
     createNewTaskState(getTypeData(type, undefined)),
   );
-  m_stack.push(
-    createChildrenReducerTaskState(m_state, children, min),
-    ...children,
-  );
+  mut_stack.push(createChildrenReducerTaskState(mut_state, children, min), ...children);
 }
 
 /**
  * Handle a primitive type.
  */
-function handleTypePrimitive(m_state: TaskStateTriage) {
-  m_state.immutability = Immutability.Immutable;
+function handleTypePrimitive(mut_state: TaskStateTriage) {
+  mut_state.immutability = Immutability.Immutable;
 }
 
 /**
@@ -926,25 +789,25 @@ function handleTypePrimitive(m_state: TaskStateTriage) {
  */
 function createIndexSignatureTaskStates(
   parameters: Parameters,
-  m_state: TaskStateBase,
+  mut_state: TaskStateBase,
   kind: ts.IndexKind,
   typeData: Readonly<TypeData>,
 ): Array<Exclude<TaskState, TaskStateCheckDone | TaskStateApplyOverride>> {
   const checker = parameters.program.getTypeChecker();
   const indexInfo = checker.getIndexInfoOfType(typeData.type, kind);
   if (indexInfo === undefined) {
-    m_state.immutability = Immutability.Unknown;
+    mut_state.immutability = Immutability.Unknown;
     return [];
   }
 
   if (parameters.immutabilityLimits.max <= Immutability.ReadonlyShallow) {
-    m_state.immutability = Immutability.ReadonlyShallow;
+    mut_state.immutability = Immutability.ReadonlyShallow;
     return [];
   }
 
   if (indexInfo.isReadonly) {
     if (indexInfo.type === typeData.type) {
-      m_state.immutability = parameters.immutabilityLimits.max;
+      mut_state.immutability = parameters.immutabilityLimits.max;
       return [];
     }
 
@@ -953,15 +816,11 @@ function createIndexSignatureTaskStates(
     );
 
     return [
-      createChildrenReducerTaskState(
-        m_state,
-        [{ immutability: Immutability.ReadonlyShallow }, child],
-        max,
-      ),
+      createChildrenReducerTaskState(mut_state, [{ immutability: Immutability.ReadonlyShallow }, child], max),
       child,
     ];
   }
 
-  m_state.immutability = Immutability.Mutable;
+  mut_state.immutability = Immutability.Mutable;
   return [];
 }

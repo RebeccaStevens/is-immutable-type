@@ -6,5 +6,3 @@ declare global {
     ): object is ObjectType & Record<Key, unknown>;
   }
 }
-
-export {};

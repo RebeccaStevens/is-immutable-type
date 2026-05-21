@@ -10,7 +10,11 @@ function getBoolean(value: string | undefined) {
   }
   const asNumber = Number(value);
   return Number.isNaN(asNumber)
-    ? Boolean(String(value).toLowerCase().replace("false", ""))
+    ? Boolean(
+        String(value as unknown)
+          .toLowerCase()
+          .replace("false", ""),
+      )
     : Boolean(asNumber);
 }
 
@@ -21,13 +25,8 @@ export default defineConfig({
 
   test: {
     include: ["./**/*.test.ts"],
-    exclude: [
-      "dist",
-      "node_modules",
-      ...(testLimitations ? [] : ["tests/limitations.test.ts"]),
-    ],
+    exclude: ["dist", "node_modules", ...(testLimitations ? [] : ["tests/limitations.test.ts"])],
     coverage: {
-      all: true,
       include: ["src"],
       exclude: ["dist"],
       reporter: ["lcov", "text"],

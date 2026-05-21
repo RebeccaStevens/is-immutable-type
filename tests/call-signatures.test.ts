@@ -23,11 +23,12 @@ describe("Call Signatures", () => {
     },
   );
 
-  it.each([
-    "type Test = { (): void; readonly bar: readonly ({ foo: number })[] };",
-  ])("works for ReadonlyShallow namespaces", (code) => {
-    runTestImmutability(code, Immutability.ReadonlyShallow);
-  });
+  it.each(["type Test = { (): void; readonly bar: readonly ({ foo: number })[] };"])(
+    "works for ReadonlyShallow namespaces",
+    (code) => {
+      runTestImmutability(code, Immutability.ReadonlyShallow);
+    },
+  );
 
   it.each([
     "type Test = { (): void; bar: number };",

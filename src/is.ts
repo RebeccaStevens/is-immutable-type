@@ -6,12 +6,7 @@ import {
   getDefaultOverrides,
   getTypeImmutability,
 } from "./calculate";
-import {
-  isImmutable,
-  isMutable,
-  isReadonlyDeep,
-  isReadonlyShallow,
-} from "./compare";
+import { isImmutable, isMutable, isReadonlyDeep, isReadonlyShallow } from "./compare";
 import { Immutability } from "./immutability";
 
 /**
@@ -29,13 +24,7 @@ export function isImmutableType(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
 ) {
-  const immutability = getTypeImmutability(
-    program,
-    typeOrTypeNode,
-    overrides,
-    useCache,
-    Immutability.Immutable,
-  );
+  const immutability = getTypeImmutability(program, typeOrTypeNode, overrides, useCache, Immutability.Immutable);
   return isImmutable(immutability);
 }
 
@@ -54,13 +43,7 @@ export function isReadonlyDeepType(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
 ) {
-  const immutability = getTypeImmutability(
-    program,
-    typeOrTypeNode,
-    overrides,
-    useCache,
-    Immutability.ReadonlyDeep,
-  );
+  const immutability = getTypeImmutability(program, typeOrTypeNode, overrides, useCache, Immutability.ReadonlyDeep);
   return isReadonlyDeep(immutability);
 }
 
@@ -79,13 +62,7 @@ export function isReadonlyShallowType(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
 ) {
-  const immutability = getTypeImmutability(
-    program,
-    typeOrTypeNode,
-    overrides,
-    useCache,
-    Immutability.ReadonlyShallow,
-  );
+  const immutability = getTypeImmutability(program, typeOrTypeNode, overrides, useCache, Immutability.ReadonlyShallow);
   return isReadonlyShallow(immutability);
 }
 
@@ -104,12 +81,6 @@ export function isMutableType(
   overrides: ImmutabilityOverrides = getDefaultOverrides(),
   useCache: ImmutabilityCache | boolean = true,
 ) {
-  const immutability = getTypeImmutability(
-    program,
-    typeOrTypeNode,
-    overrides,
-    useCache,
-    Immutability.Mutable,
-  );
+  const immutability = getTypeImmutability(program, typeOrTypeNode, overrides, useCache, Immutability.Mutable);
   return isMutable(immutability);
 }

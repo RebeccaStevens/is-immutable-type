@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
   issues: write
   pull-requests: write
 
@@ -17,10 +18,8 @@ concurrency:
 jobs:
   lint_js:
     uses: ./.github/workflows/lint-js.yml
-  lint_knip_dev:
-    uses: ./.github/workflows/lint-knip-dev.yml
-  lint_knip_prod:
-    uses: ./.github/workflows/lint-knip-prod.yml
+  lint_knip:
+    uses: ./.github/workflows/lint-knip.yml
   lint_markdown:
     uses: ./.github/workflows/lint-markdown.yml
   lint_packages:
@@ -29,30 +28,28 @@ jobs:
     uses: ./.github/workflows/lint-spelling.yml
   lint_yaml:
     uses: ./.github/workflows/lint-yaml.yml
-  test:
+  test_js:
     uses: ./.github/workflows/test-js.yml
-  type_check:
+  typecheck:
     uses: ./.github/workflows/typecheck.yml
 
   release:
     needs:
       - lint_js
-      - lint_knip_prod
+      - lint_knip
       - lint_markdown
-      - lint_spelling
       - lint_packages
+      - lint_spelling
       - lint_yaml
-      - test
-      - type_check
+      - test_js
+      - typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/prepare
-        with:
-          node-version: v20
 
       - name: Build
         run: pnpm run build
@@ -61,4 +58,3 @@ jobs:
         run: pnpm run release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

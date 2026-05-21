@@ -7,22 +7,18 @@ import { runTestImmutability } from "./helpers";
 
 describe("Unions", () => {
   describe("override resolution is independent of constituent order", () => {
-    const overrides: ImmutabilityOverrides = [
-      { type: "Error", to: Immutability.ReadonlyShallow },
-    ];
+    const overrides: ImmutabilityOverrides = [{ type: "Error", to: Immutability.ReadonlyShallow }];
 
-    it.each([
-      "type Test = Error | string;",
-      "type Test = string | Error;",
-    ])("ReadonlyShallow regardless of source order (%s)", (code) => {
-      runTestImmutability({ code, overrides }, Immutability.ReadonlyShallow);
-    });
+    it.each(["type Test = Error | string;", "type Test = string | Error;"])(
+      "ReadonlyShallow regardless of source order (%s)",
+      (code) => {
+        runTestImmutability({ code, overrides }, Immutability.ReadonlyShallow);
+      },
+    );
   });
 
   describe("override resolves through aliases that wrap a union", () => {
-    const overrides: ImmutabilityOverrides = [
-      { type: "MyError", to: Immutability.ReadonlyShallow },
-    ];
+    const overrides: ImmutabilityOverrides = [{ type: "MyError", to: Immutability.ReadonlyShallow }];
 
     it("constituent is itself an alias inside a direct union", () => {
       runTestImmutability(
@@ -65,31 +61,19 @@ describe("Unions", () => {
     });
   });
 
-  it.each([
-    "type Test = string | number",
-    "type Test = Readonly<{ foo: string; }> | number;",
-  ])("Immutable", (code) => {
+  it.each(["type Test = string | number", "type Test = Readonly<{ foo: string; }> | number;"])("Immutable", (code) => {
     runTestImmutability(code, Immutability.Immutable);
   });
 
-  it.each(["type Test = readonly string[] | readonly number[];"])(
-    "ReadonlyDeep",
-    (code) => {
-      runTestImmutability(code, Immutability.ReadonlyDeep);
-    },
-  );
+  it.each(["type Test = readonly string[] | readonly number[];"])("ReadonlyDeep", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyDeep);
+  });
 
-  it.each(["type Test = { foo: string; } | { bar: string; };"])(
-    "Mutable",
-    (code) => {
-      runTestImmutability(code, Immutability.Mutable);
-    },
-  );
+  it.each(["type Test = { foo: string; } | { bar: string; };"])("Mutable", (code) => {
+    runTestImmutability(code, Immutability.Mutable);
+  });
 
-  it.each(["type Test = Readonly<{ foo: string; } | { bar: string; }>;"])(
-    "Immutable",
-    (code) => {
-      runTestImmutability(code, Immutability.Immutable);
-    },
-  );
+  it.each(["type Test = Readonly<{ foo: string; } | { bar: string; }>;"])("Immutable", (code) => {
+    runTestImmutability(code, Immutability.Immutable);
+  });
 });

@@ -1,11 +1,6 @@
 {
   "$schema": "node_modules/knip/schema-jsonc.json",
-  "entry": ["src/index.ts!", "tests/**/*.test.ts"],
-  "project": ["src/**/*.ts!", "tests/**/*.ts"],
-  "ignoreDependencies": [
-    "@eslint/compat",
-    "@vitest/coverage-v8",
-    "eslint",
-    "tsc-files",
-  ],
+  "project": ["src/**/*.ts!"],
+  "ignoreDependencies": ["@eslint/compat", "@typescript/vfs", "tsc-files"],
+  "exclude": ["exports", "nsExports", "types", "nsTypes"],
 }

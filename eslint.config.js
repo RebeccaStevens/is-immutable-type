@@ -17,6 +17,8 @@ export default rsEslint(
   },
   {
     rules: {
+      "import/extensions": "off", // Not releasing to JSR.
+      "unicorn/no-instanceof-builtins": "off", // TODO: Look into whether we should change use of instanceof checks.
       "test/prefer-lowercase-title": "off",
     },
   },
