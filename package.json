@@ -93,7 +93,7 @@
     "@rebeccastevens/eslint-config": "3.9.7",
     "@rollup/plugin-typescript": "12.3.0",
     "@stylistic/eslint-plugin": "5.10.0",
-    "@types/node": "20.14.14",
+    "@types/node": "20.19.41",
     "@typescript-eslint/eslint-plugin": "8.59.4",
     "@typescript-eslint/parser": "8.59.4",
     "@typescript/vfs": "1.6.4",
