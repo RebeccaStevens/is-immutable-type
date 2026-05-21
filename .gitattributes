@@ -7,8 +7,6 @@
 
 **/tsconfig.json linguist-language=jsonc
 **/tsconfig.*.json linguist-language=jsonc
-/.lintstagedrc linguist-language=json
-/.markdownlint.json linguist-language=jsonc
 /.vscode/*.json linguist-language=jsonc
 
 /CHANGELOG.md linguist-generated

@@ -101,12 +101,9 @@ describe("Overrides", () => {
         ],
       },
     ] as OverrideSet)("%s", ({ overrides }) => {
-      it.each(["type Test = string;", "type Test = ReadonlyArray<string>"])(
-        "Mutable",
-        (code) => {
-          runTestImmutability({ code, overrides }, Immutability.Mutable);
-        },
-      );
+      it.each(["type Test = string;", "type Test = ReadonlyArray<string>"])("Mutable", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.Mutable);
+      });
     });
   });
 
@@ -137,12 +134,9 @@ describe("Overrides", () => {
         ],
       },
     ] as OverrideSet)("%s", ({ overrides }) => {
-      it.each(["type Test = string;", "type Test = ReadonlyArray<string>"])(
-        "Mutable",
-        (code) => {
-          runTestImmutability({ code, overrides }, Immutability.Mutable);
-        },
-      );
+      it.each(["type Test = string;", "type Test = ReadonlyArray<string>"])("Mutable", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.Mutable);
+      });
     });
   });
 
@@ -174,12 +168,12 @@ describe("Overrides", () => {
         runTestImmutability({ code, overrides }, Immutability.Immutable);
       });
 
-      it.each([
-        "type Test = ReadonlyArray<{ foo: string }>;",
-        "type Test = readonly { foo: string }[];",
-      ])("ReadonlyShallow", (code) => {
-        runTestImmutability({ code, overrides }, Immutability.ReadonlyShallow);
-      });
+      it.each(["type Test = ReadonlyArray<{ foo: string }>;", "type Test = readonly { foo: string }[];"])(
+        "ReadonlyShallow",
+        (code) => {
+          runTestImmutability({ code, overrides }, Immutability.ReadonlyShallow);
+        },
+      );
     });
   });
 
@@ -204,22 +198,13 @@ describe("Overrides", () => {
         ],
       },
     ] as OverrideSet)("%s", ({ overrides }) => {
-      it.each(["type Test = ReadonlyArray<Readonly<{ foo: string }>>;"])(
-        "Immutable",
-        (code) => {
-          runTestImmutability({ code, overrides }, Immutability.Immutable);
-        },
-      );
+      it.each(["type Test = ReadonlyArray<Readonly<{ foo: string }>>;"])("Immutable", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.Immutable);
+      });
 
-      it.each(["type Test = ReadonlyArray<{ foo: string }>;"])(
-        "ReadonlyShallow",
-        (code) => {
-          runTestImmutability(
-            { code, overrides },
-            Immutability.ReadonlyShallow,
-          );
-        },
-      );
+      it.each(["type Test = ReadonlyArray<{ foo: string }>;"])("ReadonlyShallow", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.ReadonlyShallow);
+      });
     });
   });
 
@@ -244,19 +229,13 @@ describe("Overrides", () => {
         ],
       },
     ] as OverrideSet)("%s", ({ overrides }) => {
-      it.each(["type Test = ReadonlyArray<{ foo: string }>;"])(
-        "Mutable",
-        (code) => {
-          runTestImmutability({ code, overrides }, Immutability.Mutable);
-        },
-      );
+      it.each(["type Test = ReadonlyArray<{ foo: string }>;"])("Mutable", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.Mutable);
+      });
 
-      it.each(["type Test = ReadonlyArray<Readonly<{ foo: string }>>;"])(
-        "ReadonlyDeep",
-        (code) => {
-          runTestImmutability({ code, overrides }, Immutability.ReadonlyDeep);
-        },
-      );
+      it.each(["type Test = ReadonlyArray<Readonly<{ foo: string }>>;"])("ReadonlyDeep", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.ReadonlyDeep);
+      });
     });
   });
 
@@ -281,19 +260,13 @@ describe("Overrides", () => {
         ],
       },
     ] as OverrideSet)("%s", ({ overrides }) => {
-      it.each(["type Test = ReadonlyArray<{ foo: string }>;"])(
-        "Mutable",
-        (code) => {
-          runTestImmutability({ code, overrides }, Immutability.Mutable);
-        },
-      );
+      it.each(["type Test = ReadonlyArray<{ foo: string }>;"])("Mutable", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.Mutable);
+      });
 
-      it.each(["type Test = ReadonlyArray<Readonly<{ foo: string }>>;"])(
-        "ReadonlyDeep",
-        (code) => {
-          runTestImmutability({ code, overrides }, Immutability.ReadonlyDeep);
-        },
-      );
+      it.each(["type Test = ReadonlyArray<Readonly<{ foo: string }>>;"])("ReadonlyDeep", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.ReadonlyDeep);
+      });
     });
   });
 
@@ -377,12 +350,9 @@ describe("Overrides", () => {
         ],
       },
     ] as OverrideSet)("%s", ({ overrides }) => {
-      it.each(["type ImmutableArray<T> = ReadonlyArray<T>;"])(
-        "Immutable",
-        (code) => {
-          runTestImmutability({ code, overrides }, Immutability.Immutable);
-        },
-      );
+      it.each(["type ImmutableArray<T> = ReadonlyArray<T>;"])("Immutable", (code) => {
+        runTestImmutability({ code, overrides }, Immutability.Immutable);
+      });
 
       it.each([
         `
@@ -453,9 +423,7 @@ describe("Overrides", () => {
   });
 
   describe("name matches regardless of how the type is spelled", () => {
-    const overrides = [
-      { type: "Foo", to: Immutability.ReadonlyShallow },
-    ] as ImmutabilityOverrides;
+    const overrides = [{ type: "Foo", to: Immutability.ReadonlyShallow }] as ImmutabilityOverrides;
 
     it("plain reference (baseline)", () => {
       runTestImmutability(

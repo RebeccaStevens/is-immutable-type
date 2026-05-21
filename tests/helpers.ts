@@ -29,12 +29,7 @@ function createTSTestEnvironment(code: string) {
   fsMap.set("index.ts", code);
 
   const system = tsvfs.createSystem(fsMap);
-  const env = tsvfs.createVirtualTypeScriptEnvironment(
-    system,
-    ["index.ts"],
-    ts,
-    compilerOptions,
-  );
+  const env = tsvfs.createVirtualTypeScriptEnvironment(system, ["index.ts"], ts, compilerOptions);
 
   const program = env.languageService.getProgram();
   if (program === undefined) {
@@ -64,9 +59,7 @@ function getType(code: string, line?: number) {
   const statement = ast.statements[(line ?? ast.statements.length) - 1]!;
   const checker = program.getTypeChecker();
 
-  const node = ts.isVariableStatement(statement)
-    ? statement.declarationList.declarations[0]!
-    : statement;
+  const node = ts.isVariableStatement(statement) ? statement.declarationList.declarations[0]! : statement;
   const type = checker.getTypeAtLocation(node);
 
   return {
@@ -92,9 +85,7 @@ export function runTestImmutability(
   message?: string,
 ): void {
   const { code, line, overrides, cache } =
-    typeof test === "string"
-      ? { code: test, line: undefined, overrides: undefined, cache: undefined }
-      : test;
+    typeof test === "string" ? { code: test, line: undefined, overrides: undefined, cache: undefined } : test;
 
   const { program, type, typeNode } = getType(code, line);
   const typeLike = typeNode ?? type;
@@ -103,24 +94,13 @@ export function runTestImmutability(
   expect(Immutability[actual]).to.be.equal(Immutability[expected], message);
 
   const immutable = isImmutableType(program, typeLike, overrides, cache);
-  expect(expected).to.be[immutable ? "greaterThanOrEqual" : "lessThan"](
-    Immutability.Immutable,
-  );
+  expect(expected).to.be[immutable ? "greaterThanOrEqual" : "lessThan"](Immutability.Immutable);
 
   const readonlyDeep = isReadonlyDeepType(program, typeLike, overrides, cache);
-  expect(expected).to.be[readonlyDeep ? "greaterThanOrEqual" : "lessThan"](
-    Immutability.ReadonlyDeep,
-  );
+  expect(expected).to.be[readonlyDeep ? "greaterThanOrEqual" : "lessThan"](Immutability.ReadonlyDeep);
 
-  const readonlyShallow = isReadonlyShallowType(
-    program,
-    typeLike,
-    overrides,
-    cache,
-  );
-  expect(expected).to.be[readonlyShallow ? "greaterThanOrEqual" : "lessThan"](
-    Immutability.ReadonlyShallow,
-  );
+  const readonlyShallow = isReadonlyShallowType(program, typeLike, overrides, cache);
+  expect(expected).to.be[readonlyShallow ? "greaterThanOrEqual" : "lessThan"](Immutability.ReadonlyShallow);
 
   const mutable = isMutableType(program, typeLike, overrides, cache);
   if (mutable) {

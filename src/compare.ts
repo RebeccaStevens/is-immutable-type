@@ -35,11 +35,7 @@ export function max(a: Immutability, b: Immutability): Immutability {
 /**
  * Clamp the immutability between min and max.
  */
-export function clamp(
-  minValue: Immutability,
-  value: Immutability,
-  maxValue: Immutability,
-) {
+export function clamp(minValue: Immutability, value: Immutability, maxValue: Immutability) {
   return Math.max(minValue, Math.min(maxValue, value));
 }
 

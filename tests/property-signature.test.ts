@@ -12,19 +12,13 @@ describe("Property Signatures", () => {
     runTestImmutability(code, Immutability.Immutable);
   });
 
-  it.each(["type Test = { readonly [key: string]: readonly string[] };"])(
-    "ReadonlyDeep",
-    (code) => {
-      runTestImmutability(code, Immutability.ReadonlyDeep);
-    },
-  );
+  it.each(["type Test = { readonly [key: string]: readonly string[] };"])("ReadonlyDeep", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyDeep);
+  });
 
-  it.each(["type Test = { readonly [key: string]: { foo: string[]; }; };"])(
-    "ReadonlyShallow",
-    (code) => {
-      runTestImmutability(code, Immutability.ReadonlyShallow);
-    },
-  );
+  it.each(["type Test = { readonly [key: string]: { foo: string[]; }; };"])("ReadonlyShallow", (code) => {
+    runTestImmutability(code, Immutability.ReadonlyShallow);
+  });
 
   it.each(["type Test = { [key: string]: string };"])("Mutable", (code) => {
     runTestImmutability(code, Immutability.Mutable);

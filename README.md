@@ -35,12 +35,7 @@ pnpm add is-immutable-type
 # Usage
 
 ```ts
-import {
-  Immutability,
-  getTypeImmutability,
-  isReadonlyDeep,
-  isUnknown,
-} from "is-immutable-type";
+import { Immutability, getTypeImmutability, isReadonlyDeep, isUnknown } from "is-immutable-type";
 import { hasType } from "ts-api-utils";
 import type ts from "typescript";
 

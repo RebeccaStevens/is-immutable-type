@@ -27,12 +27,7 @@ type PackageSpecifier = PatternSpecifier & TypeDeclarationPackageSpecifier;
 /**
  * How a type can be specified.
  */
-export type TypeSpecifier =
-  | string
-  | RegExp
-  | FileSpecifier
-  | LibSpecifier
-  | PackageSpecifier;
+export type TypeSpecifier = string | RegExp | FileSpecifier | LibSpecifier | PackageSpecifier;
 
 /**
  * Check if a type matches a specifier.
@@ -48,18 +43,14 @@ export type TypeMatchesPatternSpecifier = (
 /**
  * Type guard to check if a Node has a Symbol.
  */
-export function hasSymbol(
-  node: ts.Node,
-): node is ts.Node & { symbol: ts.Symbol } {
+export function hasSymbol(node: ts.Node): node is ts.Node & { symbol: ts.Symbol } {
   return Object.hasOwn(node, "symbol");
 }
 
 /**
  * Type guard to check if a Type is TypeNode.
  */
-export function isTypeNode(
-  typeLike: ts.Type | ts.TypeNode,
-): typeLike is ts.TypeNode {
+export function isTypeNode(typeLike: ts.Type | ts.TypeNode): typeLike is ts.TypeNode {
   return Object.hasOwn(typeLike, "kind");
 }
 
@@ -83,34 +74,21 @@ export type TypeData = {
  *
  * @throws if the type is an error type.
  */
-export function getTypeData(
-  type: ts.Type,
-  typeNode: ts.TypeNode | null | undefined,
-): TypeData {
+export function getTypeData(type: ts.Type, typeNode: ts.TypeNode | null | undefined): TypeData {
   if (isIntrinsicErrorType(type)) {
     throw new Error("ErrorType encountered.");
   }
 
   return {
     type,
-    typeNode:
-      typeNode === undefined ||
-      typeNode === null ||
-      isAnonymousTypeNode(typeNode)
-        ? null
-        : typeNode,
+    typeNode: typeNode === undefined || typeNode === null || isAnonymousTypeNode(typeNode) ? null : typeNode,
   };
 }
 
 /**
  * Cache a value by its type
  */
-export function cacheData<V>(
-  program: ts.Program,
-  cache: WeakMap<object, V>,
-  typeData: Readonly<TypeData>,
-  value: V,
-) {
+export function cacheData<V>(program: ts.Program, cache: WeakMap<object, V>, typeData: Readonly<TypeData>, value: V) {
   const checker = program.getTypeChecker();
   const identity = checker.getRecursionIdentity(typeData.type);
 
@@ -129,8 +107,7 @@ export function getCachedData<V>(
   typeData: Readonly<TypeData>,
 ): V | undefined {
   const checker = program.getTypeChecker();
-  const identity =
-    typeData.typeNode ?? checker.getRecursionIdentity(typeData.type);
+  const identity = typeData.typeNode ?? checker.getRecursionIdentity(typeData.type);
   return cache.get(identity);
 }
 
@@ -148,22 +125,12 @@ export function typeDataMatchesSpecifier(
   }
 
   if (typeof specifier === "string" || specifier instanceof RegExp) {
-    return typeNameMatchesSpecifier(
-      program,
-      specifier,
-      typeData,
-      typeMatchesPatternSpecifier,
-    );
+    return typeNameMatchesSpecifier(program, specifier, typeData, typeMatchesPatternSpecifier);
   }
 
   return (
     typeMatchesSpecifier(program, specifier, typeData.type) &&
-    typeNameMatchesSpecifier(
-      program,
-      specifier,
-      typeData,
-      typeMatchesPatternSpecifier,
-    )
+    typeNameMatchesSpecifier(program, specifier, typeData, typeMatchesPatternSpecifier)
   );
 }
 
@@ -195,18 +162,14 @@ function typeNameMatchesSpecifier(
           : [specifier.pattern];
 
   const ignoreNames =
-    typeof specifier === "string" ||
-    specifier instanceof RegExp ||
-    specifier.ignoreName === undefined
+    typeof specifier === "string" || specifier instanceof RegExp || specifier.ignoreName === undefined
       ? []
       : Array.isArray(specifier.ignoreName)
         ? specifier.ignoreName
         : [specifier.ignoreName];
 
   const ignorePatterns =
-    typeof specifier === "string" ||
-    specifier instanceof RegExp ||
-    specifier.ignorePattern === undefined
+    typeof specifier === "string" || specifier instanceof RegExp || specifier.ignorePattern === undefined
       ? []
       : Array.isArray(specifier.ignorePattern)
         ? specifier.ignorePattern
@@ -215,13 +178,7 @@ function typeNameMatchesSpecifier(
   const include = [...names, ...patterns];
   const exclude = [...ignoreNames, ...ignorePatterns];
 
-  return typeMatchesPatternSpecifier(
-    program,
-    typeData.type,
-    typeData.typeNode,
-    include,
-    exclude,
-  );
+  return typeMatchesPatternSpecifier(program, typeData.type, typeData.typeNode, include, exclude);
 }
 
 /**
@@ -243,9 +200,7 @@ export function defaultTypeMatchesPatternSpecifier(
   const typeNameAlias = getTypeAliasName(type, typeNode);
   if (typeNameAlias !== null) {
     const testTypeNameAlias = (pattern: string | RegExp) =>
-      typeof pattern === "string"
-        ? pattern === typeNameAlias
-        : pattern.test(typeNameAlias);
+      typeof pattern === "string" ? pattern === typeNameAlias : pattern.test(typeNameAlias);
 
     if (exclude.some(testTypeNameAlias)) {
       return false;
@@ -255,9 +210,7 @@ export function defaultTypeMatchesPatternSpecifier(
 
   const typeValue = getTypeAsString(program, type, typeNode);
   const testTypeValue = (pattern: string | RegExp) =>
-    typeof pattern === "string"
-      ? pattern === typeValue
-      : pattern.test(typeValue);
+    typeof pattern === "string" ? pattern === typeValue : pattern.test(typeValue);
 
   if (exclude.some(testTypeValue)) {
     return false;
@@ -267,9 +220,7 @@ export function defaultTypeMatchesPatternSpecifier(
   const typeNameName = extractTypeName(typeValue);
   if (typeNameName !== null) {
     const testTypeNameName = (pattern: string | RegExp) =>
-      typeof pattern === "string"
-        ? pattern === typeNameName
-        : pattern.test(typeNameName);
+      typeof pattern === "string" ? pattern === typeNameName : pattern.test(typeNameName);
 
     if (exclude.some(testTypeNameName)) {
       return false;
@@ -283,15 +234,9 @@ export function defaultTypeMatchesPatternSpecifier(
   // the checker's canonical symbol name as well so e.g. `ns.Foo` matches an
   // override on `Foo`.
   const typeSymbolName = getTypeSymbolName(type);
-  if (
-    typeSymbolName !== null &&
-    typeSymbolName !== typeNameAlias &&
-    typeSymbolName !== typeNameName
-  ) {
+  if (typeSymbolName !== null && typeSymbolName !== typeNameAlias && typeSymbolName !== typeNameName) {
     const testTypeSymbolName = (pattern: string | RegExp) =>
-      typeof pattern === "string"
-        ? pattern === typeSymbolName
-        : pattern.test(typeSymbolName);
+      typeof pattern === "string" ? pattern === typeSymbolName : pattern.test(typeSymbolName);
 
     if (exclude.some(testTypeSymbolName)) {
       return false;
@@ -302,10 +247,8 @@ export function defaultTypeMatchesPatternSpecifier(
   // Special handling for arrays not written in generic syntax.
   if (program.getTypeChecker().isArrayType(type) && typeNode !== null) {
     if (
-      (ts.isTypeOperatorNode(typeNode) &&
-        typeNode.operator === ts.SyntaxKind.ReadonlyKeyword) ||
-      (ts.isTypeOperatorNode(typeNode.parent) &&
-        typeNode.parent.operator === ts.SyntaxKind.ReadonlyKeyword)
+      (ts.isTypeOperatorNode(typeNode) && typeNode.operator === ts.SyntaxKind.ReadonlyKeyword) ||
+      (ts.isTypeOperatorNode(typeNode.parent) && typeNode.parent.operator === ts.SyntaxKind.ReadonlyKeyword)
     ) {
       const testIsReadonlyArray = (pattern: string | RegExp) =>
         typeof pattern === "string" && pattern === "ReadonlyArray";
@@ -315,8 +258,7 @@ export function defaultTypeMatchesPatternSpecifier(
       }
       m_shouldInclude ||= include.some(testIsReadonlyArray);
     } else {
-      const testIsArray = (pattern: string | RegExp) =>
-        typeof pattern === "string" && pattern === "Array";
+      const testIsArray = (pattern: string | RegExp) => typeof pattern === "string" && pattern === "Array";
 
       if (exclude.some(testIsArray)) {
         return false;
@@ -336,7 +278,7 @@ export function defaultTypeMatchesPatternSpecifier(
  * anonymous object literals whose symbol is the internal "__type", etc.).
  */
 function getTypeSymbolName(type: ts.Type): string | null {
-  const target = "target" in type ? (type.target as ts.Type) : type;
+  const target = "target" in type ? (type.target as { symbol?: ts.Symbol | undefined }) : type;
   const name = target.symbol?.getName();
   if (name === undefined || name.startsWith("__")) {
     return null;
@@ -355,19 +297,13 @@ function getTypeAliasName(type: ts.Type, typeNode: ts.TypeNode | null) {
     return t.aliasSymbol?.getName() ?? null;
   }
 
-  return ts.isTypeAliasDeclaration(typeNode.parent)
-    ? typeNode.parent.name.getText()
-    : null;
+  return ts.isTypeAliasDeclaration(typeNode.parent) ? typeNode.parent.name.getText() : null;
 }
 
 /**
  * Get the type as a string.
  */
-function getTypeAsString(
-  program: ts.Program,
-  type: ts.Type,
-  typeNode: ts.TypeNode | null,
-) {
+function getTypeAsString(program: ts.Program, type: ts.Type, typeNode: ts.TypeNode | null) {
   return typeNode === null
     ? program
         .getTypeChecker()
@@ -408,17 +344,13 @@ export function propertyNameToString(propertyName: ts.PropertyName): string {
  * Get string representations of the given entity name.
  */
 export function entityNameToString(entityName: ts.EntityName): string {
-  return ts.isIdentifier(entityName)
-    ? identifierToString(entityName)
-    : qualifiedNameToString(entityName);
+  return ts.isIdentifier(entityName) ? identifierToString(entityName) : qualifiedNameToString(entityName);
 }
 
 /**
  * Get string representations of the given identifier.
  */
-export function identifierToString(
-  identifier: ts.Identifier | ts.PrivateIdentifier,
-): string {
+export function identifierToString(identifier: ts.Identifier | ts.PrivateIdentifier): string {
   return identifier.getText();
 }
 
@@ -426,31 +358,21 @@ export function identifierToString(
  * Get string representations of the given qualified name.
  */
 function qualifiedNameToString(qualifiedName: ts.QualifiedName): string {
-  return `${entityNameToString(qualifiedName.left)}.${identifierToString(
-    qualifiedName.right,
-  )}`;
+  return `${entityNameToString(qualifiedName.left)}.${identifierToString(qualifiedName.right)}`;
 }
 
 /**
  * Is type a (non-namespace) function?
  */
 export function isFunction(type: ts.Type) {
-  return (
-    type.getCallSignatures().length > 0 && type.getProperties().length === 0
-  );
+  return type.getCallSignatures().length > 0 && type.getProperties().length === 0;
 }
 
 /**
  * Is type a type reference with type arguments?
  */
-export function isTypeReferenceWithTypeArguments(
-  type: ts.Type,
-): type is ts.TypeReference & {
+export function isTypeReferenceWithTypeArguments(type: ts.Type): type is ts.TypeReference & {
   typeArguments: NonNullable<ts.TypeReference["typeArguments"]>;
 } {
-  return (
-    isTypeReference(type) &&
-    type.typeArguments !== undefined &&
-    type.typeArguments.length > 0
-  );
+  return isTypeReference(type) && type.typeArguments !== undefined && type.typeArguments.length > 0;
 }

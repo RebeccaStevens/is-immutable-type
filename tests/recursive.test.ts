@@ -16,19 +16,13 @@ describe("Recursive Types", () => {
       runTestImmutability(code, Immutability.Immutable);
     });
 
-    it.each(["type Test = string | ReadonlyArray<Test>;"])(
-      "ReadonlyDeep",
-      (code) => {
-        runTestImmutability(code, Immutability.ReadonlyDeep);
-      },
-    );
+    it.each(["type Test = string | ReadonlyArray<Test>;"])("ReadonlyDeep", (code) => {
+      runTestImmutability(code, Immutability.ReadonlyDeep);
+    });
 
-    it.each(["type Test = ReadonlyArray<Test | { foo: 1 }>;"])(
-      "ReadonlyShallow",
-      (code) => {
-        runTestImmutability(code, Immutability.ReadonlyShallow);
-      },
-    );
+    it.each(["type Test = ReadonlyArray<Test | { foo: 1 }>;"])("ReadonlyShallow", (code) => {
+      runTestImmutability(code, Immutability.ReadonlyShallow);
+    });
 
     it.each(["type Test = string | Test[];"])("Mutable", (code) => {
       runTestImmutability(code, Immutability.Mutable);
@@ -66,12 +60,9 @@ describe("Recursive Types", () => {
   });
 
   describe("nested", () => {
-    it.each(["type Foo<U> = { readonly foo: Foo<Foo<U>>; };"])(
-      "Immutable",
-      (code) => {
-        runTestImmutability(code, Immutability.Immutable);
-      },
-    );
+    it.each(["type Foo<U> = { readonly foo: Foo<Foo<U>>; };"])("Immutable", (code) => {
+      runTestImmutability(code, Immutability.Immutable);
+    });
   });
 
   describe("Complex", () => {
