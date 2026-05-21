@@ -195,7 +195,7 @@ export function defaultTypeMatchesPatternSpecifier(
     return false;
   }
 
-  let m_shouldInclude = false;
+  let mut_shouldInclude = false;
 
   const typeNameAlias = getTypeAliasName(type, typeNode);
   if (typeNameAlias !== null) {
@@ -205,7 +205,7 @@ export function defaultTypeMatchesPatternSpecifier(
     if (exclude.some(testTypeNameAlias)) {
       return false;
     }
-    m_shouldInclude ||= include.some(testTypeNameAlias);
+    mut_shouldInclude ||= include.some(testTypeNameAlias);
   }
 
   const typeValue = getTypeAsString(program, type, typeNode);
@@ -215,7 +215,7 @@ export function defaultTypeMatchesPatternSpecifier(
   if (exclude.some(testTypeValue)) {
     return false;
   }
-  m_shouldInclude ||= include.some(testTypeValue);
+  mut_shouldInclude ||= include.some(testTypeValue);
 
   const typeNameName = extractTypeName(typeValue);
   if (typeNameName !== null) {
@@ -225,7 +225,7 @@ export function defaultTypeMatchesPatternSpecifier(
     if (exclude.some(testTypeNameName)) {
       return false;
     }
-    m_shouldInclude ||= include.some(testTypeNameName);
+    mut_shouldInclude ||= include.some(testTypeNameName);
   }
 
   // Source-spelling candidates (typeNode.getText(), the extracted generic
@@ -241,7 +241,7 @@ export function defaultTypeMatchesPatternSpecifier(
     if (exclude.some(testTypeSymbolName)) {
       return false;
     }
-    m_shouldInclude ||= include.some(testTypeSymbolName);
+    mut_shouldInclude ||= include.some(testTypeSymbolName);
   }
 
   // Special handling for arrays not written in generic syntax.
@@ -256,18 +256,18 @@ export function defaultTypeMatchesPatternSpecifier(
       if (exclude.some(testIsReadonlyArray)) {
         return false;
       }
-      m_shouldInclude ||= include.some(testIsReadonlyArray);
+      mut_shouldInclude ||= include.some(testIsReadonlyArray);
     } else {
       const testIsArray = (pattern: string | RegExp) => typeof pattern === "string" && pattern === "Array";
 
       if (exclude.some(testIsArray)) {
         return false;
       }
-      m_shouldInclude ||= include.some(testIsArray);
+      mut_shouldInclude ||= include.some(testIsArray);
     }
   }
 
-  return m_shouldInclude;
+  return mut_shouldInclude;
 }
 
 /**
