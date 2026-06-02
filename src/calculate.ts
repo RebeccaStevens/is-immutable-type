@@ -800,27 +800,27 @@ function createIndexSignatureTaskStates(
     return [];
   }
 
+  if (!indexInfo.isReadonly) {
+    mut_state.immutability = Immutability.Mutable;
+    return [];
+  }
+
   if (parameters.immutabilityLimits.max <= Immutability.ReadonlyShallow) {
     mut_state.immutability = Immutability.ReadonlyShallow;
     return [];
   }
 
-  if (indexInfo.isReadonly) {
-    if (indexInfo.type === typeData.type) {
-      mut_state.immutability = parameters.immutabilityLimits.max;
-      return [];
-    }
-
-    const child = createNewTaskState(
-      getTypeData(indexInfo.type, undefined), // TODO: can we get a type node for this?
-    );
-
-    return [
-      createChildrenReducerTaskState(mut_state, [{ immutability: Immutability.ReadonlyShallow }, child], max),
-      child,
-    ];
+  if (indexInfo.type === typeData.type) {
+    mut_state.immutability = parameters.immutabilityLimits.max;
+    return [];
   }
 
-  mut_state.immutability = Immutability.Mutable;
-  return [];
+  const child = createNewTaskState(
+    getTypeData(indexInfo.type, undefined), // TODO: can we get a type node for this?
+  );
+
+  return [
+    createChildrenReducerTaskState(mut_state, [{ immutability: Immutability.ReadonlyShallow }, child], max),
+    child,
+  ];
 }
