@@ -109,3 +109,31 @@ export function runTestImmutability(
     expect(expected).to.be.not.equal(Immutability.Mutable);
   }
 }
+
+/**
+ * Run tests against "getTypeImmutability" with a capped maximum immutability.
+ *
+ * Uses the resolved type rather than its type node, mirroring how consumers
+ * such as eslint-plugin-functional query immutability from the type checker.
+ */
+export function runTestImmutabilityCappedAt(
+  test:
+    | string
+    | Readonly<{
+        code: string;
+        line?: number;
+        overrides?: ImmutabilityOverrides;
+        cache?: ImmutabilityCache;
+      }>,
+  maxImmutability: Immutability,
+  expected: Immutability,
+  message?: string,
+): void {
+  const { code, line, overrides, cache } =
+    typeof test === "string" ? { code: test, line: undefined, overrides: undefined, cache: undefined } : test;
+
+  const { program, type } = getType(code, line);
+
+  const actual = getTypeImmutability(program, type, overrides, cache, maxImmutability);
+  expect(Immutability[actual]).to.be.equal(Immutability[expected], message);
+}
