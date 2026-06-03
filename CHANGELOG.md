@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [5.0.3](https://github.com/RebeccaStevens/is-immutable-type/compare/v5.0.2...v5.0.3) (2026-06-03)
+
+
+### Bug Fixes
+
+* report non-readonly index signatures as mutable when `maxImmutability` caps at `ReadonlyShallow` ([#592](https://github.com/RebeccaStevens/is-immutable-type/issues/592)) ([6669d5f](https://github.com/RebeccaStevens/is-immutable-type/commit/6669d5fe585b754926d0e7fa55903dbd61ee2d7f))
+
 ## [5.0.2](https://github.com/RebeccaStevens/is-immutable-type/compare/v5.0.1...v5.0.2) (2026-05-21)
 
 
