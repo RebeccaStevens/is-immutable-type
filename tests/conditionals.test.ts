@@ -23,4 +23,20 @@ describe("Conditionals", () => {
       runTestImmutability(code, Immutability.Immutable);
     },
   );
+
+  describe("recursive", () => {
+    it.each(["type Test<G> = G extends number ? Test<G> : Test<G>;"])(
+      "resolves to the lattice top when every branch is a recursive self-reference",
+      (code) => {
+        runTestImmutability(code, Immutability.Immutable);
+      },
+    );
+
+    it.each(["type Test<G> = G extends number ? Test<G> : readonly string[];"])(
+      "lets a non-recursive branch determine the immutability",
+      (code) => {
+        runTestImmutability(code, Immutability.ReadonlyDeep);
+      },
+    );
+  });
 });

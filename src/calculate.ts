@@ -275,10 +275,12 @@ function getTypeImmutabilityHelper(
     }
   } while (mut_stack.length > 0);
 
+  // A top-level result of `Calculating` means the type is purely
+  // self-referential: every constraint reduced to a recursive back-reference
+  // and none was concrete. Such a type is unconstrained, so it resolves to the
+  // top of the lattice rather than being reported as `Unknown`.
   if (mut_state.immutability === Immutability.Calculating) {
-    assert.fail('Tried to return immutability of "Calculating"');
-    // @ts-expect-error Unreachable Code
-    return Immutability.Unknown;
+    return Immutability.Immutable;
   }
   return mut_state.immutability;
 }
