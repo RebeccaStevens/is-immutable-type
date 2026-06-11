@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
+## [5.0.4](https://github.com/RebeccaStevens/is-immutable-type/compare/v5.0.3...v5.0.4) (2026-06-11)
+
+
+### Bug Fixes
+
+* resolve purely self-referential types as `Immutable` instead of `Unknown` ([#593](https://github.com/RebeccaStevens/is-immutable-type/issues/593)) ([5ac6e02](https://github.com/RebeccaStevens/is-immutable-type/commit/5ac6e029d6378b3181178a6976c5ea4529208ed6))
+
 ## [5.0.3](https://github.com/RebeccaStevens/is-immutable-type/compare/v5.0.2...v5.0.3) (2026-06-03)
 
 
