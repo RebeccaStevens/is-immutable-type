@@ -103,7 +103,7 @@
     "cspell": "10.0.1",
     "cz-conventional-changelog": "3.3.0",
     "dedent": "1.7.2",
-    "eslint": "10.4.0",
+    "eslint": "10.6.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-flat-config-utils": "3.2.0",
     "eslint-formatting-reporter": "0.0.0",
