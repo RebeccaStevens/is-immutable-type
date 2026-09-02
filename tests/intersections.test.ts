@@ -37,4 +37,31 @@ describe("Intersections", () => {
       runTestImmutability(code, Immutability.ReadonlyDeep);
     });
   });
+
+  describe("primitives", () => {
+    it.each(["string", "number", "boolean", "symbol", "bigint"])(
+      "treats %s intersected with an empty object as immutable",
+      (primitive) => {
+        runTestImmutability(`type Test = ${primitive} & {};`, Immutability.Immutable);
+      },
+    );
+
+    it("treats a readonly branded primitive as immutable", () => {
+      runTestImmutability(
+        `
+          declare const brand: unique symbol;
+          type Test = number & { readonly [brand]: true };
+        `,
+        Immutability.Immutable,
+      );
+    });
+
+    it("treats writable properties added to a primitive as mutable", () => {
+      runTestImmutability("type Test = number & { value: string };", Immutability.Mutable);
+    });
+
+    it("treats methods added to a primitive as readonly deep", () => {
+      runTestImmutability("type Test = number & { mutate(): void };", Immutability.ReadonlyDeep);
+    });
+  });
 });
