@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2021",
+    "noEmit": true,
+    "lib": ["ES2021"],
+    "types": []
+  },
+  "files": ["checker.ts"]
+}

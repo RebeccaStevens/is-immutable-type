@@ -96,6 +96,8 @@
     "@types/node": "20.19.43",
     "@typescript-eslint/eslint-plugin": "8.71.0",
     "@typescript-eslint/parser": "8.71.0",
+    "@typescript-eslint/parser-native": "npm:@typescript-eslint/parser@8.72.3-alpha.8",
+    "@typescript/native": "npm:typescript@7.1.0-dev.20261115.1",
     "@typescript/vfs": "1.6.6",
     "@vitest/coverage-v8": "5.0.2",
     "@vitest/eslint-plugin": "1.6.28",

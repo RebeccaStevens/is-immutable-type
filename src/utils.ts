@@ -41,13 +41,6 @@ export type TypeMatchesPatternSpecifier = (
 ) => boolean;
 
 /**
- * Type guard to check if a Node has a Symbol.
- */
-export function hasSymbol(node: ts.Node): node is ts.Node & { symbol: ts.Symbol } {
-  return Object.hasOwn(node, "symbol");
-}
-
-/**
  * Type guard to check if a Type is TypeNode.
  */
 export function isTypeNode(typeLike: ts.Type | ts.TypeNode): typeLike is ts.TypeNode {
@@ -88,9 +81,8 @@ export function getTypeData(type: ts.Type, typeNode: ts.TypeNode | null | undefi
 /**
  * Cache a value by its type
  */
-export function cacheData<V>(program: ts.Program, cache: WeakMap<object, V>, typeData: Readonly<TypeData>, value: V) {
-  const checker = program.getTypeChecker();
-  const identity = checker.getRecursionIdentity(typeData.type);
+export function cacheData<V>(cache: WeakMap<object, V>, typeData: Readonly<TypeData>, value: V) {
+  const identity = typeData.type;
 
   if (typeData.typeNode !== null) {
     cache.set(typeData.typeNode, value);
@@ -101,14 +93,53 @@ export function cacheData<V>(program: ts.Program, cache: WeakMap<object, V>, typ
 /**
  * Get a value by its cashed type.
  */
-export function getCachedData<V>(
-  program: ts.Program,
-  cache: WeakMap<object, V>,
-  typeData: Readonly<TypeData>,
-): V | undefined {
-  const checker = program.getTypeChecker();
-  const identity = typeData.typeNode ?? checker.getRecursionIdentity(typeData.type);
+export function getCachedData<V>(cache: WeakMap<object, V>, typeData: Readonly<TypeData>): V | undefined {
+  const identity = typeData.typeNode ?? typeData.type;
   return cache.get(identity);
+}
+
+/**
+ * Identify types with the same recursive origin.
+ */
+export function getRecursionIdentity(program: ts.Program, type: ts.Type): object {
+  if (type.aliasSymbol !== undefined) {
+    return type.aliasSymbol;
+  }
+  const checker = program.getTypeChecker();
+  if (typeof checker.getRecursionIdentity === "function") {
+    return checker.getRecursionIdentity(type);
+  }
+  if (isTypeReference(type)) {
+    return type.target.getSymbol() ?? type.target;
+  }
+  return type.getSymbol() ?? type.aliasSymbol ?? type;
+}
+
+/**
+ * Recognize finite nesting of generic instantiations.
+ */
+export function isNestedInstantiation(type: ts.Type, ancestor: ts.Type): boolean {
+  const mut_pending = [...getTypeArguments(ancestor)];
+  const mut_seen = new Set<ts.Type>();
+  while (mut_pending.length > 0) {
+    const candidate = mut_pending.pop()!;
+    if (candidate === type) {
+      return true;
+    }
+    if (mut_seen.has(candidate)) {
+      continue;
+    }
+    mut_seen.add(candidate);
+    mut_pending.push(...getTypeArguments(candidate));
+  }
+  return false;
+}
+
+/**
+ * Get the arguments of references and instantiated aliases.
+ */
+function getTypeArguments(type: ts.Type): ReadonlyArray<ts.Type> {
+  return (isTypeReference(type) ? type.typeArguments : type.aliasTypeArguments) ?? [];
 }
 
 /**
@@ -278,8 +309,8 @@ export function defaultTypeMatchesPatternSpecifier(
  * anonymous object literals whose symbol is the internal "__type", etc.).
  */
 function getTypeSymbolName(type: ts.Type): string | null {
-  const target = "target" in type ? (type.target as { symbol?: ts.Symbol | undefined }) : type;
-  const name = target.symbol?.getName();
+  const target = ("target" in type ? (type.target as ts.Type | undefined) : undefined) ?? type;
+  const name = target.getSymbol()?.getName();
   if (name === undefined || name.startsWith("__")) {
     return null;
   }
@@ -293,7 +324,7 @@ function getTypeSymbolName(type: ts.Type): string | null {
  */
 function getTypeAliasName(type: ts.Type, typeNode: ts.TypeNode | null) {
   if (typeNode === null) {
-    const t = "target" in type ? (type.target as ts.Type) : type;
+    const t = ("target" in type ? (type.target as ts.Type | undefined) : undefined) ?? type;
     return t.aliasSymbol?.getName() ?? null;
   }
 

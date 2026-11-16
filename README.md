@@ -180,10 +180,14 @@ By default, we use a global cache to speed up the calculation of multiple types'
 immutability. This prevents us from needing to calculate the immutability of
 the same types over and over again.
 
-However, this cache assumes you are always using the same type checker. If you
-need to use multiple (such as in a testing environment), this can lead to
-issues. To prevent this, you can provide a custom cache (by passing a `WeakMap`)
-to be used or have a temporary cache be used (by passing `false`).
+Results are cached by concrete type or type node, so distinct generic
+instantiations have separate entries. Recursion detection is local to each
+calculation. Only completed top-level results enter the shared cache, so
+intermediate recursive estimates cannot affect later queries.
+
+You can provide a custom cache (by passing a `WeakMap`) or use a temporary
+cache (by passing `false`). Reuse a cache only with the same type checker,
+overrides, pattern matcher, and maximum immutability.
 
 ## Making `ReadonlyDeep` types `Immutable`
 
