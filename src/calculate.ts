@@ -8,7 +8,6 @@ import {
   isIntrinsicType,
   isObjectType,
   isPropertyReadonlyInType,
-  isSymbolFlagSet,
   isUnionType,
 } from "ts-api-utils";
 import ts from "typescript";
@@ -22,9 +21,10 @@ import {
   cacheData,
   defaultTypeMatchesPatternSpecifier,
   getCachedData,
+  getRecursionIdentity,
   getTypeData,
-  hasSymbol,
   isFunction,
+  isNestedInstantiation,
   isTypeNode,
   isTypeReferenceWithTypeArguments,
   propertyNameToString,
@@ -192,14 +192,17 @@ const enum TaskStateStage {
   CheckDone,
   ApplyOverride,
   Done,
+  Leave,
 }
 
-type Stack = TaskState[];
+type Stack = Array<TaskState | { stage: TaskStateStage.Leave; identity: object }>;
 
 type Parameters = Readonly<{
   program: ts.Program;
   overrides: ImmutabilityOverrides;
   cache: ImmutabilityCache;
+  resultCache: ImmutabilityCache | null;
+  activeTypes: Map<object, ts.Type[]>;
   immutabilityLimits: Readonly<ImmutabilityLimits>;
   typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier;
 }>;
@@ -215,12 +218,15 @@ function getTypeImmutabilityHelper(
   maxImmutability: Immutability,
   typeMatchesPatternSpecifier: TypeMatchesPatternSpecifier,
 ): Immutability {
-  const cache: ImmutabilityCache = useCache === true ? globalCache : useCache === false ? new WeakMap() : useCache;
+  const resultCache = useCache === true ? globalCache : useCache === false ? null : useCache;
+  const cache: ImmutabilityCache = new WeakMap();
 
   const parameters: Parameters = {
     program,
     overrides,
     cache,
+    resultCache,
+    activeTypes: new Map(),
     immutabilityLimits: {
       min: Immutability.Mutable,
       max: maxImmutability,
@@ -230,9 +236,18 @@ function getTypeImmutabilityHelper(
 
   const mut_stack: Stack = [createNewTaskState(td)];
   let mut_PreviousImmutability = Immutability.Unknown;
-  let mut_state: TaskState;
+  let mut_state: TaskState = createNewTaskState(td);
   do {
-    mut_state = mut_stack.pop() ?? assert.fail();
+    const next = mut_stack.pop() ?? assert.fail();
+    if (next.stage === TaskStateStage.Leave) {
+      const active = parameters.activeTypes.get(next.identity) ?? assert.fail();
+      active.pop();
+      if (active.length === 0) {
+        parameters.activeTypes.delete(next.identity);
+      }
+      continue;
+    }
+    mut_state = next;
 
     switch (mut_state.stage) {
       case TaskStateStage.Triage: {
@@ -270,7 +285,7 @@ function getTypeImmutabilityHelper(
     }
 
     if (mut_state.immutability !== Immutability.Calculating) {
-      cacheData(program, cache, mut_state.typeData, mut_state.immutability);
+      cacheData(cache, mut_state.typeData, mut_state.immutability);
       mut_PreviousImmutability = mut_state.immutability;
     }
   } while (mut_stack.length > 0);
@@ -279,10 +294,11 @@ function getTypeImmutabilityHelper(
   // self-referential: every constraint reduced to a recursive back-reference
   // and none was concrete. Such a type is unconstrained, so it resolves to the
   // top of the lattice rather than being reported as `Unknown`.
-  if (mut_state.immutability === Immutability.Calculating) {
-    return Immutability.Immutable;
+  const result = mut_state.immutability === Immutability.Calculating ? Immutability.Immutable : mut_state.immutability;
+  if (resultCache !== null) {
+    cacheData(resultCache, td, result);
   }
-  return mut_state.immutability;
+  return result;
 }
 
 /**
@@ -361,7 +377,9 @@ function getOverride(parameters: Parameters, typeData: Readonly<TypeData>) {
  * Process the state and create any new next task that need to be used to process it.
  */
 function taskTriage(parameters: Parameters, mut_stack: Stack, mut_state: TaskStateTriage): void {
-  const cached = getCachedData(parameters.program, parameters.cache, mut_state.typeData);
+  const cached =
+    getCachedData(parameters.cache, mut_state.typeData) ??
+    (parameters.resultCache === null ? undefined : getCachedData(parameters.resultCache, mut_state.typeData));
   if (cached !== undefined) {
     mut_state.immutability = cached;
     return;
@@ -372,15 +390,27 @@ function taskTriage(parameters: Parameters, mut_stack: Stack, mut_state: TaskSta
     // Early escape if we don't need to check the override from.
     if (override.from === undefined) {
       mut_state.immutability = override.to;
-      cacheData(parameters.program, parameters.cache, mut_state.typeData, mut_state.immutability);
+      cacheData(parameters.cache, mut_state.typeData, mut_state.immutability);
       return;
     }
 
     mut_stack.push(createApplyOverrideTaskState(mut_state, override));
   }
 
+  const identity = getRecursionIdentity(parameters.program, mut_state.typeData.type);
+  const active = parameters.activeTypes.get(identity) ?? [];
+  if (
+    active.some(
+      (ancestor) => ancestor === mut_state.typeData.type || !isNestedInstantiation(mut_state.typeData.type, ancestor),
+    )
+  ) {
+    return;
+  }
+  active.push(mut_state.typeData.type);
+  parameters.activeTypes.set(identity, active);
+  mut_stack.push({ stage: TaskStateStage.Leave, identity });
+
   assert(mut_state.immutability === Immutability.Calculating);
-  cacheData(parameters.program, parameters.cache, mut_state.typeData, mut_state.immutability);
 
   if (isUnionType(mut_state.typeData.type)) {
     handleTypeUnion(parameters, mut_stack, mut_state);
@@ -602,12 +632,19 @@ function handleTypeConditional(parameters: Parameters, mut_stack: Stack, mut_sta
   assert(isConditionalType(mut_state.typeData.type));
 
   const checker = parameters.program.getTypeChecker();
-  const children = [mut_state.typeData.type.root.node.trueType, mut_state.typeData.type.root.node.falseType].map(
-    (typeNode) => {
-      const type = checker.getTypeFromTypeNode(typeNode);
-      return createNewTaskState(getTypeData(type, typeNode));
-    },
-  );
+  const { root } = mut_state.typeData.type as Omit<ts.ConditionalType, "root"> & {
+    root: ts.ConditionalRoot | undefined;
+  };
+  const node = root?.node;
+  const { type } = mut_state.typeData;
+  const children =
+    node === undefined
+      ? [type.resolvedTrueType, type.resolvedFalseType].map((branch) =>
+          createNewTaskState(getTypeData(branch ?? assert.fail("Conditional branch unavailable"), null)),
+        )
+      : [node.trueType, node.falseType].map((typeNode) =>
+          createNewTaskState(getTypeData(checker.getTypeFromTypeNode(typeNode), typeNode)),
+        );
 
   mut_stack.push(createChildrenReducerTaskState(mut_state, children, min), ...children);
 }
@@ -706,9 +743,7 @@ function handleTypeObject(parameters: Parameters, mut_stack: Stack, mut_state: T
       const declarations = property.getDeclarations() ?? [];
       if (declarations.length > 0) {
         if (
-          declarations.some(
-            (declaration) => hasSymbol(declaration) && isSymbolFlagSet(declaration.symbol, ts.SymbolFlags.Method),
-          )
+          declarations.some((declaration) => ts.isMethodSignature(declaration) || ts.isMethodDeclaration(declaration))
         ) {
           mut_stateWithLimits.limits.max = min(mut_stateWithLimits.limits.max, Immutability.ReadonlyDeep);
           continue;
