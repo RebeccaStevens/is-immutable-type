@@ -594,6 +594,31 @@ function handleTypeIntersection(parameters: Parameters, mut_stack: Stack, mut_st
   handleTypeObject(parameters, mut_stack, mut_state);
 }
 
+function isPropertyInheritedFromPrimitiveIntersectionMember(
+  checker: ts.TypeChecker,
+  type: ts.IntersectionType,
+  property: ts.Symbol,
+): boolean {
+  return type.types.some(
+    (intersectionMember) =>
+      isPrimitiveType(intersectionMember) &&
+      checker.getApparentType(intersectionMember).getProperties().includes(property),
+  );
+}
+
+function isPrimitiveType(type: ts.Type): boolean {
+  const primitiveFlags =
+    ts.TypeFlags.StringLike |
+    ts.TypeFlags.NumberLike |
+    ts.TypeFlags.BigIntLike |
+    ts.TypeFlags.BooleanLike |
+    ts.TypeFlags.ESSymbolLike |
+    ts.TypeFlags.VoidLike |
+    ts.TypeFlags.Null;
+
+  return (type.flags & primitiveFlags) !== 0;
+}
+
 /**
  * Handle a type we know is a conditional type.
  */
@@ -689,6 +714,13 @@ function handleTypeObject(parameters: Parameters, mut_stack: Stack, mut_state: T
   const properties = mut_stateWithLimits.typeData.type.getProperties();
   if (properties.length > 0) {
     for (const property of properties) {
+      if (
+        isIntersectionType(mut_stateWithLimits.typeData.type) &&
+        isPropertyInheritedFromPrimitiveIntersectionMember(checker, mut_stateWithLimits.typeData.type, property)
+      ) {
+        continue;
+      }
+
       if (
         isPropertyReadonlyInType(mut_stateWithLimits.typeData.type, property.getEscapedName(), checker) ||
         // Ignore "length" for tuples.
